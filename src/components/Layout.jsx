@@ -29,10 +29,13 @@ const Layout = ({ children }) => {
   // Safe translation function with fallback
   const safeT = (key, fallback) => {
     try {
+      if (!t || typeof t !== 'function') {
+        return fallback
+      }
       const translation = t(key)
-      return translation === key ? fallback : translation
+      return translation && translation !== key ? translation : fallback
     } catch (error) {
-      console.warn('Translation error for key:', key, error)
+      console.warn('Translation missing for key:', key)
       return fallback
     }
   }

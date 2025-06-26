@@ -8,7 +8,7 @@ import {
   Plus,
   Eye
 } from 'lucide-react'
-import { useAuth } from '../App'
+import { useAuth, useData } from '../App'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useToast } from '../components/Toast'
 import AddLeadModal from '../components/AddLeadModal'
@@ -16,6 +16,7 @@ import AddPropertyModal from '../components/AddPropertyModal'
 
 const Dashboard = () => {
   const { user } = useAuth()
+  const { addLead, addProperty } = useData()
   const { showToast } = useToast()
   const { t } = useLanguage()
   const navigate = useNavigate()

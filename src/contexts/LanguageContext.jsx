@@ -43,10 +43,15 @@ export const LanguageProvider = ({ children }) => {
   }
 
   const t = (key, params = {}) => {
+    // Return key if no translations loaded
+    if (!translations || Object.keys(translations).length === 0) {
+      return key
+    }
+
     // Get translation by key (supports nested keys like 'common.save')
     const keys = key.split('.')
     let translation = translations
-    
+
     for (const k of keys) {
       if (translation && typeof translation === 'object') {
         translation = translation[k]
