@@ -1,0 +1,377 @@
+import React, { useState, useEffect, createContext, useContext } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom'
+import toast, { Toaster } from 'react-hot-toast'
+import axios from 'axios'
+import {
+  Home,
+  Users,
+  Building,
+  BarChart3,
+  Settings as SettingsIcon,
+  UserCheck,
+  Menu,
+  LogOut,
+  Plus,
+  Search,
+  Filter
+} from 'lucide-react'
+
+// Import pages
+import Dashboard from './pages/Dashboard'
+import Leads from './pages/Leads'
+import Properties from './pages/Properties'
+import Team from './pages/Team'
+import Analytics from './pages/Analytics'
+import Settings from './pages/Settings'
+
+// Import components
+import Layout from './components/Layout'
+
+// Import contexts
+import { LanguageProvider } from './contexts/LanguageContext'
+import { PermissionsProvider } from './contexts/PermissionsContext'
+import { ToastProvider } from './components/Toast'
+
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend.onrender.com/api'
+
+// Auth Context
+const AuthContext = createContext()
+
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
+  return context
+}
+
+// Data Context for leads and properties
+const DataContext = createContext()
+
+export const useData = () => {
+  const context = useContext(DataContext)
+  if (!context) {
+    throw new Error('useData must be used within a DataProvider')
+  }
+  return context
+}
+
+// Data Provider Component
+const DataProvider = ({ children }) => {
+  const [leads, setLeads] = useState([])
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(false)
+
+  const addLead = (leadData) => {
+    const newLead = {
+      id: Date.now().toString(),
+      ...leadData,
+      createdAt: new Date().toISOString()
+    }
+    setLeads(prev => [...prev, newLead])
+    return newLead
+  }
+
+  const addProperty = (propertyData) => {
+    const newProperty = {
+      id: Date.now().toString(),
+      ...propertyData,
+      createdAt: new Date().toISOString()
+    }
+    setProperties(prev => [...prev, newProperty])
+    return newProperty
+  }
+
+  const value = {
+    leads,
+    properties,
+    loading,
+    setLeads,
+    setProperties,
+    addLead,
+    addProperty
+  }
+
+  return (
+    <DataContext.Provider value={value}>
+      {children}
+    </DataContext.Provider>
+  )
+}
+
+// Auth Provider
+const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      setUser({ firstName: 'Demo User', role: 'manager' })
+    }
+    setLoading(false)
+  }, [])
+
+  const login = async (credentials) => {
+    try {
+      setLoading(true)
+      // Simulate login for demo
+      if (credentials.email === 'admin@demo.com' && credentials.password === 'password') {
+        const userData = { firstName: 'Demo User', role: 'manager' }
+        localStorage.setItem('token', 'demo-token')
+        setUser(userData)
+        toast.success('Login successful!')
+        return { success: true }
+      } else {
+        toast.error('Invalid credentials')
+        return { success: false, message: 'Invalid credentials' }
+      }
+    } catch (error) {
+      toast.error('Login failed')
+      return { success: false, message: 'Login failed' }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    setUser(null)
+    toast.success('Logged out successfully')
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+// Login Component
+const Login = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const { login, loading } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const result = await login({ email, password })
+    if (result.success) {
+      navigate('/dashboard')
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-gray-900">LeadEstate</h2>
+          <p className="mt-2 text-sm text-gray-600">Complete Real Estate CRM</p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <input
+              type="email"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <input
+              type="password"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+          <p className="text-center text-sm text-gray-600">
+            Demo: admin@demo.com / password
+          </p>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// Sidebar Component
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+  const navigation = [
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Leads', href: '/leads', icon: Users },
+    { name: 'Properties', href: '/properties', icon: Building },
+    { name: 'Team', href: '/team', icon: UserCheck },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Settings', href: '/settings', icon: SettingsIcon },
+  ]
+
+  return (
+    <div className={`${sidebarOpen ? 'block' : 'hidden'} fixed inset-0 z-40 lg:relative lg:inset-0 lg:block lg:w-64 lg:flex-shrink-0`}>
+      <div className="flex flex-col w-64 bg-white border-r border-gray-200 h-full">
+        <div className="flex items-center h-16 px-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">LeadEstate</h1>
+        </div>
+        <nav className="flex-1 px-4 py-6 space-y-2">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
+            >
+              <item.icon className="w-5 h-5 mr-3" />
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </div>
+  )
+}
+
+// Header Component
+const Header = ({ setSidebarOpen }) => {
+  const { user, logout } = useAuth()
+
+  return (
+    <header className="bg-white border-b border-gray-200">
+      <div className="flex items-center justify-between h-16 px-6">
+        <button
+          type="button"
+          className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+        
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-700">
+            Welcome, {user?.firstName || 'User'}
+          </span>
+          <button
+            onClick={logout}
+            className="flex items-center px-3 py-2 text-sm text-gray-700 hover:text-gray-900"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+
+
+// Rename Settings to avoid conflict with SettingsIcon
+const SettingsPage = Settings
+
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  return user ? children : <Navigate to="/login" />
+}
+
+
+
+// Main App Component
+function App() {
+  return (
+    <AuthProvider>
+      <LanguageProvider>
+        <AppWithAuth />
+      </LanguageProvider>
+    </AuthProvider>
+  )
+}
+
+// Component that has access to auth context
+function AppWithAuth() {
+  const { user } = useAuth()
+
+  // Debug: Log user object
+  console.log('AppWithAuth user:', user)
+
+  return (
+    <PermissionsProvider userRole={user?.role || 'manager'}>
+      <ToastProvider>
+        <DataProvider>
+          <Router>
+          <div className="App">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Dashboard />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/leads" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Leads />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/properties" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Properties />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/team" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Team />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Analytics />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/settings" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <SettingsPage />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+            </Routes>
+            <Toaster position="top-right" />
+          </div>
+        </Router>
+      </DataProvider>
+    </ToastProvider>
+    </PermissionsProvider>
+  )
+}
+
+export default App
