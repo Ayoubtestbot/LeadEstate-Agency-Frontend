@@ -176,7 +176,10 @@ const Team = () => {
         
         <ProtectedComponent permission={PERMISSIONS.MANAGE_USERS}>
           <button
-            onClick={() => setShowAddMember(true)}
+            onClick={() => {
+              console.log('Add Team Member button clicked')
+              setShowAddMember(true)
+            }}
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -288,7 +291,10 @@ const Team = () => {
       {/* Modals */}
       <AddTeamMemberModal
         isOpen={showAddMember}
-        onClose={() => setShowAddMember(false)}
+        onClose={() => {
+          console.log('Closing AddTeamMemberModal')
+          setShowAddMember(false)
+        }}
         onSubmit={handleAddMember}
       />
 

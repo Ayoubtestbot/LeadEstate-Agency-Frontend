@@ -7,31 +7,39 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSubmit }) => {
     name: '',
     email: '',
     phone: '',
-    role: USER_ROLES.AGENT
+    role: USER_ROLES?.AGENT || 'agent'
   })
   const [errors, setErrors] = useState({})
 
   if (!isOpen) return null
 
+  // Debug: Log to see if modal is being called
+  console.log('AddTeamMemberModal rendering, isOpen:', isOpen)
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    
-    // Validation
-    const newErrors = {}
-    if (!formData.name.trim()) newErrors.name = 'Name is required'
-    if (!formData.email.trim()) newErrors.email = 'Email is required'
-    if (!formData.phone.trim()) newErrors.phone = 'Phone is required'
-    if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format'
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
+    try {
+      // Validation
+      const newErrors = {}
+      if (!formData.name.trim()) newErrors.name = 'Name is required'
+      if (!formData.email.trim()) newErrors.email = 'Email is required'
+      if (!formData.phone.trim()) newErrors.phone = 'Phone is required'
+      if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format'
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors)
+        return
+      }
+
+      console.log('Submitting team member:', formData)
+      onSubmit(formData)
+      setFormData({ name: '', email: '', phone: '', role: USER_ROLES?.AGENT || 'agent' })
+      setErrors({})
+      onClose()
+    } catch (error) {
+      console.error('Error submitting team member:', error)
     }
-
-    onSubmit(formData)
-    setFormData({ name: '', email: '', phone: '', role: USER_ROLES.AGENT })
-    setErrors({})
-    onClose()
   }
 
   const handleChange = (field, value) => {
@@ -42,6 +50,8 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSubmit }) => {
   }
 
   const getRoleIcon = (role) => {
+    if (!USER_ROLES) return User
+
     switch (role) {
       case USER_ROLES.MANAGER: return Crown
       case USER_ROLES.SUPER_AGENT: return Star
@@ -49,9 +59,10 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+  try {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Add Team Member</h2>
           <button
@@ -157,9 +168,26 @@ const AddTeamMemberModal = ({ isOpen, onClose, onSubmit }) => {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
-  )
+    )
+  } catch (error) {
+    console.error('Error rendering AddTeamMemberModal:', error)
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Error</h2>
+          <p className="text-red-600 mb-4">There was an error loading the form. Please try again.</p>
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    )
+  }
 }
 
 export default AddTeamMemberModal
