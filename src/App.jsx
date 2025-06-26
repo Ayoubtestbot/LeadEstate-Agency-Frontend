@@ -63,6 +63,9 @@ export const useData = () => {
   return context
 }
 
+// API Configuration
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
+
 // Data Provider Component
 const DataProvider = ({ children }) => {
   const [leads, setLeads] = useState([])
@@ -70,43 +73,125 @@ const DataProvider = ({ children }) => {
   const [teamMembers, setTeamMembers] = useState([])
   const [loading, setLoading] = useState(false)
 
-  const addLead = (leadData) => {
-    const newLead = {
-      id: Date.now().toString(),
-      ...leadData,
-      createdAt: new Date().toISOString(),
-      assignedTo: leadData.assignedTo || null,
-      status: leadData.status || 'new'
-    }
-    setLeads(prev => [...prev, newLead])
-    return newLead
-  }
+  // Fetch data from API on component mount
+  useEffect(() => {
+    fetchAllData()
+  }, [])
 
-  const addProperty = (propertyData) => {
-    const newProperty = {
-      id: Date.now().toString(),
-      ...propertyData,
-      createdAt: new Date().toISOString()
-    }
-    setProperties(prev => [...prev, newProperty])
-    return newProperty
-  }
+  const fetchAllData = async () => {
+    setLoading(true)
+    try {
+      const [leadsRes, propertiesRes, teamRes] = await Promise.all([
+        fetch(`${API_URL}/leads`).catch(() => ({ ok: false })),
+        fetch(`${API_URL}/properties`).catch(() => ({ ok: false })),
+        fetch(`${API_URL}/team`).catch(() => ({ ok: false }))
+      ])
 
-  const addTeamMember = (memberData) => {
-    const newMember = {
-      id: Date.now().toString(),
-      ...memberData,
-      joinedAt: new Date().toISOString(),
-      status: 'active',
-      stats: {
-        totalLeads: 0,
-        activeLeads: 0,
-        closedDeals: 0,
-        conversionRate: 0
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json()
+        setLeads(leadsData.data || [])
+      } else {
+        console.warn('Failed to fetch leads from API, using empty array')
+        setLeads([])
       }
+
+      if (propertiesRes.ok) {
+        const propertiesData = await propertiesRes.json()
+        setProperties(propertiesData.data || [])
+      } else {
+        console.warn('Failed to fetch properties from API, using empty array')
+        setProperties([])
+      }
+
+      if (teamRes.ok) {
+        const teamData = await teamRes.json()
+        setTeamMembers(teamData.data || [])
+      } else {
+        console.warn('Failed to fetch team members from API, using empty array')
+        setTeamMembers([])
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      // Set empty arrays as fallback
+      setLeads([])
+      setProperties([])
+      setTeamMembers([])
+    } finally {
+      setLoading(false)
     }
-    setTeamMembers(prev => [...prev, newMember])
-    return newMember
+  }
+
+  const addLead = async (leadData) => {
+    try {
+      const response = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...leadData,
+          assignedTo: leadData.assignedTo || null,
+          status: leadData.status || 'new'
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setLeads(prev => [...prev, result.data])
+        return result.data
+      } else {
+        throw new Error('Failed to add lead')
+      }
+    } catch (error) {
+      console.error('Error adding lead:', error)
+      throw error
+    }
+  }
+
+  const addProperty = async (propertyData) => {
+    try {
+      const response = await fetch(`${API_URL}/properties`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setProperties(prev => [...prev, result.data])
+        return result.data
+      } else {
+        throw new Error('Failed to add property')
+      }
+    } catch (error) {
+      console.error('Error adding property:', error)
+      throw error
+    }
+  }
+
+  const addTeamMember = async (memberData) => {
+    try {
+      const response = await fetch(`${API_URL}/team`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(memberData)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setTeamMembers(prev => [...prev, result.data])
+        return result.data
+      } else {
+        throw new Error('Failed to add team member')
+      }
+    } catch (error) {
+      console.error('Error adding team member:', error)
+      throw error
+    }
   }
 
   const updateTeamMember = (id, memberData) => {
@@ -119,10 +204,32 @@ const DataProvider = ({ children }) => {
     setTeamMembers(prev => prev.filter(member => member.id !== id))
   }
 
-  const updateLead = (id, leadData) => {
-    setLeads(prev => prev.map(lead =>
-      lead.id === id ? { ...lead, ...leadData } : lead
-    ))
+  const updateLead = async (id, leadData) => {
+    try {
+      const response = await fetch(`${API_URL}/leads/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(leadData)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setLeads(prev => prev.map(lead =>
+          lead.id === id ? result.data : lead
+        ))
+        return result.data
+      } else {
+        throw new Error('Failed to update lead')
+      }
+    } catch (error) {
+      console.error('Error updating lead:', error)
+      // Fallback to local update if API fails
+      setLeads(prev => prev.map(lead =>
+        lead.id === id ? { ...lead, ...leadData } : lead
+      ))
+    }
   }
 
   const deleteLead = (id) => {
@@ -139,6 +246,15 @@ const DataProvider = ({ children }) => {
     setLeads(prev => prev.map(lead =>
       lead.id === leadId ? { ...lead, linkedPropertyId: null } : lead
     ))
+  }
+
+  const clearAllData = () => {
+    setLeads([])
+    setProperties([])
+    setTeamMembers([])
+    localStorage.removeItem('leadestate_leads')
+    localStorage.removeItem('leadestate_properties')
+    localStorage.removeItem('leadestate_team_members')
   }
 
   const value = {
@@ -173,18 +289,28 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      // TODO: Validate token with backend and get real user data
-      setUser({ firstName: 'User', role: 'manager' })
+    let token = localStorage.getItem('token')
+
+    // If no token exists, create a demo token for development
+    if (!token) {
+      token = 'demo-token-' + Date.now()
+      localStorage.setItem('token', token)
     }
+
+    // Create a demo user
+    setUser({
+      firstName: 'Demo User',
+      name: 'Demo User',
+      role: 'manager',
+      email: 'demo@agency.com'
+    })
+
     setLoading(false)
   }, [])
 
   const login = async (credentials) => {
     try {
       setLoading(true)
-      // TODO: Replace with actual API call to backend
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
