@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Users,
   Home,
@@ -17,6 +18,7 @@ const Dashboard = () => {
   const { user } = useAuth()
   const { showToast } = useToast()
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const [showAddLead, setShowAddLead] = useState(false)
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [stats, setStats] = useState({
@@ -273,7 +275,7 @@ const Dashboard = () => {
         </button>
 
         <button
-          onClick={() => alert('View Reports functionality coming soon!')}
+          onClick={() => navigate('/reports')}
           className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4 lg:p-6 text-left"
         >
           <div className="flex items-start space-x-3">
@@ -288,7 +290,7 @@ const Dashboard = () => {
         </button>
 
         <button
-          onClick={() => alert('Close Deal functionality coming soon!')}
+          onClick={() => navigate('/leads')}
           className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow p-4 lg:p-6 text-left"
         >
           <div className="flex items-start space-x-3">

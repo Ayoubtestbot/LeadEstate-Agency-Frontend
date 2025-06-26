@@ -28,6 +28,7 @@ import FollowUp from './pages/FollowUp'
 import Clients from './pages/Clients'
 import Tasks from './pages/Tasks'
 import Reports from './pages/Reports'
+import Profile from './pages/Profile'
 
 // Import components
 import Layout from './components/Layout'
@@ -401,6 +402,13 @@ function AppWithAuth() {
                 <ProtectedRoute>
                   <Layout>
                     <Reports />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Profile />
                   </Layout>
                 </ProtectedRoute>
               } />
