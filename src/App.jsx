@@ -23,6 +23,12 @@ import Properties from './pages/Properties'
 import Team from './pages/Team'
 import Analytics from './pages/Analytics'
 import Settings from './pages/Settings'
+import Automation from './pages/Automation'
+import FollowUp from './pages/FollowUp'
+import Clients from './pages/Clients'
+import Tasks from './pages/Tasks'
+import Reports from './pages/Reports'
+import Login from './pages/Login'
 
 // Import components
 import Layout from './components/Layout'
@@ -361,6 +367,41 @@ function AppWithAuth() {
                 <ProtectedRoute>
                   <Layout>
                     <SettingsPage />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/automation" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Automation />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/follow-up" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <FollowUp />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/clients" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Clients />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/tasks" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Tasks />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/reports" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Reports />
                   </Layout>
                 </ProtectedRoute>
               } />
