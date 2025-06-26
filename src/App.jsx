@@ -28,7 +28,6 @@ import FollowUp from './pages/FollowUp'
 import Clients from './pages/Clients'
 import Tasks from './pages/Tasks'
 import Reports from './pages/Reports'
-import Login from './pages/Login'
 
 // Import components
 import Layout from './components/Layout'
