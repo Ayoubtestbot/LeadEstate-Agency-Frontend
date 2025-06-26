@@ -65,8 +65,54 @@ export const useData = () => {
 
 // Data Provider Component
 const DataProvider = ({ children }) => {
-  const [leads, setLeads] = useState([])
-  const [properties, setProperties] = useState([])
+  const [leads, setLeads] = useState([
+    {
+      id: '1',
+      name: 'John Smith',
+      email: 'john.smith@email.com',
+      phone: '+1234567890',
+      status: 'new',
+      source: 'website',
+      budget: 500000,
+      createdAt: '2024-01-15T10:00:00Z'
+    },
+    {
+      id: '2',
+      name: 'Sarah Johnson',
+      email: 'sarah.j@email.com',
+      phone: '+1234567891',
+      status: 'contacted',
+      source: 'referral',
+      budget: 750000,
+      createdAt: '2024-01-16T14:30:00Z'
+    }
+  ])
+  const [properties, setProperties] = useState([
+    {
+      id: '1',
+      title: 'Modern Downtown Apartment',
+      type: 'apartment',
+      price: 450000,
+      bedrooms: 2,
+      bathrooms: 2,
+      area: 1200,
+      location: 'Downtown',
+      status: 'available',
+      createdAt: '2024-01-10T09:00:00Z'
+    },
+    {
+      id: '2',
+      title: 'Luxury Villa with Pool',
+      type: 'villa',
+      price: 850000,
+      bedrooms: 4,
+      bathrooms: 3,
+      area: 2500,
+      location: 'Suburbs',
+      status: 'available',
+      createdAt: '2024-01-12T11:15:00Z'
+    }
+  ])
   const [teamMembers, setTeamMembers] = useState([
     {
       id: '1',
