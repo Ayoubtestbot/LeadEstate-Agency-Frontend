@@ -95,7 +95,13 @@ const DataProvider = ({ children }) => {
       id: Date.now().toString(),
       ...memberData,
       joinedAt: new Date().toISOString(),
-      status: 'active'
+      status: 'active',
+      stats: {
+        totalLeads: 0,
+        activeLeads: 0,
+        closedDeals: 0,
+        conversionRate: 0
+      }
     }
     setTeamMembers(prev => [...prev, newMember])
     return newMember
@@ -359,7 +365,7 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
-  return user ? children : <Navigate to="/login" />
+  return user ? children : <Navigate to="/login" replace />
 }
 
 
