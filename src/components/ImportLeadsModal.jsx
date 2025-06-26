@@ -188,9 +188,7 @@ const ImportLeadsModal = ({ isOpen, onClose, onImport }) => {
 
   const downloadTemplate = () => {
     const template = [
-      'name,email,phone,city,source,status',
-      'John Doe,john@example.com,+1234567890,New York,website,new',
-      'Jane Smith,jane@example.com,+1234567891,Los Angeles,facebook,contacted'
+      'name,email,phone,city,source,status'
     ].join('\n')
 
     const blob = new Blob([template], { type: 'text/csv' })

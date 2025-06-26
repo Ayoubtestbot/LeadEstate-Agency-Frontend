@@ -65,74 +65,9 @@ export const useData = () => {
 
 // Data Provider Component
 const DataProvider = ({ children }) => {
-  const [leads, setLeads] = useState([
-    {
-      id: '1',
-      name: 'John Smith',
-      email: 'john.smith@email.com',
-      phone: '+1234567890',
-      status: 'new',
-      source: 'website',
-      budget: 500000,
-      createdAt: '2024-01-15T10:00:00Z'
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      email: 'sarah.j@email.com',
-      phone: '+1234567891',
-      status: 'contacted',
-      source: 'referral',
-      budget: 750000,
-      createdAt: '2024-01-16T14:30:00Z'
-    }
-  ])
-  const [properties, setProperties] = useState([
-    {
-      id: '1',
-      title: 'Modern Downtown Apartment',
-      type: 'apartment',
-      price: 450000,
-      bedrooms: 2,
-      bathrooms: 2,
-      area: 1200,
-      location: 'Downtown',
-      status: 'available',
-      createdAt: '2024-01-10T09:00:00Z'
-    },
-    {
-      id: '2',
-      title: 'Luxury Villa with Pool',
-      type: 'villa',
-      price: 850000,
-      bedrooms: 4,
-      bathrooms: 3,
-      area: 2500,
-      location: 'Suburbs',
-      status: 'available',
-      createdAt: '2024-01-12T11:15:00Z'
-    }
-  ])
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john@agency.com',
-      role: 'manager',
-      phone: '+1234567890',
-      joinedAt: '2024-01-15',
-      status: 'active'
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@agency.com',
-      role: 'super_agent',
-      phone: '+1234567891',
-      joinedAt: '2024-02-01',
-      status: 'active'
-    }
-  ])
+  const [leads, setLeads] = useState([])
+  const [properties, setProperties] = useState([])
+  const [teamMembers, setTeamMembers] = useState([])
   const [loading, setLoading] = useState(false)
 
   const addLead = (leadData) => {
@@ -232,7 +167,8 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (token) {
-      setUser({ firstName: 'Demo User', role: 'manager' })
+      // TODO: Validate token with backend and get real user data
+      setUser({ firstName: 'User', role: 'manager' })
     }
     setLoading(false)
   }, [])
@@ -240,16 +176,25 @@ const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setLoading(true)
-      // Simulate login for demo
-      if (credentials.email === 'admin@demo.com' && credentials.password === 'password') {
-        const userData = { firstName: 'Demo User', role: 'manager' }
-        localStorage.setItem('token', 'demo-token')
-        setUser(userData)
+      // TODO: Replace with actual API call to backend
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        localStorage.setItem('token', data.token)
+        setUser(data.user)
         toast.success('Login successful!')
         return { success: true }
       } else {
-        toast.error('Invalid credentials')
-        return { success: false, message: 'Invalid credentials' }
+        toast.error(data.message || 'Invalid credentials')
+        return { success: false, message: data.message }
       }
     } catch (error) {
       toast.error('Login failed')
@@ -414,10 +359,7 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
-  // Temporary: Always allow access for testing (bypass authentication)
-  return children
-
-  // Original: return user ? children : <Navigate to="/login" />
+  return user ? children : <Navigate to="/login" />
 }
 
 

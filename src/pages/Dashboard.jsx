@@ -35,19 +35,6 @@ const Dashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      // For demo purposes, use mock data instead of API call
-      const mockStats = {
-        totalLeads: 45,
-        availableProperties: 12,
-        conversionRate: 23.5,
-        closedWonLeads: 8
-      }
-
-      setStats(mockStats)
-      setLoading(false)
-      return
-
-      // Original API call code (commented out for demo)
       const token = localStorage.getItem('token')
       const headers = {
         'Content-Type': 'application/json',

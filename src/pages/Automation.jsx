@@ -27,41 +27,7 @@ const Automation = () => {
   const { showToast } = useToast()
   const [activeTab, setActiveTab] = useState('workflows')
   const [showAddWorkflow, setShowAddWorkflow] = useState(false)
-  const [workflows, setWorkflows] = useState([
-    {
-      id: 1,
-      name: 'New Lead Welcome Sequence',
-      description: 'Automatically send welcome emails to new leads',
-      status: 'active',
-      trigger: 'New lead created',
-      actions: ['Send welcome email', 'Add to CRM', 'Assign to agent'],
-      leads: 45,
-      conversionRate: '12%',
-      lastRun: '2 hours ago'
-    },
-    {
-      id: 2,
-      name: 'Follow-up Reminder',
-      description: 'Remind agents to follow up with qualified leads',
-      status: 'active',
-      trigger: 'Lead status = qualified',
-      actions: ['Wait 1 day', 'Send reminder to agent', 'Create task'],
-      leads: 23,
-      conversionRate: '28%',
-      lastRun: '1 hour ago'
-    },
-    {
-      id: 3,
-      name: 'Property Match Notification',
-      description: 'Notify leads when matching properties are added',
-      status: 'paused',
-      trigger: 'New property matches lead criteria',
-      actions: ['Send property alert', 'Schedule viewing'],
-      leads: 12,
-      conversionRate: '35%',
-      lastRun: '1 day ago'
-    }
-  ])
+  const [workflows, setWorkflows] = useState([])
 
   // Handler functions
   const handleAddWorkflow = (workflowData) => {
@@ -115,40 +81,7 @@ const Automation = () => {
     }
   }
 
-  const templates = [
-    {
-      id: 1,
-      name: 'Lead Nurturing Campaign',
-      description: 'Multi-step email sequence for lead nurturing',
-      category: 'Email Marketing',
-      icon: Mail,
-      color: 'bg-blue-500'
-    },
-    {
-      id: 2,
-      name: 'SMS Follow-up',
-      description: 'Automated SMS reminders and updates',
-      category: 'SMS Marketing',
-      icon: MessageSquare,
-      color: 'bg-green-500'
-    },
-    {
-      id: 3,
-      name: 'Appointment Booking',
-      description: 'Automated appointment scheduling workflow',
-      category: 'Scheduling',
-      icon: Calendar,
-      color: 'bg-purple-500'
-    },
-    {
-      id: 4,
-      name: 'Lead Scoring',
-      description: 'Automatically score leads based on behavior',
-      category: 'Lead Management',
-      icon: Target,
-      color: 'bg-orange-500'
-    }
-  ]
+  const templates = []
 
   const WorkflowCard = ({ workflow }) => (
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">

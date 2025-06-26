@@ -92,28 +92,21 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'LOGIN_START' })
 
-      // Mock login for demo purposes
-      const mockUsers = {
-        'owner@agency.com': { id: '1', name: 'Agency Owner', email: 'owner@agency.com', role: 'owner' },
-        'admin@agency.com': { id: '2', name: 'Admin User', email: 'admin@agency.com', role: 'admin' },
-        'agent@agency.com': { id: '3', name: 'Agent User', email: 'agent@agency.com', role: 'agent' },
-        'demo@agency.com': { id: '4', name: 'Demo User', email: 'demo@agency.com', role: 'admin' }
-      }
+      // TODO: Replace with actual API call
+      const response = await authAPI.login(credentials)
 
-      const user = mockUsers[credentials.email]
-      if (user && credentials.password === 'password123') {
-        const token = 'mock-jwt-token-' + Date.now()
-        localStorage.setItem('token', token)
+      if (response.success) {
+        localStorage.setItem('token', response.token)
 
         dispatch({
           type: 'LOGIN_SUCCESS',
-          payload: { user, token }
+          payload: { user: response.user, token: response.token }
         })
 
-        toast.success(`Welcome back, ${user.name}!`)
+        toast.success(`Welcome back, ${response.user.name}!`)
         return { success: true }
       } else {
-        throw new Error('Invalid credentials')
+        throw new Error(response.message || 'Invalid credentials')
       }
     } catch (error) {
       const message = error.message || 'Login failed'
