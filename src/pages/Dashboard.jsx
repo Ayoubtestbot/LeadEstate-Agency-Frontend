@@ -123,7 +123,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.totalLeads')}</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats.totalLeads}</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.totalLeads || 0}</p>
                 <div className="flex items-center mt-2 text-green-600">
                   <span className="text-xs lg:text-sm font-medium">+12%</span>
                 </div>
@@ -142,7 +142,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.properties')}</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats.availableProperties}</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.availableProperties || 0}</p>
                 <div className="flex items-center mt-2 text-green-600">
                   <span className="text-xs lg:text-sm font-medium">+5%</span>
                 </div>
@@ -161,7 +161,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.conversionRate')}</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats.conversionRate}%</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.conversionRate || 0}%</p>
                 <div className="flex items-center mt-2 text-green-600">
                   <span className="text-xs lg:text-sm font-medium">+2.1%</span>
                 </div>
@@ -180,7 +180,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">Closed Deals</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats.closedWonLeads}</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.closedWonLeads || 0}</p>
                 <div className="flex items-center mt-2 text-green-600">
                   <span className="text-xs lg:text-sm font-medium">+8%</span>
                 </div>
@@ -224,19 +224,19 @@ const Dashboard = () => {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">New Leads</span>
-                <span className="text-sm font-medium text-gray-900">{stats.totalLeads}</span>
+                <span className="text-sm font-medium text-gray-900">{stats?.totalLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Properties Listed</span>
-                <span className="text-sm font-medium text-gray-900">{stats.availableProperties}</span>
+                <span className="text-sm font-medium text-gray-900">{stats?.availableProperties || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Closed Deals</span>
-                <span className="text-sm font-medium text-gray-900">{stats.closedWonLeads}</span>
+                <span className="text-sm font-medium text-gray-900">{stats?.closedWonLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Conversion Rate</span>
-                <span className="text-sm font-medium text-gray-900">{stats.conversionRate}%</span>
+                <span className="text-sm font-medium text-gray-900">{stats?.conversionRate || 0}%</span>
               </div>
             </div>
           </div>
