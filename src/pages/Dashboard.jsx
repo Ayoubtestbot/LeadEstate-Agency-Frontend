@@ -61,27 +61,6 @@ const Dashboard = () => {
       setLoading(false)
     }
   }
-        'Authorization': `Bearer ${token}`
-      }
-
-      // Fetch real data from API
-      const [leadsResponse, propertiesResponse] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL}/leads`, { headers }).catch(() => ({ ok: false })),
-        fetch(`${import.meta.env.VITE_API_URL}/properties`, { headers }).catch(() => ({ ok: false }))
-      ])
-
-      let leadsCount = 0
-      let propertiesCount = 0
-
-      if (leadsResponse.ok) {
-        const leadsData = await leadsResponse.json()
-        leadsCount = leadsData.data?.length || 0
-      }
-
-      if (propertiesResponse.ok) {
-        const propertiesData = await propertiesResponse.json()
-        propertiesCount = propertiesData.data?.length || 0
-      }
 
       setStats({
         totalLeads: leadsCount,
