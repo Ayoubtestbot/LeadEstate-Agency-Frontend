@@ -74,7 +74,9 @@ const DataProvider = ({ children }) => {
     const newLead = {
       id: Date.now().toString(),
       ...leadData,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      assignedTo: leadData.assignedTo || null,
+      status: leadData.status || 'new'
     }
     setLeads(prev => [...prev, newLead])
     return newLead

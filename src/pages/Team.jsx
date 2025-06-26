@@ -28,6 +28,21 @@ const Team = () => {
   const { user } = useAuth()
   const { hasPermission } = usePermissions()
   const { showToast } = useToast()
+
+  // Calculate dynamic stats for each team member based on assigned leads
+  const calculateMemberStats = (memberName) => {
+    const memberLeads = leads.filter(lead => lead.assignedTo === memberName)
+    const activeLeads = memberLeads.filter(lead => ['new', 'contacted', 'qualified'].includes(lead.status))
+    const closedDeals = memberLeads.filter(lead => lead.status === 'closed_won')
+    const conversionRate = memberLeads.length > 0 ? ((closedDeals.length / memberLeads.length) * 100).toFixed(1) : 0
+
+    return {
+      totalLeads: memberLeads.length,
+      activeLeads: activeLeads.length,
+      closedDeals: closedDeals.length,
+      conversionRate: parseFloat(conversionRate)
+    }
+  }
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [showAddMember, setShowAddMember] = useState(false)
@@ -79,7 +94,8 @@ const Team = () => {
 
   const TeamMemberCard = ({ member }) => {
     const RoleIcon = getRoleIcon(member.role)
-    
+    const memberStats = calculateMemberStats(member.name)
+
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between mb-4">
@@ -140,19 +156,19 @@ const Team = () => {
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
           <div className="text-center">
-            <p className="text-lg font-bold text-gray-900">{member.stats?.totalLeads || 0}</p>
+            <p className="text-lg font-bold text-gray-900">{memberStats.totalLeads}</p>
             <p className="text-xs text-gray-600">Total Leads</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-gray-900">{member.stats?.activeLeads || 0}</p>
+            <p className="text-lg font-bold text-gray-900">{memberStats.activeLeads}</p>
             <p className="text-xs text-gray-600">Active Leads</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-green-600">{member.stats?.closedDeals || 0}</p>
+            <p className="text-lg font-bold text-green-600">{memberStats.closedDeals}</p>
             <p className="text-xs text-gray-600">Closed Deals</p>
           </div>
           <div className="text-center">
-            <p className="text-lg font-bold text-blue-600">{member.stats?.conversionRate || 0}%</p>
+            <p className="text-lg font-bold text-blue-600">{memberStats.conversionRate}%</p>
             <p className="text-xs text-gray-600">Conversion</p>
           </div>
         </div>
@@ -162,8 +178,8 @@ const Team = () => {
 
   const totalMembers = teamMembers.length
   const activeMembers = teamMembers.filter(m => m.status === 'active').length
-  const totalLeads = teamMembers.reduce((sum, m) => sum + (m.stats?.totalLeads || 0), 0)
-  const totalDeals = teamMembers.reduce((sum, m) => sum + (m.stats?.closedDeals || 0), 0)
+  const totalLeads = teamMembers.reduce((sum, m) => sum + calculateMemberStats(m.name).totalLeads, 0)
+  const totalDeals = teamMembers.reduce((sum, m) => sum + calculateMemberStats(m.name).closedDeals, 0)
 
   return (
     <div className="space-y-6">

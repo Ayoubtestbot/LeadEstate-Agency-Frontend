@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { X, User, Mail, Phone, MapPin } from 'lucide-react'
+import { useData } from '../App'
 
 const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
+  const { teamMembers } = useData()
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -10,7 +12,8 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
     source: 'website',
     propertyType: 'house',
     budget: '',
-    notes: ''
+    notes: '',
+    assignedTo: ''
   })
 
   const handleSubmit = (e) => {
@@ -24,7 +27,8 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
       source: 'website',
       propertyType: 'house',
       budget: '',
-      notes: ''
+      notes: '',
+      assignedTo: ''
     })
     onClose()
   }
@@ -193,7 +197,25 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
               />
             </div>
 
-
+            {/* Assign to Agent */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Assign to Agent (Optional)
+              </label>
+              <select
+                name="assignedTo"
+                value={formData.assignedTo}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Unassigned</option>
+                {teamMembers.map(member => (
+                  <option key={member.id} value={member.name}>
+                    {member.name} ({member.role})
+                  </option>
+                ))}
+              </select>
+            </div>
 
             {/* Notes */}
             <div>
