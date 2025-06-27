@@ -113,9 +113,7 @@ const Dashboard = () => {
                   {stats?.totalLeads || 0}
                   {updating && <span className="ml-2 text-sm text-blue-500">↻</span>}
                 </p>
-                <div className="flex items-center mt-2 text-green-600">
-                  <span className="text-xs lg:text-sm font-medium">+12%</span>
-                </div>
+                {/* Real-time data - no mock percentages */}
               </div>
               <div className="flex-shrink-0 ml-4">
                 <div className="p-2 lg:p-3 rounded-lg bg-blue-100 text-blue-600">
@@ -132,9 +130,7 @@ const Dashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.properties')}</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.availableProperties || 0}</p>
-                <div className="flex items-center mt-2 text-green-600">
-                  <span className="text-xs lg:text-sm font-medium">+5%</span>
-                </div>
+                {/* Real-time data - no mock percentages */}
               </div>
               <div className="flex-shrink-0 ml-4">
                 <div className="p-2 lg:p-3 rounded-lg bg-green-100 text-green-600">
@@ -151,9 +147,7 @@ const Dashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.conversionRate')}</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.conversionRate || 0}%</p>
-                <div className="flex items-center mt-2 text-green-600">
-                  <span className="text-xs lg:text-sm font-medium">+2.1%</span>
-                </div>
+                {/* Real-time data - no mock percentages */}
               </div>
               <div className="flex-shrink-0 ml-4">
                 <div className="p-2 lg:p-3 rounded-lg bg-purple-100 text-purple-600">
@@ -170,9 +164,7 @@ const Dashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">Closed Deals</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.closedWonLeads || 0}</p>
-                <div className="flex items-center mt-2 text-green-600">
-                  <span className="text-xs lg:text-sm font-medium">+8%</span>
-                </div>
+                {/* Real-time data - no mock percentages */}
               </div>
               <div className="flex-shrink-0 ml-4">
                 <div className="p-2 lg:p-3 rounded-lg bg-orange-100 text-orange-600">
