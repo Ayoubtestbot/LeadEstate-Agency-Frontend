@@ -295,8 +295,8 @@ const Dashboard = () => {
               <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.viewReports') || 'View Reports'}</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.analyzePerformance') || 'Analyze your performance'}</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{getText('dashboard.viewReports', 'View Reports')}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{getText('dashboard.analyzePerformance', 'Analyze your performance')}</p>
             </div>
           </div>
         </button>
@@ -310,8 +310,8 @@ const Dashboard = () => {
               <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-orange-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.closeDeal') || 'Close Deal'}</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.markLeadClosed') || 'Mark a lead as closed'}</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{getText('dashboard.closeDeal', 'Close Deal')}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{getText('dashboard.markLeadClosed', 'Mark a lead as closed')}</p>
             </div>
           </div>
         </button>
