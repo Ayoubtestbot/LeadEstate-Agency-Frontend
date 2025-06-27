@@ -271,10 +271,37 @@ const DataProvider = ({ children }) => {
     }
   }
 
-  const updateTeamMember = (id, memberData) => {
-    setTeamMembers(prev => prev.map(member =>
-      member.id === id ? { ...member, ...memberData } : member
-    ))
+  const updateTeamMember = async (id, memberData) => {
+    try {
+      const response = await fetch(`${API_URL}/team/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(memberData)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+
+        // Update UI immediately with server response
+        setTeamMembers(prev => prev.map(member =>
+          member.id === id ? result.data : member
+        ))
+
+        console.log('✅ Team member updated successfully:', result.data)
+        return result.data
+      } else {
+        throw new Error('Failed to update team member')
+      }
+    } catch (error) {
+      console.error('Error updating team member:', error)
+      // Fallback to local update if API fails
+      setTeamMembers(prev => prev.map(member =>
+        member.id === id ? { ...member, ...memberData } : member
+      ))
+      throw error
+    }
   }
 
   const deleteTeamMember = (id) => {
@@ -316,16 +343,67 @@ const DataProvider = ({ children }) => {
     setLeads(prev => prev.filter(lead => lead.id !== id))
   }
 
-  const linkPropertyToLead = (leadId, propertyId) => {
-    setLeads(prev => prev.map(lead =>
-      lead.id === leadId ? { ...lead, linkedPropertyId: propertyId } : lead
-    ))
+  const updateProperty = async (id, propertyData) => {
+    try {
+      const response = await fetch(`${API_URL}/properties/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(propertyData)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+
+        // Update UI immediately with server response
+        setProperties(prev => prev.map(property =>
+          property.id === id ? result.data : property
+        ))
+
+        console.log('✅ Property updated successfully:', result.data)
+        return result.data
+      } else {
+        throw new Error('Failed to update property')
+      }
+    } catch (error) {
+      console.error('Error updating property:', error)
+      // Fallback to local update if API fails
+      setProperties(prev => prev.map(property =>
+        property.id === id ? { ...property, ...propertyData } : property
+      ))
+      throw error
+    }
   }
 
-  const unlinkPropertyFromLead = (leadId) => {
-    setLeads(prev => prev.map(lead =>
-      lead.id === leadId ? { ...lead, linkedPropertyId: null } : lead
-    ))
+  const deleteProperty = (id) => {
+    setProperties(prev => prev.filter(property => property.id !== id))
+  }
+
+  const linkPropertyToLead = async (leadId, propertyId) => {
+    try {
+      await updateLead(leadId, { linkedPropertyId: propertyId })
+      console.log('✅ Property linked to lead successfully')
+    } catch (error) {
+      console.error('Error linking property to lead:', error)
+      // Fallback to local update if API fails
+      setLeads(prev => prev.map(lead =>
+        lead.id === leadId ? { ...lead, linkedPropertyId: propertyId } : lead
+      ))
+    }
+  }
+
+  const unlinkPropertyFromLead = async (leadId) => {
+    try {
+      await updateLead(leadId, { linkedPropertyId: null })
+      console.log('✅ Property unlinked from lead successfully')
+    } catch (error) {
+      console.error('Error unlinking property from lead:', error)
+      // Fallback to local update if API fails
+      setLeads(prev => prev.map(lead =>
+        lead.id === leadId ? { ...lead, linkedPropertyId: null } : lead
+      ))
+    }
   }
 
   const clearAllData = () => {
@@ -352,6 +430,8 @@ const DataProvider = ({ children }) => {
     deleteTeamMember,
     updateLead,
     deleteLead,
+    updateProperty,
+    deleteProperty,
     linkPropertyToLead,
     unlinkPropertyFromLead,
     refreshData
