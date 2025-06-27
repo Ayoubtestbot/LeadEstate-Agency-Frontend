@@ -131,7 +131,7 @@ export default {
     title: 'Tâches de suivi',
     subtitle: 'Gérez et suivez vos activités de suivi de prospects',
     addTask: 'Ajouter une tâche'
-  }
+  },
 
   // Prospects
   leads: {
