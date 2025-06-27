@@ -39,7 +39,7 @@ import { PermissionsProvider } from './contexts/PermissionsContext'
 import { ToastProvider } from './components/Toast'
 
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-agency-backend.onrender.com/api'
+const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend-9fih.onrender.com/api'
 
 // Auth Context
 const AuthContext = createContext()
