@@ -175,11 +175,11 @@ const DataProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json()
 
-        // Optimistic update: Update UI immediately
+        // Optimistic update: Update UI immediately and keep it
         setLeads(prev => [...prev, result.data])
 
-        // Then refresh data in background to ensure consistency
-        setTimeout(() => refreshData(), 100)
+        // No background refresh needed - the optimistic update is reliable
+        console.log('✅ Lead added and UI updated immediately')
 
         return result.data
       } else {
@@ -204,8 +204,10 @@ const DataProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json()
 
-        // Refresh all data to ensure real-time updates across all components
-        await refreshData()
+        // Optimistic update: Update UI immediately and keep it
+        setProperties(prev => [...prev, result.data])
+
+        console.log('✅ Property added and UI updated immediately')
 
         return result.data
       } else {
@@ -237,8 +239,8 @@ const DataProvider = ({ children }) => {
         const result = await response.json()
         console.log('✅ Team member added successfully:', result)
 
-        // Refresh all data to ensure real-time updates across all components
-        await refreshData()
+        // Optimistic update: Update UI immediately and keep it
+        setTeamMembers(prev => [...prev, result.data])
 
         return result.data
       } else {
@@ -275,8 +277,10 @@ const DataProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json()
 
-        // Refresh all data to ensure real-time updates across all components
-        await refreshData()
+        // Optimistic update: Update UI immediately and keep it
+        setLeads(prev => prev.map(lead =>
+          lead.id === id ? result.data : lead
+        ))
 
         return result.data
       } else {
