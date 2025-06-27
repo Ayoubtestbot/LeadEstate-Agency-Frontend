@@ -162,7 +162,7 @@ const Dashboard = () => {
           <div className="p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-600 truncate">Closed Deals</p>
+                <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.closedDeals') || 'Closed Deals'}</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.closedWonLeads || 0}</p>
                 {/* Real-time data - no mock percentages */}
               </div>
@@ -181,16 +181,16 @@ const Dashboard = () => {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
-            <p className="text-sm text-gray-500">Latest updates</p>
+            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.recentActivity') || 'Recent Activity'}</h3>
+            <p className="text-sm text-gray-500">{t('dashboard.latestUpdates') || 'Latest updates'}</p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
             <div className="text-center py-8">
               <div className="h-12 w-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-gray-400" />
               </div>
-              <p className="text-sm text-gray-500">No recent activity</p>
-              <p className="text-xs text-gray-400 mt-1">Activity will appear here as you use the CRM</p>
+              <p className="text-sm text-gray-500">{t('dashboard.noRecentActivity') || 'No recent activity'}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('dashboard.activityWillAppear') || 'Activity will appear here as you use the CRM'}</p>
             </div>
           </div>
         </div>
@@ -198,25 +198,25 @@ const Dashboard = () => {
         {/* Quick Stats */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">Quick Stats</h3>
-            <p className="text-sm text-gray-500">This month</p>
+            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.quickStats') || 'Quick Stats'}</h3>
+            <p className="text-sm text-gray-500">{t('dashboard.thisMonth') || 'This month'}</p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">New Leads</span>
+                <span className="text-sm text-gray-600">{t('dashboard.newLeads') || 'New Leads'}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.totalLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Properties Listed</span>
+                <span className="text-sm text-gray-600">{t('dashboard.propertiesListed') || 'Properties Listed'}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.availableProperties || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Closed Deals</span>
+                <span className="text-sm text-gray-600">{t('dashboard.closedDeals') || 'Closed Deals'}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.closedWonLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Conversion Rate</span>
+                <span className="text-sm text-gray-600">{t('dashboard.conversionRate') || 'Conversion Rate'}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.conversionRate || 0}%</span>
               </div>
             </div>

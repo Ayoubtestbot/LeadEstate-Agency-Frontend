@@ -245,7 +245,7 @@ const Layout = ({ children }) => {
               <Menu className="h-6 w-6" />
             </button>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome back, {user?.name}!</span>
+              <span className="text-sm text-gray-600">{safeT('common.welcomeBack', 'Welcome back')}, {user?.name}!</span>
               <LanguageToggle />
             </div>
           </div>

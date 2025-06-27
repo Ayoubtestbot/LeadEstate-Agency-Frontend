@@ -40,6 +40,11 @@ export const LanguageProvider = ({ children }) => {
   const changeLanguage = (newLanguage) => {
     setLanguage(newLanguage)
     localStorage.setItem('crm_language', newLanguage)
+
+    // Force page refresh to ensure all components re-render with new language
+    setTimeout(() => {
+      window.location.reload()
+    }, 100)
   }
 
   const t = (key, params = {}) => {

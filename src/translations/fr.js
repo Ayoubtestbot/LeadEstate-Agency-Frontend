@@ -51,7 +51,8 @@ export default {
     password: 'Mot de passe',
     confirm: 'Confirmer',
     required: 'Requis',
-    optional: 'Optionnel'
+    optional: 'Optionnel',
+    welcomeBack: 'Bon retour'
   },
 
   // Navigation
@@ -81,7 +82,14 @@ export default {
     addProperty: 'Ajouter une propriété',
     viewReports: 'Voir les rapports',
     noRecentLeads: 'Aucun prospect récent',
-    noRecentActivity: 'Aucune activité récente'
+    noRecentActivity: 'Aucune activité récente',
+    closedDeals: 'Affaires conclues',
+    latestUpdates: 'Dernières mises à jour',
+    quickStats: 'Statistiques rapides',
+    thisMonth: 'Ce mois-ci',
+    newLeads: 'Nouveaux prospects',
+    propertiesListed: 'Propriétés listées',
+    activityWillAppear: 'L\'activité apparaîtra ici lorsque vous utiliserez le CRM'
   },
 
   // Prospects
