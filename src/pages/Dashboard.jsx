@@ -76,10 +76,10 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-            {t('common.welcomeBack') || 'Welcome back'}, {user?.name}!
+            {t('common.welcomeBack') === 'common.welcomeBack' ? 'Bon retour' : t('common.welcomeBack')}, {user?.name}!
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
-            {t('dashboard.subtitle') || "Here's what's happening with your real estate business today."}
+            {t('dashboard.subtitle') === 'dashboard.subtitle' ? "Voici ce qui se passe avec votre entreprise immobilière aujourd'hui." : t('dashboard.subtitle')}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -162,7 +162,7 @@ const Dashboard = () => {
           <div className="p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.closedDeals') || 'Closed Deals'}</p>
+                <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.closedDeals') === 'dashboard.closedDeals' ? 'Affaires conclues' : t('dashboard.closedDeals')}</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.closedWonLeads || 0}</p>
                 {/* Real-time data - no mock percentages */}
               </div>
@@ -198,21 +198,21 @@ const Dashboard = () => {
         {/* Quick Stats */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.quickStats') || 'Quick Stats'}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.thisMonth') || 'This month'}</p>
+            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.quickStats') === 'dashboard.quickStats' ? 'Statistiques rapides' : t('dashboard.quickStats')}</h3>
+            <p className="text-sm text-gray-500">{t('dashboard.thisMonth') === 'dashboard.thisMonth' ? 'Ce mois-ci' : t('dashboard.thisMonth')}</p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.newLeads') || 'New Leads'}</span>
+                <span className="text-sm text-gray-600">{t('dashboard.newLeads') === 'dashboard.newLeads' ? 'Nouveaux prospects' : t('dashboard.newLeads')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.totalLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.propertiesListed') || 'Properties Listed'}</span>
+                <span className="text-sm text-gray-600">{t('dashboard.propertiesListed') === 'dashboard.propertiesListed' ? 'Propriétés listées' : t('dashboard.propertiesListed')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.availableProperties || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.closedDeals') || 'Closed Deals'}</span>
+                <span className="text-sm text-gray-600">{t('dashboard.closedDeals') === 'dashboard.closedDeals' ? 'Affaires conclues' : t('dashboard.closedDeals')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.closedWonLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">

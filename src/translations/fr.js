@@ -52,7 +52,8 @@ export default {
     confirm: 'Confirmer',
     required: 'Requis',
     optional: 'Optionnel',
-    welcomeBack: 'Bon retour'
+    welcomeBack: 'Bon retour',
+    add: 'Ajouter'
   },
 
   // Navigation
@@ -95,8 +96,42 @@ export default {
     analyzePerformance: 'Analyser vos performances',
     closeDeal: 'Conclure une affaire',
     markLeadClosed: 'Marquer un prospect comme fermé',
-    reports: 'Rapports'
+    reports: 'Rapports',
+    closedDeals: 'Affaires conclues',
+    quickStats: 'Statistiques rapides',
+    thisMonth: 'Ce mois-ci',
+    newLeads: 'Nouveaux prospects',
+    propertiesListed: 'Propriétés listées',
+    latestUpdates: 'Dernières mises à jour'
   },
+
+  // Team
+  team: {
+    title: 'Gestion d\'équipe',
+    subtitle: 'Gérez les membres de votre équipe et suivez leurs performances',
+    addMember: 'Ajouter un membre',
+    totalMembers: 'Total des membres'
+  },
+
+  // Analytics
+  analytics: {
+    title: 'Analyses',
+    subtitle: 'Suivez vos performances de vente et vos métriques de prospects'
+  },
+
+  // Automation
+  automation: {
+    title: 'Automatisation',
+    subtitle: 'Automatisez votre gestion de prospects et vos processus de suivi',
+    createWorkflow: 'Créer un workflow'
+  },
+
+  // Follow-up
+  followUp: {
+    title: 'Tâches de suivi',
+    subtitle: 'Gérez et suivez vos activités de suivi de prospects',
+    addTask: 'Ajouter une tâche'
+  }
 
   // Prospects
   leads: {
