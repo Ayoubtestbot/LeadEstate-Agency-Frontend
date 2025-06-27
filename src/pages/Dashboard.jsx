@@ -76,10 +76,10 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-            Welcome back, {user?.name}!
+            {t('common.welcomeBack') || 'Welcome back'}, {user?.name}!
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
-            Here's what's happening with your real estate business today.
+            {t('dashboard.subtitle') || "Here's what's happening with your real estate business today."}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -88,16 +88,16 @@ const Dashboard = () => {
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 h-9 px-4 py-2 w-full sm:w-auto"
           >
             <Eye className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">View Reports</span>
-            <span className="sm:hidden">Reports</span>
+            <span className="hidden sm:inline">{t('dashboard.viewReports') || 'View Reports'}</span>
+            <span className="sm:hidden">{t('dashboard.reports') || 'Reports'}</span>
           </button>
           <button
             onClick={() => setShowAddLead(true)}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2 w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Add Lead</span>
-            <span className="sm:hidden">Add</span>
+            <span className="hidden sm:inline">{t('dashboard.addLead') || 'Add Lead'}</span>
+            <span className="sm:hidden">{t('common.add') || 'Add'}</span>
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../App'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import ProtectedComponent from '../components/ProtectedComponent'
 import AddTaskModal from '../components/AddTaskModal'
 import { useToast } from '../components/Toast'
@@ -26,6 +27,7 @@ const FollowUp = () => {
   const { leads } = useData()
   const { hasPermission } = usePermissions()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState('pending')
   const [searchTerm, setSearchTerm] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('all')
@@ -264,8 +266,8 @@ const FollowUp = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Follow-up Tasks</h1>
-          <p className="text-gray-600 mt-1">Manage and track your lead follow-up activities</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('followUp.title') || 'Follow-up Tasks'}</h1>
+          <p className="text-gray-600 mt-1">{t('followUp.subtitle') || 'Manage and track your lead follow-up activities'}</p>
         </div>
         
         <button
@@ -273,7 +275,7 @@ const FollowUp = () => {
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Task
+          {t('followUp.addTask') || 'Add Task'}
         </button>
       </div>
 

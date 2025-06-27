@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData } from '../App'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import ProtectedComponent from '../components/ProtectedComponent'
 import {
   BarChart3,
@@ -18,6 +19,7 @@ import {
 const Analytics = () => {
   const { leads, properties } = useData()
   const { hasPermission } = usePermissions()
+  const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState('30') // days
   const [selectedMetric, setSelectedMetric] = useState('leads')
 
@@ -78,8 +80,8 @@ const Analytics = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-600 mt-1">Track your sales performance and lead metrics</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('analytics.title') || 'Analytics'}</h1>
+          <p className="text-gray-600 mt-1">{t('analytics.subtitle') || 'Track your sales performance and lead metrics'}</p>
         </div>
         
         <div className="flex items-center space-x-3 mt-4 sm:mt-0">

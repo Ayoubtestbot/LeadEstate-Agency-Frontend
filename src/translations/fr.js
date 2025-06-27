@@ -70,7 +70,7 @@ export default {
   // Tableau de bord
   dashboard: {
     title: 'Tableau de bord',
-    subtitle: 'Aperçu de votre activité immobilière',
+    subtitle: 'Voici ce qui se passe avec votre entreprise immobilière aujourd\'hui.',
     totalLeads: 'Total des prospects',
     activeLeads: 'Prospects actifs',
     properties: 'Propriétés',
@@ -94,7 +94,8 @@ export default {
     addPropertyDescription: 'Lister une nouvelle propriété',
     analyzePerformance: 'Analyser vos performances',
     closeDeal: 'Conclure une affaire',
-    markLeadClosed: 'Marquer un prospect comme fermé'
+    markLeadClosed: 'Marquer un prospect comme fermé',
+    reports: 'Rapports'
   },
 
   // Prospects

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import ProtectedComponent from '../components/ProtectedComponent'
 import AddWorkflowModal from '../components/AddWorkflowModal'
 import { useToast } from '../components/Toast'
@@ -25,6 +26,7 @@ import {
 const Automation = () => {
   const { hasPermission } = usePermissions()
   const { showToast } = useToast()
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState('workflows')
   const [showAddWorkflow, setShowAddWorkflow] = useState(false)
   const [workflows, setWorkflows] = useState([])
@@ -200,8 +202,8 @@ const Automation = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Automation</h1>
-          <p className="text-gray-600 mt-1">Automate your lead management and follow-up processes</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('automation.title') || 'Automation'}</h1>
+          <p className="text-gray-600 mt-1">{t('automation.subtitle') || 'Automate your lead management and follow-up processes'}</p>
         </div>
         
         <button
@@ -209,7 +211,7 @@ const Automation = () => {
           className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Create Workflow
+          {t('automation.createWorkflow') || 'Create Workflow'}
         </button>
       </div>
 
