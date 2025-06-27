@@ -49,9 +49,16 @@ const Team = () => {
   const [editMember, setEditMember] = useState(null)
 
   // Handler functions
-  const handleAddMember = (memberData) => {
-    addTeamMember(memberData)
-    showToast(`${memberData.name} has been added to the team`, 'success')
+  const handleAddMember = async (memberData) => {
+    try {
+      console.log('🎯 Team component: Adding member:', memberData)
+      await addTeamMember(memberData)
+      console.log('✅ Team component: Member added successfully')
+      showToast(`${memberData.name} has been added to the team`, 'success')
+    } catch (error) {
+      console.error('❌ Team component: Error adding member:', error)
+      showToast(`Failed to add ${memberData.name}: ${error.message}`, 'error')
+    }
   }
 
   const handleEditMember = (memberId, memberData) => {

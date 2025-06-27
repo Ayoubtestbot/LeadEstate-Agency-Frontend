@@ -170,6 +170,9 @@ const DataProvider = ({ children }) => {
 
   const addTeamMember = async (memberData) => {
     try {
+      console.log('🔄 Adding team member:', memberData)
+      console.log('🌐 API URL:', `${API_URL}/team`)
+
       const response = await fetch(`${API_URL}/team`, {
         method: 'POST',
         headers: {
@@ -178,15 +181,21 @@ const DataProvider = ({ children }) => {
         body: JSON.stringify(memberData)
       })
 
+      console.log('📡 Response status:', response.status)
+      console.log('📡 Response ok:', response.ok)
+
       if (response.ok) {
         const result = await response.json()
+        console.log('✅ Team member added successfully:', result)
         setTeamMembers(prev => [...prev, result.data])
         return result.data
       } else {
-        throw new Error('Failed to add team member')
+        const errorText = await response.text()
+        console.error('❌ API Error:', response.status, errorText)
+        throw new Error(`Failed to add team member: ${response.status}`)
       }
     } catch (error) {
-      console.error('Error adding team member:', error)
+      console.error('❌ Error adding team member:', error)
       throw error
     }
   }
