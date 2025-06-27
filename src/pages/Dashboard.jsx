@@ -62,19 +62,6 @@ const Dashboard = () => {
     }
   }
 
-      setStats({
-        totalLeads: leadsCount,
-        availableProperties: propertiesCount,
-        conversionRate: leadsCount > 0 ? ((leadsCount * 0.1).toFixed(1)) : 0,
-        closedWonLeads: Math.floor(leadsCount * 0.1)
-      })
-    } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleAddLead = (leadData) => {
     const newLead = addLead(leadData)
     showToast(`Lead "${leadData.name}" added successfully!`, 'success')
