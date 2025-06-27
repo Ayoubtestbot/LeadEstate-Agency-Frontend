@@ -6,12 +6,10 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
     title: '',
     type: 'apartment',
     price: '',
-    location: '',
-    bedrooms: '',
-    bathrooms: '',
-    area: '',
-    description: '',
-    status: 'available'
+    address: '',
+    city: '',
+    surface: '',
+    description: ''
   })
 
   const handleSubmit = (e) => {
@@ -22,12 +20,10 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       title: formData.title,
       type: formData.type,
       price: parseFloat(formData.price) || 0,
-      location: formData.location,
-      bedrooms: parseInt(formData.bedrooms) || 0,
-      bathrooms: parseInt(formData.bathrooms) || 0,
-      area: parseFloat(formData.area) || 0,
-      description: formData.description,
-      status: formData.status || 'available'
+      address: formData.address,
+      city: formData.city,
+      surface: parseFloat(formData.surface) || 0,
+      description: formData.description
     }
 
     console.log('🏠 Submitting property data:', propertyData)
@@ -37,12 +33,10 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       title: '',
       type: 'apartment',
       price: '',
-      location: '',
-      bedrooms: '',
-      bathrooms: '',
-      area: '',
-      description: '',
-      status: 'available'
+      address: '',
+      city: '',
+      surface: '',
+      description: ''
     })
     onClose()
   }
@@ -138,78 +132,57 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
               </div>
             </div>
 
-            {/* Location */}
+            {/* Address */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Location *
+                Address *
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  name="location"
-                  value={formData.location}
+                  name="address"
+                  value={formData.address}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Paris 16ème, Neuilly-sur-Seine"
+                  placeholder="e.g., 123 Rue de la Paix"
                 />
               </div>
             </div>
 
-            {/* Bedrooms, Bathrooms, Area */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bedrooms
-                </label>
-                <div className="relative">
-                  <Bed className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="number"
-                    name="bedrooms"
-                    value={formData.bedrooms}
-                    onChange={handleChange}
-                    min="0"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="3"
-                  />
-                </div>
-              </div>
+            {/* City */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                City *
+              </label>
+              <input
+                type="text"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., Paris, Neuilly-sur-Seine"
+              />
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Bathrooms
-                </label>
-                <div className="relative">
-                  <Bath className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="number"
-                    name="bathrooms"
-                    value={formData.bathrooms}
-                    onChange={handleChange}
-                    min="0"
-                    step="0.5"
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="2.5"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Area (sq ft)
-                </label>
-                <input
-                  type="number"
-                  name="area"
-                  value={formData.area}
-                  onChange={handleChange}
-                  min="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="2500"
-                />
-              </div>
+            {/* Surface */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Surface (m²) *
+              </label>
+              <input
+                type="number"
+                name="surface"
+                value={formData.surface}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g., 75"
+              />
             </div>
 
             {/* Description */}
