@@ -31,14 +31,17 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
 
+  // Calculate initial stats when component mounts
   useEffect(() => {
-    fetchDashboardStats()
-    // Don't refresh data here to avoid conflicts with optimistic updates
+    setLoading(false)
   }, [])
 
   // Calculate stats directly from local data for instant updates
   useEffect(() => {
     console.log('📊 Dashboard: Data changed, calculating stats from local data...')
+    console.log('📊 Current leads:', leads?.length || 0)
+    console.log('📊 Current properties:', properties?.length || 0)
+
     setUpdating(true)
 
     // Calculate stats directly from the current data
@@ -55,33 +58,7 @@ const Dashboard = () => {
     console.log('✅ Dashboard stats updated instantly:', calculatedStats)
   }, [leads, properties])
 
-  const fetchDashboardStats = async () => {
-    try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api'
-      const response = await fetch(`${API_URL}/dashboard/stats`)
-
-      if (response.ok) {
-        const result = await response.json()
-        setStats(result.data)
-      } else {
-        throw new Error('Failed to fetch dashboard stats')
-      }
-    } catch (error) {
-      console.error('Failed to fetch dashboard stats:', error)
-      // Fallback to calculating from local data
-      const leadsCount = leads?.length || 0
-      const propertiesCount = properties?.length || 0
-
-      setStats({
-        totalLeads: leadsCount,
-        availableProperties: propertiesCount,
-        conversionRate: leadsCount > 0 ? ((leadsCount * 0.1).toFixed(1)) : 0,
-        closedWonLeads: Math.floor(leadsCount * 0.1)
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Removed fetchDashboardStats - now calculating directly from local data for instant updates
 
   const handleAddLead = (leadData) => {
     const newLead = addLead(leadData)
