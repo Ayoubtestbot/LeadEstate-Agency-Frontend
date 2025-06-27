@@ -4,33 +4,45 @@ import { X, Home, DollarSign, MapPin, Bed, Bath } from 'lucide-react'
 const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     title: '',
-    type: 'house',
+    type: 'apartment',
     price: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
+    location: '',
     bedrooms: '',
     bathrooms: '',
     area: '',
-    description: ''
+    description: '',
+    status: 'available'
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit(formData)
+
+    // Format data for backend compatibility
+    const propertyData = {
+      title: formData.title,
+      type: formData.type,
+      price: parseFloat(formData.price) || 0,
+      location: formData.location,
+      bedrooms: parseInt(formData.bedrooms) || 0,
+      bathrooms: parseInt(formData.bathrooms) || 0,
+      area: parseFloat(formData.area) || 0,
+      description: formData.description,
+      status: formData.status || 'available'
+    }
+
+    console.log('🏠 Submitting property data:', propertyData)
+    onSubmit(propertyData)
+
     setFormData({
       title: '',
-      type: 'house',
+      type: 'apartment',
       price: '',
-      address: '',
-      city: '',
-      state: '',
-      zipCode: '',
+      location: '',
       bedrooms: '',
       bathrooms: '',
       area: '',
-      description: ''
+      description: '',
+      status: 'available'
     })
     onClose()
   }
@@ -97,12 +109,13 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="house">House</option>
                   <option value="apartment">Apartment</option>
-                  <option value="condo">Condo</option>
-                  <option value="townhouse">Townhouse</option>
-                  <option value="land">Land</option>
-                  <option value="commercial">Commercial</option>
+                  <option value="house">House</option>
+                  <option value="studio">Studio</option>
+                  <option value="loft">Loft</option>
+                  <option value="duplex">Duplex</option>
+                  <option value="penthouse">Penthouse</option>
+                  <option value="villa">Villa</option>
                 </select>
               </div>
 
@@ -125,67 +138,21 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
               </div>
             </div>
 
-            {/* Address */}
+            {/* Location */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address *
+                Location *
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  name="address"
-                  value={formData.address}
+                  name="location"
+                  value={formData.location}
                   onChange={handleChange}
                   required
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="123 Main Street"
-                />
-              </div>
-            </div>
-
-            {/* City, State, Zip */}
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City *
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="New York"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State
-                </label>
-                <input
-                  type="text"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="NY"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Zip Code
-                </label>
-                <input
-                  type="text"
-                  name="zipCode"
-                  value={formData.zipCode}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="10001"
+                  placeholder="e.g., Paris 16ème, Neuilly-sur-Seine"
                 />
               </div>
             </div>
