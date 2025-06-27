@@ -80,35 +80,52 @@ const DataProvider = ({ children }) => {
   }, [])
 
   const fetchAllData = async () => {
+    console.log('🔄 Fetching all data from API...')
+    console.log('🌐 API_URL:', API_URL)
     setLoading(true)
     try {
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads`).catch(() => ({ ok: false })),
-        fetch(`${API_URL}/properties`).catch(() => ({ ok: false })),
-        fetch(`${API_URL}/team`).catch(() => ({ ok: false }))
+        fetch(`${API_URL}/leads`).catch((err) => {
+          console.error('❌ Error fetching leads:', err)
+          return { ok: false }
+        }),
+        fetch(`${API_URL}/properties`).catch((err) => {
+          console.error('❌ Error fetching properties:', err)
+          return { ok: false }
+        }),
+        fetch(`${API_URL}/team`).catch((err) => {
+          console.error('❌ Error fetching team:', err)
+          return { ok: false }
+        })
       ])
 
+      console.log('📊 Leads response status:', leadsRes.status, leadsRes.ok)
       if (leadsRes.ok) {
         const leadsData = await leadsRes.json()
+        console.log('✅ Leads data received:', leadsData)
         setLeads(leadsData.data || [])
       } else {
-        console.warn('Failed to fetch leads from API, using empty array')
+        console.warn('❌ Failed to fetch leads from API, status:', leadsRes.status)
         setLeads([])
       }
 
+      console.log('🏠 Properties response status:', propertiesRes.status, propertiesRes.ok)
       if (propertiesRes.ok) {
         const propertiesData = await propertiesRes.json()
+        console.log('✅ Properties data received:', propertiesData)
         setProperties(propertiesData.data || [])
       } else {
-        console.warn('Failed to fetch properties from API, using empty array')
+        console.warn('❌ Failed to fetch properties from API, status:', propertiesRes.status)
         setProperties([])
       }
 
+      console.log('👥 Team response status:', teamRes.status, teamRes.ok)
       if (teamRes.ok) {
         const teamData = await teamRes.json()
+        console.log('✅ Team data received:', teamData)
         setTeamMembers(teamData.data || [])
       } else {
-        console.warn('Failed to fetch team members from API, using empty array')
+        console.warn('❌ Failed to fetch team members from API, status:', teamRes.status)
         setTeamMembers([])
       }
     } catch (error) {
