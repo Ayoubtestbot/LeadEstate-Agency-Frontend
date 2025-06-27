@@ -29,6 +29,7 @@ const Dashboard = () => {
     closedWonLeads: 0
   })
   const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     fetchDashboardStats()
@@ -38,7 +39,9 @@ const Dashboard = () => {
 
   // Refresh dashboard stats when data changes
   useEffect(() => {
-    fetchDashboardStats()
+    console.log('📊 Dashboard: Data changed, updating stats...')
+    setUpdating(true)
+    fetchDashboardStats().finally(() => setUpdating(false))
   }, [leads, properties])
 
   const fetchDashboardStats = async () => {
@@ -118,7 +121,10 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.totalLeads')}</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.totalLeads || 0}</p>
+                <p className={`text-xl lg:text-2xl font-bold text-gray-900 mt-1 transition-opacity ${updating ? 'opacity-50' : 'opacity-100'}`}>
+                  {stats?.totalLeads || 0}
+                  {updating && <span className="ml-2 text-sm text-blue-500">↻</span>}
+                </p>
                 <div className="flex items-center mt-2 text-green-600">
                   <span className="text-xs lg:text-sm font-medium">+12%</span>
                 </div>

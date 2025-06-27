@@ -123,10 +123,39 @@ const DataProvider = ({ children }) => {
   }
 
   // Refresh data function for real-time updates
-  const refreshData = async () => {
+  const refreshData = async (skipLoading = true) => {
     console.log('🔄 Refreshing all data...')
-    await fetchAllData()
-    console.log('✅ Data refreshed successfully')
+
+    if (!skipLoading) setLoading(true)
+
+    try {
+      const [leadsRes, propertiesRes, teamRes] = await Promise.all([
+        fetch(`${API_URL}/leads`).catch(() => ({ ok: false })),
+        fetch(`${API_URL}/properties`).catch(() => ({ ok: false })),
+        fetch(`${API_URL}/team`).catch(() => ({ ok: false }))
+      ])
+
+      if (leadsRes.ok) {
+        const leadsData = await leadsRes.json()
+        setLeads(leadsData.data || [])
+      }
+
+      if (propertiesRes.ok) {
+        const propertiesData = await propertiesRes.json()
+        setProperties(propertiesData.data || [])
+      }
+
+      if (teamRes.ok) {
+        const teamData = await teamRes.json()
+        setTeamMembers(teamData.data || [])
+      }
+
+      console.log('✅ Data refreshed successfully')
+    } catch (error) {
+      console.error('Error refreshing data:', error)
+    } finally {
+      if (!skipLoading) setLoading(false)
+    }
   }
 
   const addLead = async (leadData) => {
@@ -146,8 +175,11 @@ const DataProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json()
 
-        // Refresh all data to ensure real-time updates across all components
-        await refreshData()
+        // Optimistic update: Update UI immediately
+        setLeads(prev => [...prev, result.data])
+
+        // Then refresh data in background to ensure consistency
+        setTimeout(() => refreshData(), 100)
 
         return result.data
       } else {
