@@ -16,7 +16,7 @@ import AddPropertyModal from '../components/AddPropertyModal'
 
 const Dashboard = () => {
   const { user } = useAuth()
-  const { leads, properties, addLead, addProperty } = useData()
+  const { leads, properties, addLead, addProperty, refreshData } = useData()
   const { showToast } = useToast()
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -32,7 +32,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardStats()
+    // Refresh data when dashboard loads to ensure latest stats
+    refreshData()
   }, [])
+
+  // Refresh dashboard stats when data changes
+  useEffect(() => {
+    fetchDashboardStats()
+  }, [leads, properties])
 
   const fetchDashboardStats = async () => {
     try {

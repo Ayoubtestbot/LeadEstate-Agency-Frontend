@@ -122,6 +122,13 @@ const DataProvider = ({ children }) => {
     }
   }
 
+  // Refresh data function for real-time updates
+  const refreshData = async () => {
+    console.log('🔄 Refreshing all data...')
+    await fetchAllData()
+    console.log('✅ Data refreshed successfully')
+  }
+
   const addLead = async (leadData) => {
     try {
       const response = await fetch(`${API_URL}/leads`, {
@@ -138,7 +145,10 @@ const DataProvider = ({ children }) => {
 
       if (response.ok) {
         const result = await response.json()
-        setLeads(prev => [...prev, result.data])
+
+        // Refresh all data to ensure real-time updates across all components
+        await refreshData()
+
         return result.data
       } else {
         throw new Error('Failed to add lead')
@@ -161,7 +171,10 @@ const DataProvider = ({ children }) => {
 
       if (response.ok) {
         const result = await response.json()
-        setProperties(prev => [...prev, result.data])
+
+        // Refresh all data to ensure real-time updates across all components
+        await refreshData()
+
         return result.data
       } else {
         throw new Error('Failed to add property')
@@ -191,7 +204,10 @@ const DataProvider = ({ children }) => {
       if (response.ok) {
         const result = await response.json()
         console.log('✅ Team member added successfully:', result)
-        setTeamMembers(prev => [...prev, result.data])
+
+        // Refresh all data to ensure real-time updates across all components
+        await refreshData()
+
         return result.data
       } else {
         const errorText = await response.text()
@@ -226,9 +242,10 @@ const DataProvider = ({ children }) => {
 
       if (response.ok) {
         const result = await response.json()
-        setLeads(prev => prev.map(lead =>
-          lead.id === id ? result.data : lead
-        ))
+
+        // Refresh all data to ensure real-time updates across all components
+        await refreshData()
+
         return result.data
       } else {
         throw new Error('Failed to update lead')
@@ -283,7 +300,8 @@ const DataProvider = ({ children }) => {
     updateLead,
     deleteLead,
     linkPropertyToLead,
-    unlinkPropertyFromLead
+    unlinkPropertyFromLead,
+    refreshData
   }
 
   return (
