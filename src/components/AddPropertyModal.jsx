@@ -9,7 +9,8 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
     address: '',
     city: '',
     surface: '',
-    description: ''
+    description: '',
+    image_url: ''
   })
 
   const handleSubmit = (e) => {
@@ -23,7 +24,8 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       address: formData.address,
       city: formData.city,
       surface: parseFloat(formData.surface) || 0,
-      description: formData.description
+      description: formData.description,
+      image_url: formData.image_url
     }
 
     console.log('🏠 Submitting property data:', propertyData)
@@ -36,7 +38,8 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       address: '',
       city: '',
       surface: '',
-      description: ''
+      description: '',
+      image_url: ''
     })
     onClose()
   }
@@ -183,6 +186,24 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="e.g., 75"
               />
+            </div>
+
+            {/* Image URL */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Image URL
+              </label>
+              <input
+                type="url"
+                name="image_url"
+                value={formData.image_url}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/property-image.jpg"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Enter a URL to an image of the property (optional)
+              </p>
             </div>
 
             {/* Description */}
