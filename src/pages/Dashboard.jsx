@@ -18,8 +18,38 @@ const Dashboard = () => {
   const { user } = useAuth()
   const { leads, properties, addLead, addProperty, refreshData } = useData()
   const { showToast } = useToast()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const navigate = useNavigate()
+
+  // French translations fallback
+  const translations = {
+    'common.welcomeBack': 'Bon retour',
+    'dashboard.subtitle': "Voici ce qui se passe avec votre entreprise immobilière aujourd'hui.",
+    'dashboard.closedDeals': 'Affaires conclues',
+    'dashboard.quickStats': 'Statistiques rapides',
+    'dashboard.thisMonth': 'Ce mois-ci',
+    'dashboard.newLeads': 'Nouveaux prospects',
+    'dashboard.propertiesListed': 'Propriétés listées',
+    'dashboard.latestUpdates': 'Dernières mises à jour',
+    'dashboard.addLead': 'Ajouter un prospect',
+    'dashboard.addProperty': 'Ajouter une propriété',
+    'dashboard.viewReports': 'Voir les rapports',
+    'dashboard.addLeadDescription': 'Ajouter un nouveau prospect à votre pipeline',
+    'dashboard.addPropertyDescription': 'Lister une nouvelle propriété',
+    'dashboard.analyzePerformance': 'Analyser vos performances',
+    'dashboard.closeDeal': 'Conclure une affaire',
+    'dashboard.markLeadClosed': 'Marquer un prospect comme fermé',
+    'dashboard.activityWillAppear': 'L\'activité apparaîtra ici lorsque vous utiliserez le CRM',
+    'dashboard.noRecentActivity': 'Aucune activité récente'
+  }
+
+  // Smart translation function
+  const getText = (key, fallback = '') => {
+    if (language === 'fr') {
+      return translations[key] || fallback || key
+    }
+    return fallback || key
+  }
   const [showAddLead, setShowAddLead] = useState(false)
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [stats, setStats] = useState({
@@ -76,10 +106,10 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-            {t('common.welcomeBack') === 'common.welcomeBack' ? 'Bon retour' : t('common.welcomeBack')}, {user?.name}!
+            {getText('common.welcomeBack', 'Welcome back')}, {user?.name}!
           </h1>
           <p className="text-sm sm:text-base text-gray-600 mt-1">
-            {t('dashboard.subtitle') === 'dashboard.subtitle' ? "Voici ce qui se passe avec votre entreprise immobilière aujourd'hui." : t('dashboard.subtitle')}
+            {getText('dashboard.subtitle', "Here's what's happening with your real estate business today.")}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -162,7 +192,7 @@ const Dashboard = () => {
           <div className="p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-600 truncate">{t('dashboard.closedDeals') === 'dashboard.closedDeals' ? 'Affaires conclues' : t('dashboard.closedDeals')}</p>
+                <p className="text-sm font-medium text-gray-600 truncate">{getText('dashboard.closedDeals', 'Closed Deals')}</p>
                 <p className="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{stats?.closedWonLeads || 0}</p>
                 {/* Real-time data - no mock percentages */}
               </div>
@@ -198,21 +228,21 @@ const Dashboard = () => {
         {/* Quick Stats */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.quickStats') === 'dashboard.quickStats' ? 'Statistiques rapides' : t('dashboard.quickStats')}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.thisMonth') === 'dashboard.thisMonth' ? 'Ce mois-ci' : t('dashboard.thisMonth')}</p>
+            <h3 className="text-lg font-medium text-gray-900">{getText('dashboard.quickStats', 'Quick Stats')}</h3>
+            <p className="text-sm text-gray-500">{getText('dashboard.thisMonth', 'This month')}</p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.newLeads') === 'dashboard.newLeads' ? 'Nouveaux prospects' : t('dashboard.newLeads')}</span>
+                <span className="text-sm text-gray-600">{getText('dashboard.newLeads', 'New Leads')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.totalLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.propertiesListed') === 'dashboard.propertiesListed' ? 'Propriétés listées' : t('dashboard.propertiesListed')}</span>
+                <span className="text-sm text-gray-600">{getText('dashboard.propertiesListed', 'Properties Listed')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.availableProperties || 0}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">{t('dashboard.closedDeals') === 'dashboard.closedDeals' ? 'Affaires conclues' : t('dashboard.closedDeals')}</span>
+                <span className="text-sm text-gray-600">{getText('dashboard.closedDeals', 'Closed Deals')}</span>
                 <span className="text-sm font-medium text-gray-900">{stats?.closedWonLeads || 0}</span>
               </div>
               <div className="flex justify-between items-center">
@@ -235,8 +265,8 @@ const Dashboard = () => {
               <Users className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.addLead') || 'New Lead'}</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.addLeadDescription') || 'Add a new lead to your pipeline'}</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{getText('dashboard.addLead', 'Add Lead')}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{getText('dashboard.addLeadDescription', 'Add a new lead to your pipeline')}</p>
             </div>
           </div>
         </button>
@@ -250,8 +280,8 @@ const Dashboard = () => {
               <Home className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.addProperty') || 'Add Property'}</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.addPropertyDescription') || 'List a new property'}</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{getText('dashboard.addProperty', 'Add Property')}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{getText('dashboard.addPropertyDescription', 'List a new property')}</p>
             </div>
           </div>
         </button>
