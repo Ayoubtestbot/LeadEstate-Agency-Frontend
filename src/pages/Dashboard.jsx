@@ -31,6 +31,8 @@ const Dashboard = () => {
     'dashboard.newLeads': 'Nouveaux prospects',
     'dashboard.propertiesListed': 'Propriétés listées',
     'dashboard.latestUpdates': 'Dernières mises à jour',
+    'dashboard.recentActivity': 'Activité récente',
+    'dashboard.noRecentActivity': 'Aucune activité récente',
     'dashboard.addLead': 'Ajouter un prospect',
     'dashboard.addProperty': 'Ajouter une propriété',
     'dashboard.viewReports': 'Voir les rapports',
@@ -60,11 +62,59 @@ const Dashboard = () => {
   })
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
+  const [recentActivity, setRecentActivity] = useState([])
 
   // Calculate initial stats when component mounts
   useEffect(() => {
     setLoading(false)
   }, [])
+
+  // Generate recent activity from leads and properties data
+  useEffect(() => {
+    const activities = []
+
+    // Get recent leads (last 3)
+    const recentLeads = [...(leads || [])].sort((a, b) =>
+      new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
+    ).slice(0, 3)
+
+    recentLeads.forEach(lead => {
+      activities.push({
+        id: `lead-${lead.id}`,
+        type: 'lead_added',
+        message: language === 'fr'
+          ? `Nouveau prospect: ${lead.name}`
+          : `New lead: ${lead.name}`,
+        time: lead.created_at || lead.createdAt,
+        icon: 'user'
+      })
+    })
+
+    // Get recent properties (last 2)
+    const recentProperties = [...(properties || [])].sort((a, b) =>
+      new Date(b.created_at || b.createdAt || 0) - new Date(a.created_at || a.createdAt || 0)
+    ).slice(0, 2)
+
+    recentProperties.forEach(property => {
+      activities.push({
+        id: `property-${property.id}`,
+        type: 'property_added',
+        message: language === 'fr'
+          ? `Nouvelle propriété: ${property.title}`
+          : `New property: ${property.title}`,
+        time: property.created_at || property.createdAt,
+        icon: 'home'
+      })
+    })
+
+    // Sort all activities by time and take the most recent 5
+    const sortedActivities = activities
+      .filter(activity => activity.time)
+      .sort((a, b) => new Date(b.time) - new Date(a.time))
+      .slice(0, 5)
+
+    setRecentActivity(sortedActivities)
+  }, [leads, properties, language])
 
   // Calculate stats directly from local data for instant updates
   useEffect(() => {
@@ -211,17 +261,46 @@ const Dashboard = () => {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">{t('dashboard.recentActivity') || 'Recent Activity'}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard.latestUpdates') || 'Latest updates'}</p>
+            <h3 className="text-lg font-medium text-gray-900">{getText('dashboard.recentActivity', 'Recent Activity')}</h3>
+            <p className="text-sm text-gray-500">{getText('dashboard.latestUpdates', 'Latest updates')}</p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
-            <div className="text-center py-8">
-              <div className="h-12 w-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-gray-400" />
+            {recentActivity.length > 0 ? (
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        {activity.icon === 'user' ? (
+                          <Users className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <Home className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900">{activity.message}</p>
+                      <p className="text-xs text-gray-500">
+                        {activity.time ? new Date(activity.time).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        }) : ''}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <p className="text-sm text-gray-500">{t('dashboard.noRecentActivity') || 'No recent activity'}</p>
-              <p className="text-xs text-gray-400 mt-1">{t('dashboard.activityWillAppear') || 'Activity will appear here as you use the CRM'}</p>
-            </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="h-12 w-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-gray-400" />
+                </div>
+                <p className="text-sm text-gray-500">{getText('dashboard.noRecentActivity', 'No recent activity')}</p>
+                <p className="text-xs text-gray-400 mt-1">{getText('dashboard.activityWillAppear', 'Activity will appear here as you use the CRM')}</p>
+              </div>
+            )}
           </div>
         </div>
 
