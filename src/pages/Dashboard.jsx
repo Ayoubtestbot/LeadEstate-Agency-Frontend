@@ -235,8 +235,8 @@ const Dashboard = () => {
               <Users className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">New Lead</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">Add a new lead to your pipeline</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.addLead') || 'New Lead'}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.addLeadDescription') || 'Add a new lead to your pipeline'}</p>
             </div>
           </div>
         </button>
@@ -250,8 +250,8 @@ const Dashboard = () => {
               <Home className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">Add Property</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">List a new property</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.addProperty') || 'Add Property'}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.addPropertyDescription') || 'List a new property'}</p>
             </div>
           </div>
         </button>
@@ -265,8 +265,8 @@ const Dashboard = () => {
               <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 text-purple-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">View Reports</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">Analyze your performance</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.viewReports') || 'View Reports'}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.analyzePerformance') || 'Analyze your performance'}</p>
             </div>
           </div>
         </button>
@@ -280,8 +280,8 @@ const Dashboard = () => {
               <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-orange-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-medium text-gray-900 text-sm lg:text-base">Close Deal</h4>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">Mark a lead as closed</p>
+              <h4 className="font-medium text-gray-900 text-sm lg:text-base">{t('dashboard.closeDeal') || 'Close Deal'}</h4>
+              <p className="text-xs lg:text-sm text-gray-500 mt-1">{t('dashboard.markLeadClosed') || 'Mark a lead as closed'}</p>
             </div>
           </div>
         </button>

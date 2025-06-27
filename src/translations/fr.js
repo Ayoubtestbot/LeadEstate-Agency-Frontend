@@ -89,7 +89,12 @@ export default {
     thisMonth: 'Ce mois-ci',
     newLeads: 'Nouveaux prospects',
     propertiesListed: 'Propriétés listées',
-    activityWillAppear: 'L\'activité apparaîtra ici lorsque vous utiliserez le CRM'
+    activityWillAppear: 'L\'activité apparaîtra ici lorsque vous utiliserez le CRM',
+    addLeadDescription: 'Ajouter un nouveau prospect à votre pipeline',
+    addPropertyDescription: 'Lister une nouvelle propriété',
+    analyzePerformance: 'Analyser vos performances',
+    closeDeal: 'Conclure une affaire',
+    markLeadClosed: 'Marquer un prospect comme fermé'
   },
 
   // Prospects

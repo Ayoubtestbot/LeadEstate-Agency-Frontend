@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useData, useAuth } from '../App'
 import { usePermissions, PERMISSIONS, USER_ROLES, ROLE_DISPLAY_NAMES } from '../contexts/PermissionsContext'
+import { useLanguage } from '../contexts/LanguageContext'
 import ProtectedComponent from '../components/ProtectedComponent'
 import AddTeamMemberModal from '../components/AddTeamMemberModal'
 import EditTeamMemberModal from '../components/EditTeamMemberModal'
@@ -28,6 +29,7 @@ const Team = () => {
   const { user } = useAuth()
   const { hasPermission } = usePermissions()
   const { showToast } = useToast()
+  const { t } = useLanguage()
 
   // Calculate dynamic stats for each team member based on assigned leads
   const calculateMemberStats = (memberName) => {
@@ -193,8 +195,8 @@ const Team = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Team Management</h1>
-          <p className="text-gray-600 mt-1">Manage your team members and track their performance</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('team.title') || 'Team Management'}</h1>
+          <p className="text-gray-600 mt-1">{t('team.subtitle') || 'Manage your team members and track their performance'}</p>
         </div>
         
         <ProtectedComponent permission={PERMISSIONS.MANAGE_USERS}>
@@ -206,7 +208,7 @@ const Team = () => {
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add Team Member
+            {t('team.addMember') || 'Add Team Member'}
           </button>
         </ProtectedComponent>
       </div>
@@ -220,7 +222,7 @@ const Team = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{totalMembers}</p>
-              <p className="text-sm text-gray-600">Total Members</p>
+              <p className="text-sm text-gray-600">{t('team.totalMembers') || 'Total Members'}</p>
             </div>
           </div>
         </div>
