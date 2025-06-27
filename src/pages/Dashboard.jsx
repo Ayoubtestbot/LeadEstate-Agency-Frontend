@@ -39,7 +39,7 @@ const Dashboard = () => {
     'dashboard.analyzePerformance': 'Analyser vos performances',
     'dashboard.closeDeal': 'Conclure une affaire',
     'dashboard.markLeadClosed': 'Marquer un prospect comme fermé',
-    'dashboard.activityWillAppear': 'L\'activité apparaîtra ici lorsque vous utiliserez le CRM',
+    'dashboard.activityWillAppear': "L'activité apparaîtra ici lorsque vous utiliserez le CRM",
     'dashboard.noRecentActivity': 'Aucune activité récente'
   }
 
