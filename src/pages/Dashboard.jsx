@@ -261,8 +261,12 @@ const Dashboard = () => {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
           <div className="flex flex-col space-y-1.5 p-4 lg:p-6">
-            <h3 className="text-lg font-medium text-gray-900">{getText('dashboard.recentActivity', 'Recent Activity')}</h3>
-            <p className="text-sm text-gray-500">{getText('dashboard.latestUpdates', 'Latest updates')}</p>
+            <h3 className="text-lg font-medium text-gray-900">
+              {language === 'fr' ? 'Activité récente' : 'Recent Activity'}
+            </h3>
+            <p className="text-sm text-gray-500">
+              {language === 'fr' ? 'Dernières mises à jour' : 'Latest updates'}
+            </p>
           </div>
           <div className="p-4 lg:p-6 pt-0">
             {recentActivity.length > 0 ? (
@@ -297,8 +301,12 @@ const Dashboard = () => {
                 <div className="h-12 w-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-gray-400" />
                 </div>
-                <p className="text-sm text-gray-500">{getText('dashboard.noRecentActivity', 'No recent activity')}</p>
-                <p className="text-xs text-gray-400 mt-1">{getText('dashboard.activityWillAppear', 'Activity will appear here as you use the CRM')}</p>
+                <p className="text-sm text-gray-500">
+                  {language === 'fr' ? 'Aucune activité récente' : 'No recent activity'}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {language === 'fr' ? "L'activité apparaîtra ici lorsque vous utiliserez le CRM" : 'Activity will appear here as you use the CRM'}
+                </p>
               </div>
             )}
           </div>
