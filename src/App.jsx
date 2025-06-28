@@ -195,6 +195,15 @@ const DataProvider = ({ children }) => {
         // Optimistic update: Update UI immediately and keep it
         setLeads(prev => [...prev, result.data])
 
+        // Send WhatsApp welcome message if lead is assigned
+        if (result.data.assignedTo && result.data.phone) {
+          try {
+            await sendWhatsAppWelcome(result.data.id);
+          } catch (whatsappError) {
+            console.log('⚠️ WhatsApp message failed (non-critical):', whatsappError.message);
+          }
+        }
+
         // No background refresh needed - the optimistic update is reliable
         console.log('✅ Lead added and UI updated immediately')
 
@@ -204,6 +213,42 @@ const DataProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error adding lead:', error)
+      throw error
+    }
+  }
+
+  const sendWhatsAppWelcome = async (leadId) => {
+    try {
+      const response = await fetch(`${API_URL}/whatsapp/welcome/${leadId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('📱 WhatsApp welcome message prepared:', result.data)
+
+        // Show notification with WhatsApp link
+        if (result.data.whatsappUrl) {
+          const shouldOpen = window.confirm(
+            `📱 WhatsApp welcome message ready for ${result.data.leadName}!\n\n` +
+            `Agent: ${result.data.agent}\n\n` +
+            `Click OK to open WhatsApp and send the welcome message.`
+          );
+
+          if (shouldOpen) {
+            window.open(result.data.whatsappUrl, '_blank');
+          }
+        }
+
+        return result.data
+      } else {
+        throw new Error('Failed to prepare WhatsApp message')
+      }
+    } catch (error) {
+      console.error('Error preparing WhatsApp welcome:', error)
       throw error
     }
   }

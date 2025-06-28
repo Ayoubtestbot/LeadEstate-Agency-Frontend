@@ -99,6 +99,48 @@ const Leads = () => {
     setWhatsAppLead(lead)
   }
 
+  const handleWhatsAppWelcome = async (lead) => {
+    if (!lead.assignedTo) {
+      showToast('Lead must be assigned to an agent first!', 'error')
+      return
+    }
+
+    if (!lead.phone) {
+      showToast('Lead has no phone number!', 'error')
+      return
+    }
+
+    try {
+      const response = await fetch(`https://leadestate-backend-9fih.onrender.com/api/whatsapp/welcome/${lead.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+
+        // Show confirmation and open WhatsApp
+        const shouldOpen = window.confirm(
+          `📱 WhatsApp welcome message ready for ${lead.name}!\n\n` +
+          `Agent: ${result.data.agent}\n\n` +
+          `Click OK to open WhatsApp and send the welcome message.`
+        );
+
+        if (shouldOpen) {
+          window.open(result.data.whatsappUrl, '_blank');
+          showToast(`WhatsApp message opened for ${lead.name}!`, 'success')
+        }
+      } else {
+        throw new Error('Failed to prepare WhatsApp message')
+      }
+    } catch (error) {
+      console.error('Error preparing WhatsApp welcome:', error)
+      showToast('Failed to prepare WhatsApp message', 'error')
+    }
+  }
+
   const handleImportLeads = (importedLeads) => {
     importedLeads.forEach(leadData => {
       const newLead = {
@@ -436,6 +478,17 @@ const Leads = () => {
                       >
                         <MessageCircle className="h-4 w-4" />
                       </button>
+
+                      {/* WhatsApp Welcome - Send welcome message */}
+                      {lead.assignedTo && lead.phone && (
+                        <button
+                          onClick={() => handleWhatsAppWelcome(lead)}
+                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Send WhatsApp Welcome Message"
+                        >
+                          <Phone className="h-4 w-4" />
+                        </button>
+                      )}
 
                       {/* Edit - All roles can edit (filtered by permissions in component) */}
                       <ProtectedComponent permission={PERMISSIONS.EDIT_LEAD}>
