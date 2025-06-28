@@ -132,7 +132,7 @@ const ViewPropertyModal = ({ isOpen, onClose, property }) => {
             <div className="flex items-center space-x-3">
               <Calendar className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-600">
-                Listed: {new Date(property.createdAt).toLocaleDateString()}
+                Listed: {new Date(property.created_at || property.createdAt).toLocaleDateString()}
               </span>
             </div>
             <div className="flex items-center space-x-3">

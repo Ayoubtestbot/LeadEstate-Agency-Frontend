@@ -146,7 +146,7 @@ const Properties = () => {
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <span className="text-xs text-gray-500">
-                    Added {new Date(property.createdAt).toLocaleDateString()}
+                    Added {new Date(property.created_at || property.createdAt).toLocaleDateString()}
                   </span>
                   <div className="flex space-x-2">
                     <button
