@@ -78,17 +78,23 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
       >
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            {property.images && property.images.length > 0 ? (
-              <img 
-                src={property.images[0]} 
+            {property.image_url ? (
+              <img
+                src={property.image_url}
                 alt={property.title}
                 className="w-16 h-16 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
               />
-            ) : (
-              <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                <Home className="h-8 w-8 text-gray-400" />
-              </div>
-            )}
+            ) : null}
+            <div
+              className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center"
+              style={{ display: property.image_url ? 'none' : 'flex' }}
+            >
+              <Home className="h-8 w-8 text-gray-400" />
+            </div>
           </div>
           
           <div className="flex-1 min-w-0">

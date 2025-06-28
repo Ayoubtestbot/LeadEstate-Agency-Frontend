@@ -68,22 +68,23 @@ const Properties = () => {
             <div key={property.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
               {/* Property Image */}
               <div className="h-48 bg-gray-200 relative">
-                {property.images && property.images.length > 0 ? (
+                {property.image_url ? (
                   <img
-                    src={property.images[0]}
+                    src={property.image_url}
                     alt={property.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Home className="h-16 w-16 text-gray-400" />
-                  </div>
-                )}
-                {property.images && property.images.length > 1 && (
-                  <div className="absolute bottom-3 right-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                    +{property.images.length - 1} more
-                  </div>
-                )}
+                ) : null}
+                <div
+                  className="w-full h-full flex items-center justify-center"
+                  style={{ display: property.image_url ? 'none' : 'flex' }}
+                >
+                  <Home className="h-16 w-16 text-gray-400" />
+                </div>
               </div>
 
               <div className="p-6">

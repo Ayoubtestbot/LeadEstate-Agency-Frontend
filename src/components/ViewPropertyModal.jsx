@@ -26,6 +26,20 @@ const ViewPropertyModal = ({ isOpen, onClose, property }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Property Details" size="lg">
       <div className="space-y-6">
+        {/* Property Image */}
+        {property.image_url && (
+          <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
+            <img
+              src={property.image_url}
+              alt={property.title}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+
         {/* Property Header */}
         <div className="flex items-start space-x-4">
           <div className="h-16 w-16 rounded-lg bg-blue-100 flex items-center justify-center">
