@@ -99,11 +99,6 @@ const Analytics = () => {
 
   useEffect(() => {
     fetchAnalyticsData()
-    
-    // Set up real-time updates every 30 seconds
-    const interval = setInterval(fetchAnalyticsData, 30000)
-    
-    return () => clearInterval(interval)
   }, [selectedPeriod])
 
   const handlePeriodChange = (period) => {
@@ -128,9 +123,9 @@ const Analytics = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600">Real-time insights and performance metrics</p>
+          <p className="text-gray-600">Comprehensive insights and performance metrics</p>
           <p className="text-xs text-gray-500 mt-1">
-            Last updated: {lastUpdated.toLocaleTimeString()}
+            Last updated: {lastUpdated.toLocaleTimeString()} • Click refresh to update data
           </p>
         </div>
         
