@@ -214,3 +214,63 @@ const Analytics = () => {
           </div>
         </div>
       </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Leads by Source - Pie Chart */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Leads by Source</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={analyticsData.leadsBySource}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="count"
+              >
+                {analyticsData.leadsBySource.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Conversion Rate by Source - Bar Chart */}
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Conversion Rate by Source</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={analyticsData.conversionRateBySource}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="source" />
+              <YAxis />
+              <Tooltip formatter={(value) => [`${value}%`, 'Conversion Rate']} />
+              <Bar dataKey="conversion_rate" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Average Contact Time by Agent */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Average Time to First Contact by Agent</h3>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={analyticsData.avgContactTimeByAgent}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="agent" />
+            <YAxis />
+            <Tooltip formatter={(value) => [`${value} hours`, 'Avg Contact Time']} />
+            <Bar dataKey="avg_hours_to_contact" fill="#82ca9d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  )
+}
+
+export default Analytics
