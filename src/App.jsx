@@ -195,12 +195,14 @@ const DataProvider = ({ children }) => {
         // Optimistic update: Update UI immediately and keep it
         setLeads(prev => [...prev, result.data])
 
-        // Send WhatsApp welcome message if lead is assigned
-        if (result.data.assignedTo && result.data.phone) {
-          try {
-            await sendWhatsAppWelcome(result.data.id);
-          } catch (whatsappError) {
-            console.log('⚠️ WhatsApp message failed (non-critical):', whatsappError.message);
+        // Check if WhatsApp message was sent automatically
+        if (result.whatsapp) {
+          if (result.whatsapp.success && result.whatsapp.method === 'twilio') {
+            console.log('📱 WhatsApp message sent automatically via Twilio!');
+            // Could show a success notification here
+          } else if (result.whatsapp.success && result.whatsapp.method === 'url_only') {
+            console.log('📱 WhatsApp message prepared (Twilio not configured)');
+            // Could offer to open WhatsApp manually
           }
         }
 
