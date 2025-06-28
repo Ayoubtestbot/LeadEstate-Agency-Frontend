@@ -432,6 +432,7 @@ const DataProvider = ({ children }) => {
   }
 
   const linkPropertyToLead = async (leadId, propertyId) => {
+    console.log('🔗 Linking property:', { leadId, propertyId })
     try {
       const response = await fetch(`${API_URL}/leads/${leadId}/link-property/${propertyId}`, {
         method: 'POST',
@@ -440,9 +441,11 @@ const DataProvider = ({ children }) => {
         }
       })
 
+      console.log('🔗 Link response status:', response.status)
+
       if (response.ok) {
         const result = await response.json()
-        console.log('✅ Property linked to lead successfully')
+        console.log('✅ Property linked to lead successfully:', result)
 
         // Update local state with the returned data
         setLeads(prev => prev.map(lead =>
@@ -452,16 +455,21 @@ const DataProvider = ({ children }) => {
           } : lead
         ))
       } else {
-        throw new Error('Failed to link property')
+        const errorText = await response.text()
+        console.error('❌ Link failed with status:', response.status, errorText)
+        throw new Error(`Failed to link property: ${response.status}`)
       }
     } catch (error) {
-      console.error('Error linking property to lead:', error)
+      console.error('❌ Error linking property to lead:', error)
       // Fallback to local update if API fails
+      console.log('🔄 Using fallback local update')
       setLeads(prev => prev.map(lead => {
         if (lead.id === leadId) {
           const currentProperties = lead.interestedProperties || []
           if (!currentProperties.includes(propertyId)) {
-            return { ...lead, interestedProperties: [...currentProperties, propertyId] }
+            const updated = { ...lead, interestedProperties: [...currentProperties, propertyId] }
+            console.log('🔄 Fallback updated lead:', updated)
+            return updated
           }
         }
         return lead

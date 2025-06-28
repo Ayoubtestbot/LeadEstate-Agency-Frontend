@@ -7,10 +7,17 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   if (!lead) return null
 
+  // Debug: Log lead data to see what's available
+  console.log('🔍 ViewLeadModal - Lead data:', lead)
+  console.log('🔍 ViewLeadModal - interestedProperties:', lead.interestedProperties)
+  console.log('🔍 ViewLeadModal - Available properties:', properties)
+
   // Get linked properties
   const linkedProperties = properties.filter(property =>
     lead.interestedProperties?.includes(property.id)
   )
+
+  console.log('🔍 ViewLeadModal - Linked properties found:', linkedProperties)
 
   const getStatusColor = (status) => {
     switch (status) {
