@@ -85,16 +85,42 @@ const Leads = () => {
     setLinkProperty(lead)
   }
 
-  const handlePropertyLink = (propertyId) => {
-    linkPropertyToLead(linkProperty.id, propertyId)
-    const property = properties.find(p => p.id === propertyId)
-    showToast(`${linkProperty.name} is now interested in "${property?.title}"!`, 'success')
+  const handlePropertyLink = async (propertyId) => {
+    console.log('🔗 handlePropertyLink called with:', { propertyId, type: typeof propertyId })
+    console.log('🔗 Available properties:', properties.map(p => ({ id: p.id, title: p.title, type: typeof p.id })))
+
+    try {
+      await linkPropertyToLead(linkProperty.id, propertyId)
+
+      // Try both string and number comparison
+      const property = properties.find(p => p.id == propertyId || p.id === propertyId || p.id === parseInt(propertyId))
+      console.log('🔗 Found property:', property)
+
+      if (property) {
+        showToast(`${linkProperty.name} is now interested in "${property.title}"!`, 'success')
+      } else {
+        showToast(`${linkProperty.name} is now interested in a property!`, 'success')
+      }
+
+      // Close the modal and refresh data
+      setLinkProperty(null)
+    } catch (error) {
+      console.error('❌ Error in handlePropertyLink:', error)
+      showToast('Failed to link property', 'error')
+    }
   }
 
   const handlePropertyUnlink = (propertyId) => {
     unlinkPropertyFromLead(linkProperty.id, propertyId)
-    const property = properties.find(p => p.id === propertyId)
-    showToast(`Removed "${property?.title}" from ${linkProperty.name}'s interests`, 'success')
+
+    // Try both string and number comparison
+    const property = properties.find(p => p.id == propertyId || p.id === propertyId || p.id === parseInt(propertyId))
+
+    if (property) {
+      showToast(`Removed "${property.title}" from ${linkProperty.name}'s interests`, 'success')
+    } else {
+      showToast(`Removed property from ${linkProperty.name}'s interests`, 'success')
+    }
   }
 
   const handleWhatsAppLead = (lead) => {

@@ -12,10 +12,13 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
   console.log('🔍 ViewLeadModal - interestedProperties:', lead.interestedProperties)
   console.log('🔍 ViewLeadModal - Available properties:', properties)
 
-  // Get linked properties
-  const linkedProperties = properties.filter(property =>
-    lead.interestedProperties?.includes(property.id)
-  )
+  // Get linked properties - handle both string and number IDs
+  const linkedProperties = properties.filter(property => {
+    const interestedIds = lead.interestedProperties || []
+    return interestedIds.some(id =>
+      id == property.id || id === property.id || parseInt(id) === property.id || id === String(property.id)
+    )
+  })
 
   console.log('🔍 ViewLeadModal - Linked properties found:', linkedProperties)
 
