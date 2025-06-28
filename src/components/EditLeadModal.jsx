@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { User, Phone, Mail, MapPin } from 'lucide-react'
+import { useData } from '../App'
 import Modal from './Modal'
 
 const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
+  const { teamMembers } = useData()
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -12,7 +14,8 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
     source: 'website',
     propertyType: 'house',
     budget: '',
-    notes: ''
+    notes: '',
+    assignedTo: ''
   })
 
   // Update form data when lead changes
@@ -27,7 +30,8 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
         source: lead.source || 'website',
         propertyType: lead.propertyType || 'house',
         budget: lead.budget || '',
-        notes: lead.notes || ''
+        notes: lead.notes || '',
+        assignedTo: lead.assignedTo || ''
       })
     }
   }, [lead])
@@ -200,6 +204,26 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="e.g., $300,000 - $500,000"
           />
+        </div>
+
+        {/* Assign to Agent */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Assign to Agent
+          </label>
+          <select
+            name="assignedTo"
+            value={formData.assignedTo}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Unassigned</option>
+            {teamMembers.map(member => (
+              <option key={member.id} value={member.name}>
+                {member.name} ({member.role})
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Notes */}
