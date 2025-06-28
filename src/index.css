@@ -55,3 +55,63 @@ body {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
 }
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  /* Ensure proper touch targets */
+  button, .btn-primary, .btn-secondary {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better spacing on mobile */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+
+  /* Responsive text sizes */
+  h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  h3 {
+    font-size: 1.125rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  /* Better table responsiveness */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Chart containers */
+  .recharts-wrapper {
+    font-size: 12px !important;
+  }
+
+  /* Modal improvements */
+  .modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Adjust grid layouts for tablets */
+  .grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
