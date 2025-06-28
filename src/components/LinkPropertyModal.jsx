@@ -7,7 +7,16 @@ const LinkPropertyModal = ({ isOpen, onClose, lead, properties, onLink, onUnlink
 
   const handleLink = () => {
     if (selectedProperty) {
-      onLink(parseInt(selectedProperty))
+      console.log('🔗 LinkPropertyModal - selectedProperty:', selectedProperty, typeof selectedProperty)
+
+      // Don't parse if it's already a number or if it's a string that represents a number
+      let propertyId = selectedProperty
+      if (typeof selectedProperty === 'string' && !isNaN(selectedProperty)) {
+        propertyId = parseInt(selectedProperty)
+      }
+
+      console.log('🔗 LinkPropertyModal - sending propertyId:', propertyId, typeof propertyId)
+      onLink(propertyId)
       setSelectedProperty('')
       onClose()
     }
@@ -19,15 +28,20 @@ const LinkPropertyModal = ({ isOpen, onClose, lead, properties, onLink, onUnlink
 
   if (!lead) return null
 
+  console.log('🔗 LinkPropertyModal - All properties:', properties)
+  console.log('🔗 LinkPropertyModal - Lead interested properties:', lead.interestedProperties)
+
   // Get linked properties
-  const linkedProperties = properties.filter(property => 
+  const linkedProperties = properties.filter(property =>
     lead.interestedProperties?.includes(property.id)
   )
 
   // Get available properties (not linked)
-  const availableProperties = properties.filter(property => 
+  const availableProperties = properties.filter(property =>
     !lead.interestedProperties?.includes(property.id)
   )
+
+  console.log('🔗 LinkPropertyModal - Available properties:', availableProperties)
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Manage Property Interest" size="lg">
