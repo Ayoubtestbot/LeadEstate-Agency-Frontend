@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle } from 'lucide-react'
+import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User } from 'lucide-react'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
 import ProtectedComponent from './ProtectedComponent'
 
@@ -70,43 +70,43 @@ const KanbanView = ({
   }
 
   return (
-    <div className="flex space-x-4 overflow-x-auto pb-4">
+    <div className="flex space-x-3 overflow-x-auto pb-4">
       {columns.map((column) => {
         const columnLeads = getLeadsByStatus(column.id)
-        
+
         return (
           <div
             key={column.id}
-            className={`flex-shrink-0 w-72 ${column.color} border rounded-lg`}
+            className={`flex-shrink-0 w-64 ${column.color} border rounded-lg`}
             onDragOver={handleDragOver}
             onDrop={(e) => handleDrop(e, column.id)}
           >
             {/* Column Header */}
-            <div className={`${column.headerColor} px-4 py-3 rounded-t-lg border-b`}>
+            <div className={`${column.headerColor} px-3 py-2 rounded-t-lg border-b`}>
               <div className="flex items-center justify-between">
-                <h3 className="font-medium text-gray-900">{column.title}</h3>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white text-gray-700">
+                <h3 className="font-medium text-gray-900 text-sm">{column.title}</h3>
+                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700">
                   {columnLeads.length}
                 </span>
               </div>
             </div>
 
             {/* Column Content */}
-            <div className="p-2 space-y-2 min-h-[200px]">
+            <div className="p-1.5 space-y-1.5 min-h-[200px]">
               {columnLeads.map((lead) => (
                 <div
                   key={lead.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, lead)}
-                  className={`bg-white rounded-md border border-gray-200 p-3 shadow-sm hover:shadow-md transition-shadow cursor-move ${
+                  className={`bg-white rounded-md border border-gray-200 p-2 shadow-sm hover:shadow-md transition-shadow cursor-move ${
                     draggedLead?.id === lead.id ? 'opacity-50' : ''
                   }`}
                 >
                   {/* Lead Header */}
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between mb-1.5">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-1 mb-1">
-                        <h4 className="font-medium text-gray-900 text-sm">{lead.name}</h4>
+                      <div className="flex items-center space-x-1 mb-0.5">
+                        <h4 className="font-medium text-gray-900 text-xs">{lead.name}</h4>
                         {lead.interestedProperties?.length > 0 && (
                           <span className="inline-flex items-center px-1 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {lead.interestedProperties.length} 🏠
@@ -119,37 +119,22 @@ const KanbanView = ({
                     </div>
                   </div>
 
-                  {/* Contact Info */}
-                  <div className="space-y-1 mb-2">
+                  {/* Contact Info - Compact */}
+                  <div className="space-y-0.5 mb-1.5">
                     <div className="flex items-center text-xs text-gray-600">
                       <Phone className="h-3 w-3 mr-1 text-gray-400" />
                       <span className="truncate">{lead.phone}</span>
                     </div>
-                    {lead.email && (
-                      <div className="flex items-center text-xs text-gray-600">
-                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                        <span className="truncate">{lead.email}</span>
-                      </div>
-                    )}
-                    {lead.city && (
-                      <div className="flex items-center text-xs text-gray-600">
-                        <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        <span className="truncate">{lead.city}</span>
+                    {lead.assignedTo && (
+                      <div className="flex items-center text-xs text-gray-500">
+                        <UserCheck className="h-3 w-3 mr-1 text-gray-400" />
+                        <span className="truncate">{lead.assignedTo}</span>
                       </div>
                     )}
                   </div>
 
-                  {/* Assignment */}
-                  {lead.assignedTo && (
-                    <div className="mb-2">
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        👤 {lead.assignedTo}
-                      </span>
-                    </div>
-                  )}
-
                   {/* Actions */}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-100">
                     <span className="text-xs text-gray-500">
                       {new Date(lead.createdAt).toLocaleDateString()}
                     </span>

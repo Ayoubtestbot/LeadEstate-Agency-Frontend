@@ -31,12 +31,14 @@ import KanbanView from '../components/KanbanView'
 import ConfirmDialog from '../components/ConfirmDialog'
 
 const Leads = () => {
-  const { leads, properties, addLead, updateLead, deleteLead, linkPropertyToLead, unlinkPropertyFromLead } = useData()
+  const { leads, properties, teamMembers, addLead, updateLead, deleteLead, linkPropertyToLead, unlinkPropertyFromLead } = useData()
   const { user } = useAuth()
   const { hasPermission } = usePermissions()
   const { showToast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [agentFilter, setAgentFilter] = useState('all') // New agent filter
+  const [selectedLeads, setSelectedLeads] = useState([]) // For bulk actions
   const [viewMode, setViewMode] = useState('table') // 'table' or 'kanban'
   const [showAddLead, setShowAddLead] = useState(false)
   const [viewLead, setViewLead] = useState(null)
@@ -178,6 +180,55 @@ const Leads = () => {
     setDeleteConfirm(null)
   }
 
+  // Bulk action handlers
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedLeads(filteredLeads.map(lead => lead.id))
+    } else {
+      setSelectedLeads([])
+    }
+  }
+
+  const handleSelectLead = (leadId, checked) => {
+    if (checked) {
+      setSelectedLeads(prev => [...prev, leadId])
+    } else {
+      setSelectedLeads(prev => prev.filter(id => id !== leadId))
+    }
+  }
+
+  const handleBulkAssign = (agentName) => {
+    selectedLeads.forEach(leadId => {
+      const lead = leads.find(l => l.id === leadId)
+      if (lead) {
+        updateLead(leadId, { ...lead, assignedTo: agentName })
+      }
+    })
+    showToast(`${selectedLeads.length} leads assigned to ${agentName}`, 'success')
+    setSelectedLeads([])
+  }
+
+  const handleBulkStatusChange = (status) => {
+    selectedLeads.forEach(leadId => {
+      const lead = leads.find(l => l.id === leadId)
+      if (lead) {
+        updateLead(leadId, { ...lead, status })
+      }
+    })
+    showToast(`${selectedLeads.length} leads updated to ${status}`, 'success')
+    setSelectedLeads([])
+  }
+
+  const handleBulkDelete = () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedLeads.length} leads?`)) {
+      selectedLeads.forEach(leadId => {
+        deleteLead(leadId)
+      })
+      showToast(`${selectedLeads.length} leads deleted`, 'success')
+      setSelectedLeads([])
+    }
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'new':
@@ -216,16 +267,17 @@ const Leads = () => {
     }
   }
 
-  // Filter leads based on search, status, and user permissions
+  // Filter leads based on search, status, agent, and user permissions
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || lead.status === statusFilter
+    const matchesAgent = agentFilter === 'all' || lead.assignedTo === agentFilter
 
     // Role-based filtering
     if (hasPermission(PERMISSIONS.VIEW_ALL_LEADS)) {
       // Manager and Super Agent can see all leads
-      return matchesSearch && matchesStatus
+      return matchesSearch && matchesStatus && matchesAgent
     } else if (hasPermission(PERMISSIONS.VIEW_ASSIGNED_LEADS)) {
       // Agent can only see their assigned leads
       return matchesSearch && matchesStatus && lead.assignedTo === user?.name
@@ -340,21 +392,24 @@ const Leads = () => {
                   </select>
                 </div>
 
-                {/* Source Filter */}
-                <div className="sm:w-48">
-                  <select
-                    value="all"
-                    className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="all">All Sources</option>
-                    <option value="website">Website</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="google">Google</option>
-                    <option value="referral">Referral</option>
-                    <option value="walk-in">Walk-in</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
+                {/* Agent Filter - Manager and Super Agent only */}
+                {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && (
+                  <div className="sm:w-48">
+                    <select
+                      value={agentFilter}
+                      onChange={(e) => setAgentFilter(e.target.value)}
+                      className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="all">All Agents</option>
+                      <option value="">Unassigned</option>
+                      {teamMembers.map(member => (
+                        <option key={member.id} value={member.name}>
+                          {member.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -365,10 +420,72 @@ const Leads = () => {
       {viewMode === 'table' ? (
         /* Table View */
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+          {/* Bulk Actions - Manager and Super Agent only */}
+          {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && selectedLeads.length > 0 && (
+            <div className="px-4 py-3 border-b bg-blue-50">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">
+                  {selectedLeads.length} lead{selectedLeads.length > 1 ? 's' : ''} selected
+                </span>
+                <div className="flex items-center space-x-2">
+                  <select
+                    onChange={(e) => e.target.value && handleBulkAssign(e.target.value)}
+                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                    defaultValue=""
+                  >
+                    <option value="">Assign to...</option>
+                    {teamMembers.map(member => (
+                      <option key={member.id} value={member.name}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    onChange={(e) => e.target.value && handleBulkStatusChange(e.target.value)}
+                    className="text-sm border border-gray-300 rounded px-2 py-1"
+                    defaultValue=""
+                  >
+                    <option value="">Change status...</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="proposal">Proposal</option>
+                    <option value="negotiation">Negotiation</option>
+                    <option value="closed-won">Closed Won</option>
+                    <option value="closed-lost">Closed Lost</option>
+                  </select>
+                  <button
+                    onClick={handleBulkDelete}
+                    className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setSelectedLeads([])}
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="w-full caption-bottom text-sm">
               <thead className="border-b">
                 <tr>
+                  {/* Checkbox column - Manager and Super Agent only */}
+                  {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && (
+                    <th className="h-10 px-2 text-left align-middle font-medium text-gray-500 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.length === filteredLeads.length && filteredLeads.length > 0}
+                        onChange={(e) => handleSelectAll(e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                    </th>
+                  )}
                   <th className="h-10 px-2 text-left align-middle font-medium text-gray-500">Lead</th>
                   <th className="h-10 px-2 text-left align-middle font-medium text-gray-500 hidden sm:table-cell">Contact</th>
                   <th className="h-10 px-2 text-left align-middle font-medium text-gray-500">Status</th>
@@ -381,6 +498,17 @@ const Leads = () => {
             <tbody>
               {filteredLeads.map((lead) => (
                 <tr key={lead.id} className="border-b transition-colors hover:bg-gray-50">
+                  {/* Checkbox column - Manager and Super Agent only */}
+                  {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && (
+                    <td className="p-2 align-middle w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.includes(lead.id)}
+                        onChange={(e) => handleSelectLead(lead.id, e.target.checked)}
+                        className="rounded border-gray-300"
+                      />
+                    </td>
+                  )}
                   <td className="p-2 align-middle">
                     <div>
                       <div className="flex items-center space-x-2">
