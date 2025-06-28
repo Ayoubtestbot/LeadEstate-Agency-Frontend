@@ -34,7 +34,7 @@ import Profile from './pages/Profile'
 import Layout from './components/Layout'
 
 // Import contexts
-import { LanguageProvider } from './contexts/LanguageContext'
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import { PermissionsProvider } from './contexts/PermissionsContext'
 import { ToastProvider } from './components/Toast'
 
@@ -73,6 +73,9 @@ const DataProvider = ({ children }) => {
   const [properties, setProperties] = useState([])
   const [teamMembers, setTeamMembers] = useState([])
   const [loading, setLoading] = useState(false)
+
+  // Get language context for WhatsApp messages
+  const { language } = useLanguage ? useLanguage() : { language: 'en' }
 
   // Fetch data from API on component mount
   useEffect(() => {
@@ -185,7 +188,8 @@ const DataProvider = ({ children }) => {
         body: JSON.stringify({
           ...leadData,
           assignedTo: leadData.assignedTo || null,
-          status: leadData.status || 'new'
+          status: leadData.status || 'new',
+          language: language || 'en' // Include user's language preference
         })
       })
 
