@@ -120,33 +120,36 @@ const Analytics = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600">Comprehensive insights and performance metrics</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Comprehensive insights and performance metrics</p>
           <p className="text-xs text-gray-500 mt-1">
-            Last updated: {lastUpdated.toLocaleTimeString()} • Click refresh to update data
+            Last updated: {lastUpdated.toLocaleTimeString()}
+          </p>
+          <p className="text-xs text-gray-500 sm:hidden">
+            Click refresh to update data
           </p>
         </div>
-        
-        <div className="flex items-center space-x-3">
+
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
           {/* Refresh Button */}
           <button
             onClick={handleRefresh}
             disabled={loading}
-            className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+            className="flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 w-full sm:w-auto"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          
+
           {/* Period Selector */}
-          <div className="flex space-x-2">
+          <div className="flex space-x-1 sm:space-x-2">
             {['day', 'week', 'month'].map((period) => (
               <button
                 key={period}
                 onClick={() => handlePeriodChange(period)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                   selectedPeriod === period
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -160,7 +163,7 @@ const Analytics = () => {
       </div>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Not Contacted Leads */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="flex items-center">
@@ -241,11 +244,11 @@ const Analytics = () => {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Leads by Source - Pie Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Leads by Source</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Leads by Source</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={analyticsData.leadsBySource}
@@ -253,7 +256,7 @@ const Analytics = () => {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
+                outerRadius={60}
                 fill="#8884d8"
                 dataKey="count"
               >
@@ -267,13 +270,19 @@ const Analytics = () => {
         </div>
 
         {/* Conversion Rate by Source - Bar Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Conversion Rate by Source</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Conversion Rate by Source</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={analyticsData.conversionRateBySource}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="source" />
-              <YAxis />
+              <XAxis
+                dataKey="source"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis fontSize={12} />
               <Tooltip formatter={(value) => [`${value}%`, 'Conversion Rate']} />
               <Bar dataKey="conversion_rate" fill="#8884d8" />
             </BarChart>
@@ -282,13 +291,19 @@ const Analytics = () => {
       </div>
 
       {/* Average Contact Time by Agent */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Average Time to First Contact by Agent</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Average Time to First Contact by Agent</h3>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart data={analyticsData.avgContactTimeByAgent}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="agent" />
-            <YAxis />
+            <XAxis
+              dataKey="agent"
+              fontSize={12}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis fontSize={12} />
             <Tooltip formatter={(value) => [`${value} hours`, 'Avg Contact Time']} />
             <Bar dataKey="avg_hours_to_contact" fill="#82ca9d" />
           </BarChart>
@@ -296,11 +311,11 @@ const Analytics = () => {
       </div>
 
       {/* Additional Analytics Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Leads by Status - Pie Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Leads by Status</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Leads by Status</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={analyticsData.leadsByStatus}
@@ -308,7 +323,7 @@ const Analytics = () => {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percentage }) => `${name} ${percentage}%`}
-                outerRadius={80}
+                outerRadius={60}
                 fill="#8884d8"
                 dataKey="count"
               >
@@ -322,15 +337,21 @@ const Analytics = () => {
         </div>
 
         {/* Agent Performance - Bar Chart */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Agent Performance</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Agent Performance</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={analyticsData.leadsByAgent}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="agent" />
-              <YAxis />
+              <XAxis
+                dataKey="agent"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis fontSize={12} />
               <Tooltip />
-              <Legend />
+              <Legend fontSize={12} />
               <Bar dataKey="total_leads" fill="#8884d8" name="Total Leads" />
               <Bar dataKey="closed_won" fill="#82ca9d" name="Closed Won" />
               <Bar dataKey="active_leads" fill="#ffc658" name="Active" />
@@ -340,19 +361,25 @@ const Analytics = () => {
       </div>
 
       {/* Budget Analysis */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Budget Analysis</h3>
-        <ResponsiveContainer width="100%" height={300}>
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Budget Analysis</h3>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart data={analyticsData.budgetAnalysis}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="range" />
-            <YAxis />
+            <XAxis
+              dataKey="range"
+              fontSize={10}
+              angle={-45}
+              textAnchor="end"
+              height={80}
+            />
+            <YAxis fontSize={12} />
             <Tooltip formatter={(value, name) => {
               if (name === 'avg_budget') return [`$${value.toLocaleString()}`, 'Average Budget']
               if (name === 'conversion_rate') return [`${value}%`, 'Conversion Rate']
               return [value, name]
             }} />
-            <Legend />
+            <Legend fontSize={12} />
             <Bar dataKey="count" fill="#8884d8" name="Lead Count" />
             <Bar dataKey="conversions" fill="#82ca9d" name="Conversions" />
           </BarChart>
