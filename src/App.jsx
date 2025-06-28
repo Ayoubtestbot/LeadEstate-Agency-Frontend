@@ -433,27 +433,75 @@ const DataProvider = ({ children }) => {
 
   const linkPropertyToLead = async (leadId, propertyId) => {
     try {
-      await updateLead(leadId, { linkedPropertyId: propertyId })
-      console.log('✅ Property linked to lead successfully')
+      const response = await fetch(`${API_URL}/leads/${leadId}/link-property/${propertyId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Property linked to lead successfully')
+
+        // Update local state with the returned data
+        setLeads(prev => prev.map(lead =>
+          lead.id === leadId ? {
+            ...lead,
+            interestedProperties: JSON.parse(result.data.interested_properties || '[]')
+          } : lead
+        ))
+      } else {
+        throw new Error('Failed to link property')
+      }
     } catch (error) {
       console.error('Error linking property to lead:', error)
       // Fallback to local update if API fails
-      setLeads(prev => prev.map(lead =>
-        lead.id === leadId ? { ...lead, linkedPropertyId: propertyId } : lead
-      ))
+      setLeads(prev => prev.map(lead => {
+        if (lead.id === leadId) {
+          const currentProperties = lead.interestedProperties || []
+          if (!currentProperties.includes(propertyId)) {
+            return { ...lead, interestedProperties: [...currentProperties, propertyId] }
+          }
+        }
+        return lead
+      }))
     }
   }
 
-  const unlinkPropertyFromLead = async (leadId) => {
+  const unlinkPropertyFromLead = async (leadId, propertyId) => {
     try {
-      await updateLead(leadId, { linkedPropertyId: null })
-      console.log('✅ Property unlinked from lead successfully')
+      const response = await fetch(`${API_URL}/leads/${leadId}/unlink-property/${propertyId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        console.log('✅ Property unlinked from lead successfully')
+
+        // Update local state with the returned data
+        setLeads(prev => prev.map(lead =>
+          lead.id === leadId ? {
+            ...lead,
+            interestedProperties: JSON.parse(result.data.interested_properties || '[]')
+          } : lead
+        ))
+      } else {
+        throw new Error('Failed to unlink property')
+      }
     } catch (error) {
       console.error('Error unlinking property from lead:', error)
       // Fallback to local update if API fails
-      setLeads(prev => prev.map(lead =>
-        lead.id === leadId ? { ...lead, linkedPropertyId: null } : lead
-      ))
+      setLeads(prev => prev.map(lead => {
+        if (lead.id === leadId) {
+          const currentProperties = lead.interestedProperties || []
+          return { ...lead, interestedProperties: currentProperties.filter(id => id !== propertyId) }
+        }
+        return lead
+      }))
     }
   }
 
