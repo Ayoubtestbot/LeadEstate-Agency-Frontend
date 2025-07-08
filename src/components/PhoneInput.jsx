@@ -18,6 +18,20 @@ const COUNTRY_CODES = [
   { code: '+351', country: 'Portugal', flag: '🇵🇹', name: 'PT' },
   { code: '+971', country: 'UAE', flag: '🇦🇪', name: 'AE' },
   { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', name: 'SA' },
+  { code: '+213', country: 'Algeria', flag: '🇩🇿', name: 'DZ' },
+  { code: '+216', country: 'Tunisia', flag: '🇹🇳', name: 'TN' },
+  { code: '+20', country: 'Egypt', flag: '🇪🇬', name: 'EG' },
+  { code: '+90', country: 'Turkey', flag: '🇹🇷', name: 'TR' },
+  { code: '+7', country: 'Russia', flag: '🇷🇺', name: 'RU' },
+  { code: '+86', country: 'China', flag: '🇨🇳', name: 'CN' },
+  { code: '+91', country: 'India', flag: '🇮🇳', name: 'IN' },
+  { code: '+81', country: 'Japan', flag: '🇯🇵', name: 'JP' },
+  { code: '+82', country: 'South Korea', flag: '🇰🇷', name: 'KR' },
+  { code: '+55', country: 'Brazil', flag: '🇧🇷', name: 'BR' },
+  { code: '+52', country: 'Mexico', flag: '🇲🇽', name: 'MX' },
+  { code: '+61', country: 'Australia', flag: '🇦🇺', name: 'AU' },
+  { code: '+64', country: 'New Zealand', flag: '🇳🇿', name: 'NZ' },
+  { code: '+27', country: 'South Africa', flag: '🇿🇦', name: 'ZA' },
 ]
 
 // Default country based on LeadEstate platform (Morocco-focused)
@@ -93,9 +107,11 @@ const PhoneInput = ({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
+            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 min-w-[100px]"
           >
-            <span className="text-base mr-2">{selectedCountry.flag}</span>
+            <span className="text-lg mr-2" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>
+              {selectedCountry.flag}
+            </span>
             <span className="text-sm font-medium text-gray-700 mr-1">
               {selectedCountry.code}
             </span>
@@ -104,16 +120,21 @@ const PhoneInput = ({
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-0 mt-1 w-80 bg-white border border-gray-300 rounded-md shadow-xl z-50 max-h-80 overflow-y-auto">
               {COUNTRY_CODES.map((country, index) => (
                 <button
                   key={`${country.code}-${country.name}-${index}`}
                   type="button"
                   onClick={() => handleCountrySelect(country)}
-                  className="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                  className="w-full flex items-center px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
                 >
-                  <span className="text-base mr-3">{country.flag}</span>
-                  <span className="text-sm font-medium text-gray-700 mr-3 min-w-[3rem]">
+                  <span
+                    className="text-lg mr-3"
+                    style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif', minWidth: '24px' }}
+                  >
+                    {country.flag}
+                  </span>
+                  <span className="text-sm font-medium text-gray-700 mr-3 min-w-[4rem]">
                     {country.code}
                   </span>
                   <span className="text-sm text-gray-600 truncate">
