@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { X, User, Mail, Phone, Crown, Star } from 'lucide-react'
+import { X, User, Mail, Crown, Star } from 'lucide-react'
 import { USER_ROLES, ROLE_DISPLAY_NAMES } from '../contexts/PermissionsContext'
+import PhoneInput from './PhoneInput'
 
 const EditTeamMemberModal = ({ isOpen, onClose, onSubmit, member }) => {
   const [formData, setFormData] = useState({
@@ -114,14 +115,13 @@ const EditTeamMemberModal = ({ isOpen, onClose, onSubmit, member }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Phone Number *
             </label>
-            <input
-              type="tel"
+            <PhoneInput
+              name="phone"
               value={formData.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                errors.phone ? 'border-red-300' : 'border-gray-300'
-              }`}
               placeholder="Enter phone number"
+              required
+              className={errors.phone ? 'border-red-300' : ''}
             />
             {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>

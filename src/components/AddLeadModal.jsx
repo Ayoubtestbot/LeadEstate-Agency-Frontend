@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { X, User, Mail, Phone, MapPin } from 'lucide-react'
+import { X, User, Mail, MapPin } from 'lucide-react'
 import { useData } from '../App'
+import PhoneInput from './PhoneInput'
 
 const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
   const { teamMembers } = useData()
@@ -90,18 +91,13 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Phone Number *
               </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter phone number"
-                />
-              </div>
+              <PhoneInput
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Enter phone number"
+                required
+              />
             </div>
 
             {/* City */}
