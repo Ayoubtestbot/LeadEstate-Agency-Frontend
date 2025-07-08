@@ -32,7 +32,6 @@ import Profile from './pages/Profile'
 
 // Import components
 import Layout from './components/Layout'
-import PerformanceMonitor from './components/PerformanceMonitor'
 
 // Import contexts
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
@@ -927,15 +926,7 @@ function AppWithAuth() {
             </Routes>
             <Toaster position="top-right" />
 
-            {/* PERFORMANCE: Add performance monitor */}
-            <PerformanceMonitor
-              loading={loading}
-              dataCount={{
-                leads: leads.length,
-                properties: properties.length,
-                team: teamMembers.length
-              }}
-            />
+            {/* PERFORMANCE: Performance monitor temporarily disabled due to scope issue */}
           </div>
         </Router>
       </DataProvider>
