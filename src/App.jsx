@@ -32,6 +32,7 @@ import Profile from './pages/Profile'
 
 // Import components
 import Layout from './components/Layout'
+import PerformanceMonitor from './components/PerformanceMonitor'
 
 // Import contexts
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
@@ -74,6 +75,14 @@ const DataProvider = ({ children }) => {
   const [teamMembers, setTeamMembers] = useState([])
   const [loading, setLoading] = useState(false)
 
+  // PERFORMANCE: Add caching to avoid repeated API calls
+  const [dataCache, setDataCache] = useState({
+    data: null,
+    timestamp: null,
+    isValid: false
+  })
+  const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes cache
+
   // Get language context for WhatsApp messages
   const { language } = useLanguage ? useLanguage() : { language: 'en' }
 
@@ -82,58 +91,115 @@ const DataProvider = ({ children }) => {
     fetchAllData()
   }, [])
 
-  const fetchAllData = async () => {
-    console.log('🔄 Fetching all data from API...')
+  // OPTIMIZED: Load all data with caching + single API call + fallback
+  const fetchAllData = async (forceRefresh = false) => {
+    console.log('🚀 Starting optimized data loading...')
     console.log('🌐 API_URL:', API_URL)
+
+    // Check cache first (unless force refresh)
+    if (!forceRefresh && dataCache.isValid && dataCache.timestamp) {
+      const cacheAge = Date.now() - dataCache.timestamp
+      if (cacheAge < CACHE_DURATION) {
+        console.log('📦 Using cached data (age:', Math.round(cacheAge / 1000), 'seconds)')
+        setLeads(dataCache.data.leads || [])
+        setProperties(dataCache.data.properties || [])
+        setTeamMembers(dataCache.data.team || [])
+        return // Exit early with cached data
+      } else {
+        console.log('⏰ Cache expired, fetching fresh data...')
+      }
+    }
+
     setLoading(true)
+
+    try {
+      // Try optimized single API call first
+      const dashboardRes = await fetch(`${API_URL}/dashboard/all-data`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }).catch((err) => {
+        console.error('❌ Error fetching dashboard data:', err)
+        return { ok: false }
+      })
+
+      if (dashboardRes.ok) {
+        const dashboardData = await dashboardRes.json()
+        console.log('✅ All dashboard data received:', dashboardData)
+
+        // Set all data at once
+        setLeads(dashboardData.data?.leads || [])
+        setProperties(dashboardData.data?.properties || [])
+        setTeamMembers(dashboardData.data?.team || [])
+
+        // PERFORMANCE: Cache the data for future use
+        setDataCache({
+          data: dashboardData.data,
+          timestamp: Date.now(),
+          isValid: true
+        })
+
+        console.log('📊 Optimized data loaded and cached:', {
+          leads: dashboardData.data?.leads?.length || 0,
+          properties: dashboardData.data?.properties?.length || 0,
+          team: dashboardData.data?.team?.length || 0
+        })
+        return // Success, exit early
+      }
+
+      console.warn('❌ Optimized endpoint failed, using fallback...')
+    } catch (error) {
+      console.error('Error with optimized endpoint:', error)
+    }
+
+    // Fallback: Use parallel individual calls with limits
     try {
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads`).catch((err) => {
+        fetch(`${API_URL}/leads?limit=50`).catch((err) => {
           console.error('❌ Error fetching leads:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/properties`).catch((err) => {
+        fetch(`${API_URL}/properties?limit=50`).catch((err) => {
           console.error('❌ Error fetching properties:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/team`).catch((err) => {
+        fetch(`${API_URL}/team?limit=50`).catch((err) => {
           console.error('❌ Error fetching team:', err)
           return { ok: false }
         })
       ])
 
-      console.log('📊 Leads response status:', leadsRes.status, leadsRes.ok)
-      if (leadsRes.ok) {
-        const leadsData = await leadsRes.json()
-        console.log('✅ Leads data received:', leadsData)
-        setLeads(leadsData.data || [])
-      } else {
-        console.warn('❌ Failed to fetch leads from API, status:', leadsRes.status)
-        setLeads([])
-      }
+      // Process all responses in parallel
+      const [leadsData, propertiesData, teamData] = await Promise.all([
+        leadsRes.ok ? leadsRes.json().catch(() => ({ data: [] })) : { data: [] },
+        propertiesRes.ok ? propertiesRes.json().catch(() => ({ data: [] })) : { data: [] },
+        teamRes.ok ? teamRes.json().catch(() => ({ data: [] })) : { data: [] }
+      ])
 
-      console.log('🏠 Properties response status:', propertiesRes.status, propertiesRes.ok)
-      if (propertiesRes.ok) {
-        const propertiesData = await propertiesRes.json()
-        console.log('✅ Properties data received:', propertiesData)
-        setProperties(propertiesData.data || [])
-      } else {
-        console.warn('❌ Failed to fetch properties from API, status:', propertiesRes.status)
-        setProperties([])
-      }
+      setLeads(leadsData.data || [])
+      setProperties(propertiesData.data || [])
+      setTeamMembers(teamData.data || [])
 
-      console.log('👥 Team response status:', teamRes.status, teamRes.ok)
-      if (teamRes.ok) {
-        const teamData = await teamRes.json()
-        console.log('✅ Team data received:', teamData)
-        setTeamMembers(teamData.data || [])
-      } else {
-        console.warn('❌ Failed to fetch team members from API, status:', teamRes.status)
-        setTeamMembers([])
-      }
+      // PERFORMANCE: Cache fallback data too
+      setDataCache({
+        data: {
+          leads: leadsData.data || [],
+          properties: propertiesData.data || [],
+          team: teamData.data || []
+        },
+        timestamp: Date.now(),
+        isValid: true
+      })
+
+      console.log('✅ Fallback data loaded and cached:', {
+        leads: leadsData.data?.length || 0,
+        properties: propertiesData.data?.length || 0,
+        team: teamData.data?.length || 0
+      })
     } catch (error) {
-      console.error('Error fetching data:', error)
-      // Set empty arrays as fallback
+      console.error('Error in fallback data loading:', error)
+      // Set empty arrays as final fallback
       setLeads([])
       setProperties([])
       setTeamMembers([])
@@ -142,40 +208,21 @@ const DataProvider = ({ children }) => {
     }
   }
 
-  // Refresh data function for real-time updates
+  // OPTIMIZED: Refresh data function using the optimized fetchAllData
   const refreshData = async (skipLoading = true) => {
-    console.log('🔄 Refreshing all data...')
+    console.log('🔄 Refreshing all data (force refresh)...')
 
-    if (!skipLoading) setLoading(true)
-
-    try {
-      const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads`).catch(() => ({ ok: false })),
-        fetch(`${API_URL}/properties`).catch(() => ({ ok: false })),
-        fetch(`${API_URL}/team`).catch(() => ({ ok: false }))
-      ])
-
-      if (leadsRes.ok) {
-        const leadsData = await leadsRes.json()
-        setLeads(leadsData.data || [])
-      }
-
-      if (propertiesRes.ok) {
-        const propertiesData = await propertiesRes.json()
-        setProperties(propertiesData.data || [])
-      }
-
-      if (teamRes.ok) {
-        const teamData = await teamRes.json()
-        setTeamMembers(teamData.data || [])
-      }
-
-      console.log('✅ Data refreshed successfully')
-    } catch (error) {
-      console.error('Error refreshing data:', error)
-    } finally {
-      if (!skipLoading) setLoading(false)
+    // Use the optimized fetchAllData with force refresh
+    if (!skipLoading) {
+      await fetchAllData(true) // Force refresh, will show loading
+    } else {
+      // Force refresh without showing loading spinner
+      const currentLoading = loading
+      await fetchAllData(true)
+      setLoading(currentLoading) // Restore previous loading state
     }
+
+    console.log('✅ Data refreshed successfully using optimized method')
   }
 
   const addLead = async (leadData) => {
@@ -879,6 +926,16 @@ function AppWithAuth() {
               } />
             </Routes>
             <Toaster position="top-right" />
+
+            {/* PERFORMANCE: Add performance monitor */}
+            <PerformanceMonitor
+              loading={loading}
+              dataCount={{
+                leads: leads.length,
+                properties: properties.length,
+                team: teamMembers.length
+              }}
+            />
           </div>
         </Router>
       </DataProvider>
