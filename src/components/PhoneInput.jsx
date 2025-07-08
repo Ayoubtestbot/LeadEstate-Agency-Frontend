@@ -20,19 +20,10 @@ const COUNTRY_CODES = [
   { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', name: 'SA' },
 ]
 
-// Default country based on common real estate markets
+// Default country based on LeadEstate platform (Morocco-focused)
 const getDefaultCountryCode = () => {
-  // Try to detect user's location or use Morocco as default for this platform
-  const userLanguage = navigator.language || navigator.userLanguage
-  
-  if (userLanguage.includes('fr')) return '+33' // France
-  if (userLanguage.includes('en-US')) return '+1' // US
-  if (userLanguage.includes('en-GB')) return '+44' // UK
-  if (userLanguage.includes('de')) return '+49' // Germany
-  if (userLanguage.includes('es')) return '+34' // Spain
-  if (userLanguage.includes('it')) return '+39' // Italy
-  
-  // Default to Morocco for LeadEstate platform
+  // Always default to Morocco for LeadEstate platform
+  // Users can manually change if needed
   return '+212'
 }
 
@@ -102,9 +93,9 @@ const PhoneInput = ({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
           >
-            <span className="text-lg mr-1">{selectedCountry.flag}</span>
+            <span className="text-base mr-2">{selectedCountry.flag}</span>
             <span className="text-sm font-medium text-gray-700 mr-1">
               {selectedCountry.code}
             </span>
@@ -121,8 +112,8 @@ const PhoneInput = ({
                   onClick={() => handleCountrySelect(country)}
                   className="w-full flex items-center px-3 py-2 text-left hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                 >
-                  <span className="text-lg mr-2">{country.flag}</span>
-                  <span className="text-sm font-medium text-gray-700 mr-2">
+                  <span className="text-base mr-3">{country.flag}</span>
+                  <span className="text-sm font-medium text-gray-700 mr-3 min-w-[3rem]">
                     {country.code}
                   </span>
                   <span className="text-sm text-gray-600 truncate">
@@ -143,7 +134,7 @@ const PhoneInput = ({
             onChange={handlePhoneChange}
             placeholder={placeholder}
             required={required}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
           />
         </div>
       </div>
