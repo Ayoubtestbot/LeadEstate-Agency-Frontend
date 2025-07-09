@@ -296,7 +296,7 @@ const Leads = () => {
     }
   }
 
-  // Filter leads based on search, status, agent, and user permissions
+  // Filter and sort leads based on search, status, agent, and user permissions
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          lead.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -314,6 +314,11 @@ const Leads = () => {
 
     // Fallback: if no specific permissions, don't show leads
     return false
+  }).sort((a, b) => {
+    // Sort by creation date - newest first (descending order)
+    const dateA = new Date(a.created_at || a.createdAt || 0)
+    const dateB = new Date(b.created_at || b.createdAt || 0)
+    return dateB - dateA
   })
 
   // Pagination logic
