@@ -226,20 +226,38 @@ const Leads = () => {
     }
   }
 
-  const cleanupEmptyLeads = async () => {
+  const cleanupAllLeads = async () => {
     try {
       const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/cleanup', {
         method: 'DELETE'
       })
       const result = await response.json()
       if (result.success) {
-        showToast(`Cleaned up ${result.deletedCount} empty leads!`, 'success')
+        showToast(`Deleted all ${result.deletedCount} leads!`, 'success')
         refreshData() // Refresh the leads list
         setDebugStats(null) // Clear debug stats to force refresh
       }
     } catch (error) {
       console.error('Error cleaning up leads:', error)
       showToast('Failed to clean up leads', 'error')
+    }
+  }
+
+  const createSampleLeads = async () => {
+    try {
+      showToast('Creating 50 sample leads...', 'info')
+      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/create-samples', {
+        method: 'POST'
+      })
+      const result = await response.json()
+      if (result.success) {
+        showToast(`Created ${result.createdCount} sample leads!`, 'success')
+        refreshData() // Refresh the leads list
+        setDebugStats(null) // Clear debug stats to force refresh
+      }
+    } catch (error) {
+      console.error('Error creating sample leads:', error)
+      showToast('Failed to create sample leads', 'error')
     }
   }
 
@@ -501,7 +519,7 @@ const Leads = () => {
 
           {showDebug && (
             <div className="space-y-3">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={fetchDebugStats}
                   className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
@@ -509,10 +527,16 @@ const Leads = () => {
                   Get Database Stats
                 </button>
                 <button
-                  onClick={cleanupEmptyLeads}
+                  onClick={cleanupAllLeads}
                   className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                 >
-                  Clean Up Empty Leads
+                  Delete All Leads
+                </button>
+                <button
+                  onClick={createSampleLeads}
+                  className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Create 50 Sample Leads
                 </button>
               </div>
 
