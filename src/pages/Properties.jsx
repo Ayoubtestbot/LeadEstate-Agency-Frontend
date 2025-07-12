@@ -51,40 +51,40 @@ const Properties = () => {
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-3xl" />
 
-        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg">
-                  <Home className="h-6 w-6 drop-shadow-sm" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg">
+                  <Home className="h-5 w-5 drop-shadow-sm" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                   Properties Management
                 </h1>
               </div>
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-3">
                 Manage your property listings and showcase your real estate portfolio
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-green-600 font-medium">{properties.length} Total Properties</span>
+                  <span className="text-xs text-green-600 font-medium">{properties.length} Total Properties</span>
                 </div>
                 <div className="w-1 h-1 bg-gray-400 rounded-full" />
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-blue-600 font-medium">Active Listings</span>
+                  <span className="text-xs text-blue-600 font-medium">Active Listings</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => setShowAddProperty(true)}
-                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+                className="group relative inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-md hover:shadow-lg h-10 px-4 py-2 w-full sm:w-auto"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-blue-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-blue-700/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Plus className="h-4 w-4 mr-2 drop-shadow-sm relative z-10" />
                 <span className="relative z-10">Add Property</span>
               </button>
             </div>
