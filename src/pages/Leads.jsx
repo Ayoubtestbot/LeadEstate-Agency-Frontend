@@ -321,16 +321,18 @@ const Leads = () => {
     return dateB - dateA
   })
 
-  // Pagination logic
+  // Pagination logic - only for table view
   const totalPages = Math.ceil(filteredLeads.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedLeads = filteredLeads.slice(startIndex, endIndex)
+  const paginatedLeads = viewMode === 'table' ? filteredLeads.slice(startIndex, endIndex) : filteredLeads
 
-  // Reset to first page when filters change
+  // Reset to first page when filters change (only for table view)
   React.useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, statusFilter, agentFilter, itemsPerPage])
+    if (viewMode === 'table') {
+      setCurrentPage(1)
+    }
+  }, [searchTerm, statusFilter, agentFilter, itemsPerPage, viewMode])
 
   // Pagination handlers
   const handlePageChange = (page) => {
@@ -815,83 +817,6 @@ const Leads = () => {
             onWhatsAppLead={handleWhatsAppLead}
             onDeleteLead={handleDeleteLead}
           />
-
-          {/* Pagination Controls for Kanban */}
-          {filteredLeads.length > 0 && (
-            <div className="mt-4 px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* Items per page selector */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-700">Show:</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                    className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value={10}>10</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
-                  <span className="text-sm text-gray-700">per page</span>
-                </div>
-
-                {/* Pagination info and controls */}
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-700">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length} leads
-                  </span>
-
-                  {totalPages > 1 && (
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-
-                      {/* Page numbers */}
-                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum;
-                        if (totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (currentPage <= 3) {
-                          pageNum = i + 1;
-                        } else if (currentPage >= totalPages - 2) {
-                          pageNum = totalPages - 4 + i;
-                        } else {
-                          pageNum = currentPage - 2 + i;
-                        }
-
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-1 text-sm border rounded-md ${
-                              currentPage === pageNum
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'border-gray-300 hover:bg-gray-100'
-                            }`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-
-                      <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Empty State for Kanban */}
           {filteredLeads.length === 0 && (
