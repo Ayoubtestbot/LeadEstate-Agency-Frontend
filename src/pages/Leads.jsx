@@ -51,8 +51,6 @@ const Leads = () => {
   const [whatsAppLead, setWhatsAppLead] = useState(null)
   const [showImport, setShowImport] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
-  const [showDebug, setShowDebug] = useState(false)
-  const [debugStats, setDebugStats] = useState(null)
 
   const handleAddLead = (leadData) => {
     addLead(leadData)
@@ -211,53 +209,25 @@ const Leads = () => {
     setDeleteConfirm(null)
   }
 
-  // Debug functions
-  const fetchDebugStats = async () => {
-    try {
-      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/stats')
-      const result = await response.json()
-      if (result.success) {
-        setDebugStats(result.data)
-        showToast('Debug stats fetched successfully!', 'success')
-      }
-    } catch (error) {
-      console.error('Error fetching debug stats:', error)
-      showToast('Failed to fetch debug stats', 'error')
+  // Replace problematic leads with proper sample data
+  const replaceLeadsWithSamples = async () => {
+    if (!window.confirm('This will replace all current leads with 50 new sample leads. Are you sure?')) {
+      return
     }
-  }
 
-  const cleanupAllLeads = async () => {
     try {
-      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/cleanup', {
-        method: 'DELETE'
-      })
-      const result = await response.json()
-      if (result.success) {
-        showToast(`Deleted all ${result.deletedCount} leads!`, 'success')
-        refreshData() // Refresh the leads list
-        setDebugStats(null) // Clear debug stats to force refresh
-      }
-    } catch (error) {
-      console.error('Error cleaning up leads:', error)
-      showToast('Failed to clean up leads', 'error')
-    }
-  }
-
-  const createSampleLeads = async () => {
-    try {
-      showToast('Creating 50 sample leads...', 'info')
-      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/create-samples', {
+      showToast('Replacing leads with proper sample data...', 'info')
+      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/replace-all', {
         method: 'POST'
       })
       const result = await response.json()
       if (result.success) {
-        showToast(`Created ${result.createdCount} sample leads!`, 'success')
+        showToast(result.message, 'success')
         refreshData() // Refresh the leads list
-        setDebugStats(null) // Clear debug stats to force refresh
       }
     } catch (error) {
-      console.error('Error creating sample leads:', error)
-      showToast('Failed to create sample leads', 'error')
+      console.error('Error replacing leads:', error)
+      showToast('Failed to replace leads', 'error')
     }
   }
 
@@ -504,66 +474,21 @@ const Leads = () => {
         </div>
       </div>
 
-      {/* Debug Panel */}
-      {user?.role === 'super_agent' && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-yellow-800">🔧 Debug Panel (Super Agent Only)</h3>
+      {/* Manager Tools */}
+      {hasPermission(PERMISSIONS.MANAGE_TEAM) && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-blue-800">Manager Tools</h3>
+              <p className="text-xs text-blue-600 mt-1">Replace current leads with proper sample data</p>
+            </div>
             <button
-              onClick={() => setShowDebug(!showDebug)}
-              className="text-xs text-yellow-600 hover:text-yellow-800"
+              onClick={replaceLeadsWithSamples}
+              className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
             >
-              {showDebug ? 'Hide' : 'Show'}
+              Replace with Sample Leads
             </button>
           </div>
-
-          {showDebug && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={fetchDebugStats}
-                  className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                >
-                  Get Database Stats
-                </button>
-                <button
-                  onClick={cleanupAllLeads}
-                  className="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                >
-                  Delete All Leads
-                </button>
-                <button
-                  onClick={createSampleLeads}
-                  className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                >
-                  Create 50 Sample Leads
-                </button>
-              </div>
-
-              {debugStats && (
-                <div className="bg-white p-3 rounded border text-xs">
-                  <h4 className="font-medium mb-2">Database Statistics:</h4>
-                  <ul className="space-y-1 text-gray-600">
-                    <li>Total Leads: {debugStats.totalLeads}</li>
-                    <li>Empty Names: {debugStats.emptyNames}</li>
-                    <li>Unassigned: {debugStats.unassigned}</li>
-                  </ul>
-                  {debugStats.sampleLeads?.length > 0 && (
-                    <div className="mt-2">
-                      <h5 className="font-medium mb-1">Recent Leads Sample:</h5>
-                      <ul className="space-y-1 text-gray-600">
-                        {debugStats.sampleLeads.map(lead => (
-                          <li key={lead.id}>
-                            {lead.first_name} {lead.last_name} → {lead.assigned_to || 'Unassigned'}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       )}
 
