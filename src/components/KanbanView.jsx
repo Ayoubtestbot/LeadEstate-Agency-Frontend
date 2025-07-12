@@ -62,34 +62,39 @@ const KanbanView = ({
     lead.assignedTo && !teamMembers.find(member => member.name === lead.assignedTo)
   )
 
-  // Auto-cleanup orphaned leads silently with rate limiting
+  // Auto-delete orphaned leads permanently with rate limiting
   useEffect(() => {
-    if (orphanedLeads.length > 0 && onUpdateLead) {
-      console.log('🧹 Auto-cleaning orphaned leads:', orphanedLeads.length)
+    if (orphanedLeads.length > 0 && onDeleteLead) {
+      console.log('🗑️ Auto-deleting orphaned leads permanently:', orphanedLeads.length)
+      console.log('📋 Leads to be deleted:', orphanedLeads.map(lead => ({
+        name: lead.name,
+        email: lead.email,
+        assignedTo: lead.assignedTo
+      })))
 
-      // Rate-limited cleanup to avoid overwhelming the server
-      const cleanupLeadsSequentially = async () => {
+      // Rate-limited deletion to avoid overwhelming the server
+      const deleteLeadsSequentially = async () => {
         for (let i = 0; i < orphanedLeads.length; i++) {
           const lead = orphanedLeads[i]
           try {
-            await onUpdateLead(lead.id, { assignedTo: null })
-            console.log(`✅ Auto-unassigned (${i + 1}/${orphanedLeads.length}): ${lead.name} (was assigned to: ${lead.assignedTo})`)
+            await onDeleteLead(lead.id)
+            console.log(`🗑️ Auto-deleted (${i + 1}/${orphanedLeads.length}): ${lead.name} (was assigned to: ${lead.assignedTo})`)
 
             // Add delay between requests to avoid overwhelming server
             if (i < orphanedLeads.length - 1) {
               await new Promise(resolve => setTimeout(resolve, 500)) // 500ms delay
             }
           } catch (error) {
-            console.error(`❌ Failed to auto-unassign lead ${lead.name}:`, error)
+            console.error(`❌ Failed to auto-delete lead ${lead.name}:`, error)
             // Continue with next lead even if one fails
           }
         }
-        console.log('🎉 Orphaned leads cleanup completed')
+        console.log('🎉 Orphaned leads deletion completed - database cleaned!')
       }
 
-      cleanupLeadsSequentially()
+      deleteLeadsSequentially()
     }
-  }, [orphanedLeads.length, onUpdateLead])
+  }, [orphanedLeads.length, onDeleteLead])
 
   // Debug: Check for orphaned assignments and data issues
   const orphanedAssignments = assignedAgentNames.filter(name =>
