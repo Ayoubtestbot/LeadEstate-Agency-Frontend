@@ -209,27 +209,7 @@ const Leads = () => {
     setDeleteConfirm(null)
   }
 
-  // Replace problematic leads with proper sample data
-  const replaceLeadsWithSamples = async () => {
-    if (!window.confirm('This will replace all current leads with 50 new sample leads. Are you sure?')) {
-      return
-    }
 
-    try {
-      showToast('Replacing leads with proper sample data...', 'info')
-      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/leads/replace-all', {
-        method: 'POST'
-      })
-      const result = await response.json()
-      if (result.success) {
-        showToast(result.message, 'success')
-        refreshData() // Refresh the leads list
-      }
-    } catch (error) {
-      console.error('Error replacing leads:', error)
-      showToast('Failed to replace leads', 'error')
-    }
-  }
 
   // Bulk action handlers
   const handleSelectAll = (checked) => {
@@ -474,23 +454,7 @@ const Leads = () => {
         </div>
       </div>
 
-      {/* Manager Tools */}
-      {hasPermission(PERMISSIONS.MANAGE_TEAM) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-blue-800">Manager Tools</h3>
-              <p className="text-xs text-blue-600 mt-1">Replace current leads with proper sample data</p>
-            </div>
-            <button
-              onClick={replaceLeadsWithSamples}
-              className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-            >
-              Replace with Sample Leads
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Enhanced Filters - Only show for table view */}
       {viewMode === 'table' && (
