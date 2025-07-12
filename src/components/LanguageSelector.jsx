@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, Globe } from 'lucide-react'
 import { useLanguage } from '../contexts/LanguageContext'
+import FlagIcon from './FlagIcon'
 
 const LanguageSelector = ({ className = '' }) => {
   const { language, changeLanguage, availableLanguages } = useLanguage()
@@ -35,17 +36,11 @@ const LanguageSelector = ({ className = '' }) => {
         aria-label="Select language"
       >
         <Globe className="h-4 w-4" />
-        <div
-          className="hidden sm:flex items-center justify-center bg-blue-100 text-blue-800 rounded"
-          style={{
-            width: '20px',
-            height: '16px',
-            fontSize: '10px',
-            fontWeight: 'bold'
-          }}
-        >
-          {currentLanguage?.code?.toUpperCase()}
-        </div>
+        <FlagIcon
+          countryCode={currentLanguage?.code}
+          size="sm"
+          className="hidden sm:flex"
+        />
         <span className="hidden md:inline">{currentLanguage?.name}</span>
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -61,17 +56,11 @@ const LanguageSelector = ({ className = '' }) => {
                   language === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                 }`}
               >
-                <div
-                  className="flex items-center justify-center bg-blue-100 text-blue-800 rounded"
-                  style={{
-                    width: '20px',
-                    height: '16px',
-                    fontSize: '10px',
-                    fontWeight: 'bold'
-                  }}
-                >
-                  {lang.code.toUpperCase()}
-                </div>
+                <FlagIcon
+                  countryCode={lang.code}
+                  size="sm"
+                  className=""
+                />
                 <span>{lang.name}</span>
                 {language === lang.code && (
                   <span className="ml-auto">

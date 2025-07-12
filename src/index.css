@@ -1,3 +1,6 @@
+/* Flag Icons CSS - must be imported first */
+@import 'flag-icons/css/flag-icons.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

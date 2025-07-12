@@ -96,13 +96,7 @@ export default {
     analyzePerformance: 'Analyser vos performances',
     closeDeal: 'Conclure une affaire',
     markLeadClosed: 'Marquer un prospect comme fermé',
-    reports: 'Rapports',
-    closedDeals: 'Affaires conclues',
-    quickStats: 'Statistiques rapides',
-    thisMonth: 'Ce mois-ci',
-    newLeads: 'Nouveaux prospects',
-    propertiesListed: 'Propriétés listées',
-    latestUpdates: 'Dernières mises à jour'
+    reports: 'Rapports'
   },
 
   // Team
