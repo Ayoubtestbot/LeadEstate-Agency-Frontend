@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, User, Mail, MapPin } from 'lucide-react'
 import { useData } from '../App'
 import PhoneInput from './PhoneInput'
 
 const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
   const { teamMembers } = useData()
-  const [formData, setFormData] = useState({
+
+  // Initial form state
+  const initialFormData = {
     name: '',
     phone: '',
     city: '',
@@ -15,22 +17,23 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
     budget: '',
     notes: '',
     assignedTo: ''
-  })
+  }
+
+  const [formData, setFormData] = useState(initialFormData)
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      // Reset form when modal opens
+      setFormData(initialFormData)
+    }
+  }, [isOpen])
 
   const handleSubmit = (e) => {
     e.preventDefault()
     onSubmit(formData)
-    setFormData({
-      name: '',
-      phone: '',
-      city: '',
-      email: '',
-      source: 'website',
-      propertyType: 'house',
-      budget: '',
-      notes: '',
-      assignedTo: ''
-    })
+    // Reset form after successful submission
+    setFormData(initialFormData)
     onClose()
   }
 
@@ -41,15 +44,21 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
     })
   }
 
+  const handleClose = () => {
+    // Reset form when closing modal
+    setFormData(initialFormData)
+    onClose()
+  }
+
   if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div 
+        <div
           className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          onClick={onClose}
+          onClick={handleClose}
         />
 
         {/* Modal */}
@@ -58,7 +67,7 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium text-gray-900">Add New Lead</h3>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="text-gray-400 hover:text-gray-600"
             >
               <X className="h-5 w-5" />
@@ -232,7 +241,7 @@ const AddLeadModal = ({ isOpen, onClose, onSubmit }) => {
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Cancel
