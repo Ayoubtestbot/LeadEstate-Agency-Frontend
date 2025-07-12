@@ -16,6 +16,7 @@ const KanbanView = ({
   const [draggedLead, setDraggedLead] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [agentFilter, setAgentFilter] = useState('all')
   const [columnLimits, setColumnLimits] = useState({})
   const [showAllColumns, setShowAllColumns] = useState(false)
   const { hasPermission } = usePermissions()
@@ -35,7 +36,11 @@ const KanbanView = ({
     { id: 'closed-lost', title: 'Closed Lost', color: 'bg-red-50 border-red-200', headerColor: 'bg-red-100' }
   ]
 
-  // Filter leads based on search term
+  // Get unique agents for filter dropdown
+  const uniqueAgents = [...new Set(leads.map(lead => lead.assignedAgent || lead.assigned_agent).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b))
+
+  // Filter leads based on search term and agent
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = searchTerm === '' ||
       lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,11 +48,15 @@ const KanbanView = ({
       lead.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    return matchesSearch
+    const matchesAgent = agentFilter === 'all' ||
+      lead.assignedAgent === agentFilter ||
+      lead.assigned_agent === agentFilter
+
+    return matchesSearch && matchesAgent
   })
 
-  // Performance optimization: limit total leads if no search
-  const shouldLimitLeads = searchTerm === '' && filteredLeads.length > MAX_TOTAL_LEADS
+  // Performance optimization: limit total leads if no search or agent filter
+  const shouldLimitLeads = searchTerm === '' && agentFilter === 'all' && filteredLeads.length > MAX_TOTAL_LEADS
   const performanceFilteredLeads = shouldLimitLeads
     ? filteredLeads.slice(0, MAX_TOTAL_LEADS)
     : filteredLeads
@@ -56,8 +65,8 @@ const KanbanView = ({
     const statusLeads = performanceFilteredLeads.filter(lead => lead.status === status)
     const limit = columnLimits[status] || INITIAL_COLUMN_LIMIT
 
-    // If searching, show all matching leads in column
-    if (searchTerm !== '') {
+    // If searching or filtering by agent, show all matching leads in column
+    if (searchTerm !== '' || agentFilter !== 'all') {
       return statusLeads
     }
 
@@ -125,7 +134,7 @@ const KanbanView = ({
   return (
     <div className="space-y-4">
       {/* Performance Warning */}
-      {shouldLimitLeads && !searchTerm && (
+      {shouldLimitLeads && !searchTerm && agentFilter === 'all' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex items-start">
             <div className="flex-shrink-0">
@@ -140,7 +149,7 @@ const KanbanView = ({
               <div className="mt-2 text-sm text-yellow-700">
                 <p>
                   Showing {MAX_TOTAL_LEADS} of {leads.length} leads for optimal performance.
-                  Use search to find specific leads or click "Show all leads" to see everything.
+                  Use search or agent filter to find specific leads, or click "Show all leads" to see everything.
                 </p>
               </div>
             </div>
@@ -150,22 +159,42 @@ const KanbanView = ({
 
       {/* Search and Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search leads by name, email, phone, or city..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+        {/* Search and Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search leads by name, email, phone, or city..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Agent Filter */}
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <select
+              value={agentFilter}
+              onChange={(e) => setAgentFilter(e.target.value)}
+              className="pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px]"
+            >
+              <option value="all">All Agents</option>
+              {uniqueAgents.map(agent => (
+                <option key={agent} value={agent}>
+                  {agent}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Quick Stats */}
         <div className="flex items-center space-x-4 text-sm text-gray-600">
           <span>
-            {searchTerm ? (
+            {searchTerm || agentFilter !== 'all' ? (
               `Found: ${filteredLeads.length} leads`
             ) : shouldLimitLeads ? (
               `Showing: ${MAX_TOTAL_LEADS} of ${leads.length} leads (for performance)`
@@ -173,15 +202,38 @@ const KanbanView = ({
               `Total: ${filteredLeads.length} leads`
             )}
           </span>
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              Clear search
-            </button>
+          {(searchTerm || agentFilter !== 'all') && (
+            <div className="flex items-center space-x-2">
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Clear search
+                </button>
+              )}
+              {agentFilter !== 'all' && (
+                <button
+                  onClick={() => setAgentFilter('all')}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Clear agent filter
+                </button>
+              )}
+              {(searchTerm || agentFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setAgentFilter('all')
+                  }}
+                  className="text-blue-600 hover:text-blue-800"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
           )}
-          {shouldLimitLeads && !searchTerm && (
+          {shouldLimitLeads && !searchTerm && agentFilter === 'all' && (
             <button
               onClick={() => setShowAllColumns(!showAllColumns)}
               className="text-blue-600 hover:text-blue-800"
@@ -363,7 +415,7 @@ const KanbanView = ({
               )}
 
               {/* Load More Button */}
-              {columnStats.hasMore && !searchTerm && (
+              {columnStats.hasMore && !searchTerm && agentFilter === 'all' && (
                 <div className="text-center py-3">
                   <button
                     onClick={() => loadMoreInColumn(column.id)}
