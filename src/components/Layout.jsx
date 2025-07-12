@@ -16,15 +16,29 @@ import {
   BarChart3,
   Zap,
   Clock,
-  UserCheck
+  UserCheck,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    // Load collapsed state from localStorage
+    const saved = localStorage.getItem('sidebarCollapsed')
+    return saved ? JSON.parse(saved) : false
+  })
   const location = useLocation()
   const { user, logout } = useAuth()
   const { hasPermission, hasAnyPermission, roleDisplayName } = usePermissions()
   const { t } = useLanguage()
+
+  // Toggle sidebar collapsed state and save to localStorage
+  const toggleSidebarCollapsed = () => {
+    const newState = !sidebarCollapsed
+    setSidebarCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', JSON.stringify(newState))
+  }
 
   // Safe translation function with fallback
   const safeT = (key, fallback) => {
@@ -95,37 +109,53 @@ const Layout = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar - Hidden on mobile, visible on desktop */}
-      <div className="hidden lg:flex lg:w-64 bg-white shadow-lg border-r border-gray-200">
-        <div className="flex flex-col h-full">
+      <div className={`hidden lg:flex ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} bg-white shadow-lg border-r border-gray-200 transition-all duration-300`}>
+        <div className="flex flex-col h-full w-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-3 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">RealEstate CRM</span>
+              <Building2 className="h-8 w-8 text-blue-600 flex-shrink-0" />
+              {!sidebarCollapsed && (
+                <span className="text-xl font-bold text-gray-900 whitespace-nowrap">RealEstate CRM</span>
+              )}
             </div>
+            {/* Collapse toggle button */}
+            <button
+              onClick={toggleSidebarCollapsed}
+              className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-5 w-5" />
+              ) : (
+                <ChevronLeft className="h-5 w-5" />
+              )}
+            </button>
           </div>
 
           {/* User info */}
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <div className={`${sidebarCollapsed ? 'px-3' : 'px-6'} py-4 border-b border-gray-200`}>
+            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'}`}>
+              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                 <span className="text-blue-600 font-medium text-sm">
                   {user?.name?.charAt(0)?.toUpperCase()}
                 </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {roleDisplayName}
-                </p>
-              </div>
+              {!sidebarCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {roleDisplayName}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1">
+          <nav className={`flex-1 ${sidebarCollapsed ? 'px-2' : 'px-4'} py-4 space-y-1`}>
             {navigation.map((item) => {
               const isActive = location.pathname === item.href
               const Icon = item.icon
@@ -135,25 +165,31 @@ const Layout = ({ children }) => {
                   key={item.name}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 hover:bg-gray-100 ${
+                  className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'gap-3 px-3'} rounded-lg py-2 text-gray-500 transition-all hover:text-gray-900 hover:bg-gray-100 ${
                     isActive ? 'bg-blue-100 text-blue-700' : ''
                   }`}
+                  title={sidebarCollapsed ? item.name : ''}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.name}</span>
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {!sidebarCollapsed && (
+                    <span className="font-medium">{item.name}</span>
+                  )}
                 </Link>
               )
             })}
           </nav>
 
           {/* Logout */}
-          <div className="px-4 py-4 border-t border-gray-200">
+          <div className={`${sidebarCollapsed ? 'px-2' : 'px-4'} py-4 border-t border-gray-200`}>
             <button
               onClick={logout}
-              className="flex items-center w-full px-3 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className={`flex items-center w-full ${sidebarCollapsed ? 'justify-center px-2' : 'px-3'} py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors`}
+              title={sidebarCollapsed ? 'Logout' : ''}
             >
-              <LogOut className="h-5 w-5 mr-3" />
-              <span className="font-medium">{t('common.logout')}</span>
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              {!sidebarCollapsed && (
+                <span className="ml-3 font-medium">{safeT('common.logout', 'Logout')}</span>
+              )}
             </button>
           </div>
         </div>
@@ -304,12 +340,25 @@ const Layout = ({ children }) => {
         {/* Header */}
         <header className="bg-white shadow-sm border-b border-gray-200">
           <div className="flex items-center justify-between h-16 px-6">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
+            <div className="flex items-center space-x-3">
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              >
+                <Menu className="h-6 w-6" />
+              </button>
+
+              {/* Desktop sidebar toggle button */}
+              <button
+                onClick={toggleSidebarCollapsed}
+                className="hidden lg:block p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            </div>
+
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">{safeT('common.welcomeBack', 'Welcome back')}, {user?.name}!</span>
               <LanguageToggle />
