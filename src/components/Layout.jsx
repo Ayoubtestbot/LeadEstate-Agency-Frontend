@@ -109,7 +109,7 @@ const Layout = ({ children }) => {
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Sidebar - Hidden on mobile, visible on desktop */}
-      <div className={`hidden lg:flex ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} bg-gradient-to-b from-white to-gray-50 shadow-2xl border-r border-gray-200/50 transition-all duration-500 ease-in-out backdrop-blur-sm`}>
+      <div className={`hidden lg:flex ${sidebarCollapsed ? 'lg:w-20' : 'lg:w-72'} bg-gradient-to-b from-white to-gray-50 shadow-2xl border-r border-gray-200/50 transition-all duration-500 ease-in-out backdrop-blur-sm relative`} style={{ zIndex: 1000 }}>
         <div className="flex flex-col h-full w-full relative">
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
@@ -217,7 +217,7 @@ const Layout = ({ children }) => {
 
                   {/* Tooltip for collapsed state */}
                   {sidebarCollapsed && (
-                    <div className="absolute left-full ml-4 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                    <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl border border-gray-700" style={{ zIndex: 99999 }}>
                       {item.name}
                       <div className="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                     </div>
@@ -251,7 +251,7 @@ const Layout = ({ children }) => {
 
               {/* Tooltip for collapsed state */}
               {sidebarCollapsed && (
-                <div className="absolute left-full ml-4 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                <div className="absolute left-full ml-2 top-1/2 transform -translate-y-1/2 bg-gray-900 text-white px-3 py-2 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap shadow-xl border border-gray-700" style={{ zIndex: 99999 }}>
                   {safeT('common.logout', 'Logout')}
                   <div className="absolute right-full top-1/2 transform -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
                 </div>
