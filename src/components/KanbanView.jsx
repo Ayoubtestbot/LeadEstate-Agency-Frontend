@@ -62,9 +62,26 @@ const KanbanView = ({
     lead.assignedTo && !teamMembers.find(member => member.name === lead.assignedTo)
   )
 
+  // Direct API call to delete leads without confirmation dialog
+  const deleteLeadDirectly = async (leadId) => {
+    const API_URL = 'https://leadestate-backend-9fih.onrender.com/api'
+    const response = await fetch(`${API_URL}/leads/${leadId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete lead: ${response.status}`)
+    }
+
+    return await response.json()
+  }
+
   // Auto-delete orphaned leads permanently with rate limiting
   useEffect(() => {
-    if (orphanedLeads.length > 0 && onDeleteLead) {
+    if (orphanedLeads.length > 0) {
       console.log('🗑️ Auto-deleting orphaned leads permanently:', orphanedLeads.length)
       console.log('📋 Leads to be deleted:', orphanedLeads.map(lead => ({
         name: lead.name,
@@ -77,7 +94,7 @@ const KanbanView = ({
         for (let i = 0; i < orphanedLeads.length; i++) {
           const lead = orphanedLeads[i]
           try {
-            await onDeleteLead(lead.id)
+            await deleteLeadDirectly(lead.id)
             console.log(`🗑️ Auto-deleted (${i + 1}/${orphanedLeads.length}): ${lead.name} (was assigned to: ${lead.assignedTo})`)
 
             // Add delay between requests to avoid overwhelming server
@@ -90,11 +107,14 @@ const KanbanView = ({
           }
         }
         console.log('🎉 Orphaned leads deletion completed - database cleaned!')
+
+        // Force page refresh to update the UI with deleted leads
+        window.location.reload()
       }
 
       deleteLeadsSequentially()
     }
-  }, [orphanedLeads.length, onDeleteLead])
+  }, [orphanedLeads.length])
 
   // Debug: Check for orphaned assignments and data issues
   const orphanedAssignments = assignedAgentNames.filter(name =>
