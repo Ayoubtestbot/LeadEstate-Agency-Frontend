@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { TrendingUp, Users, Target, Phone, Calendar, RefreshCw } from 'lucide-react'
+import { TrendingUp, Users, Target, Phone, Calendar, RefreshCw, BarChart3, Eye, Filter } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend-9fih.onrender.com/api'
 
@@ -118,46 +118,73 @@ const Analytics = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Comprehensive insights and performance metrics</p>
-          <p className="text-xs text-gray-500 mt-1">
-            Last updated: {lastUpdated.toLocaleTimeString()}
-          </p>
-          <p className="text-xs text-gray-500 sm:hidden">
-            Click refresh to update data
-          </p>
-        </div>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="relative">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-3xl" />
 
-        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-3">
-          {/* Refresh Button */}
-          <button
-            onClick={handleRefresh}
-            disabled={loading}
-            className="flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 w-full sm:w-auto"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
+          <div className="flex flex-col space-y-6 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg">
+                  <BarChart3 className="h-6 w-6 drop-shadow-sm" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  Analytics Dashboard
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                Comprehensive insights and performance metrics for your real estate business
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-green-600 font-medium">Live Data</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-indigo-600 font-medium">
+                    Updated: {lastUpdated.toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-          {/* Period Selector */}
-          <div className="flex space-x-1 sm:space-x-2">
-            {['day', 'week', 'month'].map((period) => (
+            <div className="flex flex-col sm:flex-row gap-4 mt-6">
+              {/* Enhanced Refresh Button */}
               <button
-                key={period}
-                onClick={() => handlePeriodChange(period)}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                  selectedPeriod === period
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                onClick={handleRefresh}
+                disabled={loading}
+                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
               >
-                {period.charAt(0).toUpperCase() + period.slice(1)}
+                <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-emerald-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <RefreshCw className={`h-5 w-5 mr-3 drop-shadow-sm relative z-10 ${loading ? 'animate-spin' : ''}`} />
+                <span className="relative z-10">Refresh Data</span>
               </button>
-            ))}
+
+              {/* Enhanced Period Selector */}
+              <div className="flex rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-lg p-1">
+                {['day', 'week', 'month'].map((period) => (
+                  <button
+                    key={period}
+                    onClick={() => handlePeriodChange(period)}
+                    className={`group relative px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                      selectedPeriod === period
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                        : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
+                    }`}
+                  >
+                    {selectedPeriod === period && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-700/20 to-purple-700/20 rounded-xl" />
+                    )}
+                    <span className="relative z-10 capitalize">{period}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

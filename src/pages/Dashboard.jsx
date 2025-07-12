@@ -6,7 +6,10 @@ import {
   TrendingUp,
   DollarSign,
   Plus,
-  Eye
+  Eye,
+  Clock,
+  BarChart3,
+  Zap
 } from 'lucide-react'
 import { useAuth, useData } from '../App'
 import { useLanguage } from '../contexts/LanguageContext'
