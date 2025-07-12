@@ -266,18 +266,17 @@ const PhoneInput = ({
             style={{ minWidth: '110px' }}
           >
             {/* Flag */}
-            <span
-              className="mr-2"
+            <div
+              className="mr-2 flex items-center justify-center bg-blue-100 text-blue-800 rounded"
               style={{
-                fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-                fontSize: '18px',
-                display: 'inline-block',
-                width: '20px',
-                textAlign: 'center'
+                width: '24px',
+                height: '20px',
+                fontSize: '10px',
+                fontWeight: 'bold'
               }}
             >
-              {selectedCountry.flag || selectedCountry.name}
-            </span>
+              {selectedCountry.name}
+            </div>
             {/* Country Code */}
             <span className="text-sm font-medium text-gray-700 mr-1">
               {selectedCountry.code}
@@ -300,18 +299,17 @@ const PhoneInput = ({
                   onClick={() => handleCountrySelect(country)}
                   className="w-full flex items-center px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
                 >
-                  <span
-                    className="mr-3"
+                  <div
+                    className="mr-3 flex items-center justify-center bg-blue-100 text-blue-800 rounded"
                     style={{
-                      fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-                      fontSize: '18px',
-                      display: 'inline-block',
                       width: '24px',
-                      textAlign: 'center'
+                      height: '20px',
+                      fontSize: '10px',
+                      fontWeight: 'bold'
                     }}
                   >
-                    {country.flag}
-                  </span>
+                    {country.name}
+                  </div>
                   <span className="text-sm font-medium text-gray-700 mr-3 min-w-[4rem] flex-shrink-0">
                     {country.code}
                   </span>

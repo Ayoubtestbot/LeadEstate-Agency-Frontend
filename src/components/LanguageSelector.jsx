@@ -35,7 +35,17 @@ const LanguageSelector = ({ className = '' }) => {
         aria-label="Select language"
       >
         <Globe className="h-4 w-4" />
-        <span className="hidden sm:inline">{currentLanguage?.flag}</span>
+        <div
+          className="hidden sm:flex items-center justify-center bg-blue-100 text-blue-800 rounded"
+          style={{
+            width: '20px',
+            height: '16px',
+            fontSize: '10px',
+            fontWeight: 'bold'
+          }}
+        >
+          {currentLanguage?.code?.toUpperCase()}
+        </div>
         <span className="hidden md:inline">{currentLanguage?.name}</span>
         <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -51,7 +61,17 @@ const LanguageSelector = ({ className = '' }) => {
                   language === lang.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                 }`}
               >
-                <span className="text-lg">{lang.flag}</span>
+                <div
+                  className="flex items-center justify-center bg-blue-100 text-blue-800 rounded"
+                  style={{
+                    width: '20px',
+                    height: '16px',
+                    fontSize: '10px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {lang.code.toUpperCase()}
+                </div>
                 <span>{lang.name}</span>
                 {language === lang.code && (
                   <span className="ml-auto">
