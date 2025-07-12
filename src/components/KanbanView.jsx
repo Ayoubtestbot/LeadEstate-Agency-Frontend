@@ -16,7 +16,14 @@ const KanbanView = ({
   const [draggedLead, setDraggedLead] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [columnLimits, setColumnLimits] = useState({})
+  const [showAllColumns, setShowAllColumns] = useState(false)
   const { hasPermission } = usePermissions()
+
+  // Performance settings
+  const INITIAL_COLUMN_LIMIT = 20 // Show 20 leads per column initially
+  const LOAD_MORE_INCREMENT = 20  // Load 20 more when "Load More" is clicked
+  const MAX_TOTAL_LEADS = 200     // Maximum leads to show across all columns without search
 
   const columns = [
     { id: 'new', title: 'New Leads', color: 'bg-blue-50 border-blue-200', headerColor: 'bg-blue-100' },
@@ -39,8 +46,41 @@ const KanbanView = ({
     return matchesSearch
   })
 
+  // Performance optimization: limit total leads if no search
+  const shouldLimitLeads = searchTerm === '' && filteredLeads.length > MAX_TOTAL_LEADS
+  const performanceFilteredLeads = shouldLimitLeads
+    ? filteredLeads.slice(0, MAX_TOTAL_LEADS)
+    : filteredLeads
+
   const getLeadsByStatus = (status) => {
-    return filteredLeads.filter(lead => lead.status === status)
+    const statusLeads = performanceFilteredLeads.filter(lead => lead.status === status)
+    const limit = columnLimits[status] || INITIAL_COLUMN_LIMIT
+
+    // If searching, show all matching leads in column
+    if (searchTerm !== '') {
+      return statusLeads
+    }
+
+    // Otherwise, apply column limit for performance
+    return statusLeads.slice(0, limit)
+  }
+
+  const getColumnStats = (status) => {
+    const allStatusLeads = filteredLeads.filter(lead => lead.status === status)
+    const visibleLeads = getLeadsByStatus(status)
+    return {
+      total: allStatusLeads.length,
+      visible: visibleLeads.length,
+      hasMore: visibleLeads.length < allStatusLeads.length
+    }
+  }
+
+  const loadMoreInColumn = (status) => {
+    const currentLimit = columnLimits[status] || INITIAL_COLUMN_LIMIT
+    setColumnLimits(prev => ({
+      ...prev,
+      [status]: currentLimit + LOAD_MORE_INCREMENT
+    }))
   }
 
   const handleDragStart = (e, lead) => {
@@ -84,6 +124,30 @@ const KanbanView = ({
 
   return (
     <div className="space-y-4">
+      {/* Performance Warning */}
+      {shouldLimitLeads && !searchTerm && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                Performance Mode Active
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>
+                  Showing {MAX_TOTAL_LEADS} of {leads.length} leads for optimal performance.
+                  Use search to find specific leads or click "Show all leads" to see everything.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filter Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
         {/* Search */}
@@ -100,13 +164,29 @@ const KanbanView = ({
 
         {/* Quick Stats */}
         <div className="flex items-center space-x-4 text-sm text-gray-600">
-          <span>Total: {filteredLeads.length} leads</span>
+          <span>
+            {searchTerm ? (
+              `Found: ${filteredLeads.length} leads`
+            ) : shouldLimitLeads ? (
+              `Showing: ${MAX_TOTAL_LEADS} of ${leads.length} leads (for performance)`
+            ) : (
+              `Total: ${filteredLeads.length} leads`
+            )}
+          </span>
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
               className="text-blue-600 hover:text-blue-800"
             >
               Clear search
+            </button>
+          )}
+          {shouldLimitLeads && !searchTerm && (
+            <button
+              onClick={() => setShowAllColumns(!showAllColumns)}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              {showAllColumns ? 'Optimize view' : 'Show all leads'}
             </button>
           )}
         </div>
@@ -116,6 +196,7 @@ const KanbanView = ({
       <div className="flex space-x-3 overflow-x-auto pb-4">
       {columns.map((column) => {
         const columnLeads = getLeadsByStatus(column.id)
+        const columnStats = getColumnStats(column.id)
 
         return (
           <div
@@ -128,9 +209,14 @@ const KanbanView = ({
             <div className={`${column.headerColor} px-3 py-2 rounded-t-lg border-b`}>
               <div className="flex items-center justify-between">
                 <h3 className="font-medium text-gray-900 text-sm">{column.title}</h3>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700">
-                  {columnLeads.length}
-                </span>
+                <div className="flex items-center space-x-1">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700">
+                    {columnStats.visible}
+                    {columnStats.total !== columnStats.visible && (
+                      <span className="text-gray-500">/{columnStats.total}</span>
+                    )}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -273,6 +359,18 @@ const KanbanView = ({
                   <div className="text-xs mt-1">
                     {searchTerm ? 'Try adjusting your search' : 'Drag leads here to update status'}
                   </div>
+                </div>
+              )}
+
+              {/* Load More Button */}
+              {columnStats.hasMore && !searchTerm && (
+                <div className="text-center py-3">
+                  <button
+                    onClick={() => loadMoreInColumn(column.id)}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    Load {Math.min(LOAD_MORE_INCREMENT, columnStats.total - columnStats.visible)} more...
+                  </button>
                 </div>
               )}
             </div>
