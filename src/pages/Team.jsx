@@ -191,26 +191,56 @@ const Team = () => {
   const totalDeals = teamMembers.reduce((sum, m) => sum + calculateMemberStats(m.name).closedDeals, 0)
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('team.title') || 'Team Management'}</h1>
-          <p className="text-gray-600 mt-1">{t('team.subtitle') || 'Manage your team members and track their performance'}</p>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="relative">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-3xl" />
+
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white shadow-lg">
+                  <Users className="h-6 w-6 drop-shadow-sm" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  {t('team.title') || 'Team Management'}
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                Manage your real estate team and track performance metrics
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-blue-600 font-medium">{totalMembers} Team Members</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-cyan-600 font-medium">{activeMembers} Active</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <ProtectedComponent permission={PERMISSIONS.MANAGE_USERS}>
+                <button
+                  onClick={() => {
+                    console.log('Add Team Member button clicked')
+                    setShowAddMember(true)
+                  }}
+                  className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-cyan-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                  <span className="relative z-10">{t('team.addMember') || 'Add Team Member'}</span>
+                </button>
+              </ProtectedComponent>
+            </div>
+          </div>
         </div>
-        
-        <ProtectedComponent permission={PERMISSIONS.MANAGE_USERS}>
-          <button
-            onClick={() => {
-              console.log('Add Team Member button clicked')
-              setShowAddMember(true)
-            }}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t('team.addMember') || 'Add Team Member'}
-          </button>
-        </ProtectedComponent>
       </div>
 
       {/* Stats */}

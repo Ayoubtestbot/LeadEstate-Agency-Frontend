@@ -198,55 +198,103 @@ const Automation = () => {
   )
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('automation.title') || 'Automation'}</h1>
-          <p className="text-gray-600 mt-1">{t('automation.subtitle') || 'Automate your lead management and follow-up processes'}</p>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="relative">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl" />
+
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg">
+                  <Zap className="h-6 w-6 drop-shadow-sm" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  {t('automation.title') || 'Automation Hub'}
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                {t('automation.subtitle') || 'Automate your lead management and follow-up processes with intelligent workflows'}
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-purple-600 font-medium">{workflows.length} Active Workflows</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-pink-600 font-medium">Smart Automation</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowAddWorkflow(true)}
+                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-700/20 to-pink-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                <span className="relative z-10">{t('automation.createWorkflow') || 'Create Workflow'}</span>
+              </button>
+            </div>
+          </div>
         </div>
-        
-        <button
-          onClick={() => setShowAddWorkflow(true)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-4 sm:mt-0"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          {t('automation.createWorkflow') || 'Create Workflow'}
-        </button>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      {/* Enhanced Tabs */}
+      <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-lg p-2">
+        <nav className="flex space-x-2">
           <button
             onClick={() => setActiveTab('workflows')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`group relative px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
               activeTab === 'workflows'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
             }`}
           >
-            Active Workflows
+            {activeTab === 'workflows' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-700/20 to-pink-700/20 rounded-xl" />
+            )}
+            <span className="relative z-10 flex items-center">
+              <Zap className="h-4 w-4 mr-2" />
+              Active Workflows
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('templates')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`group relative px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
               activeTab === 'templates'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
             }`}
           >
-            Templates
+            {activeTab === 'templates' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-700/20 to-pink-700/20 rounded-xl" />
+            )}
+            <span className="relative z-10 flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              Templates
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+            className={`group relative px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
               activeTab === 'analytics'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                : 'text-gray-700 hover:bg-gray-50 hover:text-purple-600'
             }`}
           >
-            Analytics
+            {activeTab === 'analytics' && (
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-700/20 to-pink-700/20 rounded-xl" />
+            )}
+            <span className="relative z-10 flex items-center">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </span>
           </button>
         </nav>
       </div>
