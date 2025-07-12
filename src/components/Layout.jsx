@@ -115,44 +115,42 @@ const Layout = ({ children }) => {
           <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none" />
 
           {/* Logo */}
-          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-6'} h-20 border-b border-gray-200/50 relative z-10`}>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <Building2 className="h-10 w-10 text-blue-600 flex-shrink-0 drop-shadow-sm" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'justify-between px-4'} h-20 border-b border-gray-200/50 relative z-10`}>
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="relative flex-shrink-0">
+                <Building2 className={`${sidebarCollapsed ? 'h-8 w-8' : 'h-9 w-9'} text-blue-600 flex-shrink-0 drop-shadow-sm transition-all duration-300`} />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
               </div>
               <div className={`flex flex-col transition-all duration-500 overflow-hidden ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
-                <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent whitespace-nowrap">
+                <span className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent whitespace-nowrap">
                   RealEstate CRM
                 </span>
                 <span className="text-xs text-gray-500 font-medium whitespace-nowrap">Professional Edition</span>
               </div>
             </div>
             {/* Enhanced Collapse toggle button */}
-            <button
-              onClick={toggleSidebarCollapsed}
-              className={`group relative p-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:scale-105 ${sidebarCollapsed ? 'mx-auto' : ''}`}
-              title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              {sidebarCollapsed ? (
-                <ChevronRight className="h-5 w-5 text-blue-600 relative z-10 transition-transform duration-300 group-hover:translate-x-0.5" />
-              ) : (
-                <ChevronLeft className="h-5 w-5 text-blue-600 relative z-10 transition-transform duration-300 group-hover:-translate-x-0.5" />
-              )}
-            </button>
+            {!sidebarCollapsed && (
+              <button
+                onClick={toggleSidebarCollapsed}
+                className="group relative p-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-md flex-shrink-0"
+                title="Collapse sidebar"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <ChevronLeft className="h-4 w-4 text-blue-600 relative z-10 transition-transform duration-300 group-hover:-translate-x-0.5" />
+              </button>
+            )}
           </div>
 
           {/* Enhanced User info */}
-          <div className={`${sidebarCollapsed ? 'px-3' : 'px-6'} py-6 border-b border-gray-200/50 relative z-10`}>
-            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-4'}`}>
-              <div className="relative">
-                <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg ring-4 ring-blue-100/50">
-                  <span className="text-white font-bold text-lg drop-shadow-sm">
+          <div className={`${sidebarCollapsed ? 'px-3' : 'px-4'} py-4 border-b border-gray-200/50 relative z-10`}>
+            <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : 'space-x-3'}`}>
+              <div className="relative flex-shrink-0">
+                <div className={`${sidebarCollapsed ? 'h-10 w-10' : 'h-11 w-11'} rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg ring-2 ring-blue-100/50 transition-all duration-300`}>
+                  <span className={`text-white font-bold ${sidebarCollapsed ? 'text-base' : 'text-lg'} drop-shadow-sm transition-all duration-300`}>
                     {user?.name?.charAt(0)?.toUpperCase()}
                   </span>
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm" />
+                <div className={`absolute -bottom-1 -right-1 ${sidebarCollapsed ? 'w-3 h-3' : 'w-4 h-4'} bg-green-500 rounded-full border-2 border-white shadow-sm transition-all duration-300`} />
               </div>
               <div className={`flex-1 min-w-0 transition-all duration-500 overflow-hidden ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
                 <p className="text-base font-semibold text-gray-900 truncate mb-1 whitespace-nowrap">
@@ -168,8 +166,22 @@ const Layout = ({ children }) => {
             </div>
           </div>
 
+          {/* Expand button for collapsed state */}
+          {sidebarCollapsed && (
+            <div className="px-3 py-3 border-b border-gray-200/50">
+              <button
+                onClick={toggleSidebarCollapsed}
+                className="group relative p-2 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-md w-full flex justify-center"
+                title="Expand sidebar"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <ChevronRight className="h-4 w-4 text-blue-600 relative z-10 transition-transform duration-300 group-hover:translate-x-0.5" />
+              </button>
+            </div>
+          )}
+
           {/* Enhanced Navigation */}
-          <nav className={`flex-1 ${sidebarCollapsed ? 'px-3' : 'px-6'} py-6 space-y-2 relative z-10`}>
+          <nav className={`flex-1 ${sidebarCollapsed ? 'px-3' : 'px-4'} py-4 space-y-2 relative z-10`}>
             {navigation.map((item, index) => {
               const isActive = location.pathname === item.href
               const Icon = item.icon
@@ -222,7 +234,7 @@ const Layout = ({ children }) => {
           </nav>
 
           {/* Enhanced Logout */}
-          <div className={`${sidebarCollapsed ? 'px-3' : 'px-6'} py-6 border-t border-gray-200/50 relative z-10`}>
+          <div className={`${sidebarCollapsed ? 'px-3' : 'px-4'} py-4 border-t border-gray-200/50 relative z-10`}>
             <div className="relative group">
               <button
                 onClick={logout}
