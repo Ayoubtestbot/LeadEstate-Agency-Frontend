@@ -57,35 +57,41 @@ const KanbanView = ({
     .filter(Boolean) // Remove null entries (agents not in current team)
     .sort((a, b) => a.name.localeCompare(b.name))
 
+  // Get leads with orphaned assignments (assigned to non-existent team members)
+  const orphanedLeads = leads.filter(lead =>
+    lead.assignedTo && !teamMembers.find(member => member.name === lead.assignedTo)
+  )
+
+  // Auto-cleanup orphaned leads silently
+  React.useEffect(() => {
+    if (orphanedLeads.length > 0 && onUpdateLead) {
+      console.log('🧹 Auto-cleaning orphaned leads:', orphanedLeads.length)
+
+      // Silently unassign orphaned leads
+      orphanedLeads.forEach(async (lead) => {
+        try {
+          await onUpdateLead(lead.id, { assignedTo: null })
+          console.log(`✅ Auto-unassigned: ${lead.name} (was assigned to: ${lead.assignedTo})`)
+        } catch (error) {
+          console.error(`❌ Failed to auto-unassign lead ${lead.name}:`, error)
+        }
+      })
+    }
+  }, [orphanedLeads.length, onUpdateLead])
+
   // Debug: Check for orphaned assignments and data issues
   const orphanedAssignments = assignedAgentNames.filter(name =>
     !teamMembers.find(member => member.name === name)
   )
 
-  // Get leads with orphaned assignments
-  const orphanedLeads = leads.filter(lead =>
-    lead.assignedTo && !teamMembers.find(member => member.name === lead.assignedTo)
-  )
-
-  console.log('🔍 Debug Agent Filtering (FIXED):')
+  console.log('🔍 Debug Agent Filtering (AUTO-CLEANUP):')
   console.log('📊 Total leads:', leads.length)
   console.log('👥 Team members:', teamMembers.length, teamMembers.map(m => ({ id: m.id, name: m.name })))
   console.log('🎯 Assigned agent NAMES:', assignedAgentNames)
-  console.log('❌ Orphaned assignments (names not in team):', orphanedAssignments)
-  console.log('🗑️ Orphaned leads count:', orphanedLeads.length)
+  console.log('❌ Orphaned assignments (auto-cleaning):', orphanedAssignments)
+  console.log('🗑️ Orphaned leads (auto-cleaning):', orphanedLeads.length)
   console.log('📋 Unassigned leads count:', leads.filter(lead => !lead.assignedTo).length)
   console.log('✅ Valid agents with leads:', uniqueAgents)
-
-  if (orphanedAssignments.length > 0) {
-    console.warn('🚨 Found orphaned lead assignments:', orphanedAssignments)
-    console.warn('📋 Current team members:', teamMembers.map(m => ({ id: m.id, name: m.name })))
-    console.warn('🗑️ Orphaned leads that need cleanup:', orphanedLeads.map(lead => ({
-      id: lead.id,
-      name: lead.name,
-      assignedTo: lead.assignedTo,
-      email: lead.email
-    })))
-  }
 
   // Check if there are unassigned leads
   const hasUnassignedLeads = leads.some(lead => !lead.assignedTo)
@@ -154,27 +160,7 @@ const KanbanView = ({
     }))
   }
 
-  // Function to clean up orphaned leads (unassign them)
-  const cleanupOrphanedLeads = async () => {
-    if (orphanedLeads.length === 0) return
 
-    try {
-      console.log('🧹 Starting cleanup of orphaned leads...')
-
-      // Update each orphaned lead to unassign them
-      for (const lead of orphanedLeads) {
-        await onUpdateLead(lead.id, { assignedTo: null })
-        console.log(`✅ Unassigned lead: ${lead.name} (was assigned to: ${lead.assignedTo})`)
-      }
-
-      console.log(`🎉 Successfully cleaned up ${orphanedLeads.length} orphaned leads`)
-      alert(`Successfully unassigned ${orphanedLeads.length} leads from non-existent agents. They are now in the "Unassigned" category.`)
-
-    } catch (error) {
-      console.error('❌ Error cleaning up orphaned leads:', error)
-      alert('Error cleaning up orphaned leads. Please try again.')
-    }
-  }
 
   const handleDragStart = (e, lead) => {
     setDraggedLead(lead)
@@ -217,44 +203,6 @@ const KanbanView = ({
 
   return (
     <div className="space-y-4">
-      {/* Orphaned Leads Cleanup Warning */}
-      {orphanedLeads.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3 flex-1">
-              <h3 className="text-sm font-medium text-red-800">
-                Data Cleanup Required
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>
-                  Found {orphanedLeads.length} leads assigned to agents who are no longer in your team.
-                  These leads won't appear in agent filtering and may cause confusion.
-                </p>
-                <div className="mt-2">
-                  <strong>Orphaned agents:</strong> {orphanedAssignments.join(', ')}
-                </div>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={cleanupOrphanedLeads}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  Unassign {orphanedLeads.length} Orphaned Leads
-                </button>
-                <span className="ml-3 text-xs text-red-600">
-                  This will move them to "Unassigned" status
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Performance Warning */}
       {shouldLimitLeads && !searchTerm && agentFilter === 'all' && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
