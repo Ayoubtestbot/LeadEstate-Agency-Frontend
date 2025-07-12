@@ -50,7 +50,7 @@ const FlagIcon = ({ countryCode, className = '', size = 'sm' }) => {
   return (
     <div className={`inline-flex items-center justify-center ${className}`}>
       <div
-        className={`fi fi-${flagCode} ${sizeClasses[size]} rounded-sm border border-gray-200 shadow-sm`}
+        className={`fi fi-${flagCode} ${sizeClasses[size]} rounded-sm`}
         style={{
           backgroundSize: 'cover',
           backgroundPosition: 'center',

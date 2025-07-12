@@ -276,10 +276,6 @@ const PhoneInput = ({
             <span className="text-sm font-medium text-gray-700 mr-1">
               {selectedCountry.code}
             </span>
-            {/* Country Name */}
-            <span className="text-xs text-gray-500 mr-1">
-              {selectedCountry.name}
-            </span>
             {/* Dropdown Arrow */}
             <ChevronDown className="h-4 w-4 text-gray-400" />
           </button>
