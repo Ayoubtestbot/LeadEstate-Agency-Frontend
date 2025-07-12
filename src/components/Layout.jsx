@@ -121,14 +121,12 @@ const Layout = ({ children }) => {
                 <Building2 className="h-10 w-10 text-blue-600 flex-shrink-0 drop-shadow-sm" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse" />
               </div>
-              {!sidebarCollapsed && (
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent whitespace-nowrap">
-                    RealEstate CRM
-                  </span>
-                  <span className="text-xs text-gray-500 font-medium">Professional Edition</span>
-                </div>
-              )}
+              <div className={`flex flex-col transition-all duration-500 overflow-hidden ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
+                <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent whitespace-nowrap">
+                  RealEstate CRM
+                </span>
+                <span className="text-xs text-gray-500 font-medium whitespace-nowrap">Professional Edition</span>
+              </div>
             </div>
             {/* Enhanced Collapse toggle button */}
             <button
@@ -156,19 +154,17 @@ const Layout = ({ children }) => {
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm" />
               </div>
-              {!sidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-gray-900 truncate mb-1">
-                    {user?.name}
-                  </p>
-                  <div className="flex items-center space-x-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200/50">
-                      {roleDisplayName}
-                    </span>
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  </div>
+              <div className={`flex-1 min-w-0 transition-all duration-500 overflow-hidden ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
+                <p className="text-base font-semibold text-gray-900 truncate mb-1 whitespace-nowrap">
+                  {user?.name}
+                </p>
+                <div className="flex items-center space-x-2">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200/50 whitespace-nowrap">
+                    {roleDisplayName}
+                  </span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
@@ -203,11 +199,9 @@ const Layout = ({ children }) => {
                       )}
                     </div>
 
-                    {!sidebarCollapsed && (
-                      <span className={`font-semibold text-sm relative z-10 ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'} transition-colors duration-300`}>
-                        {item.name}
-                      </span>
-                    )}
+                    <span className={`font-semibold text-sm relative z-10 whitespace-nowrap overflow-hidden ${isActive ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'} transition-all duration-500 ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
+                      {item.name}
+                    </span>
 
                     {/* Hover effect */}
                     {!isActive && (
@@ -242,11 +236,9 @@ const Layout = ({ children }) => {
                   <LogOut className="h-6 w-6 flex-shrink-0 drop-shadow-sm" />
                 </div>
 
-                {!sidebarCollapsed && (
-                  <span className="font-semibold text-sm text-gray-700 group-hover:text-red-600 transition-colors duration-300 relative z-10">
-                    {safeT('common.logout', 'Logout')}
-                  </span>
-                )}
+                <span className={`font-semibold text-sm text-gray-700 group-hover:text-red-600 transition-all duration-500 relative z-10 whitespace-nowrap overflow-hidden ${sidebarCollapsed ? 'opacity-0 w-0 translate-x-4' : 'opacity-100 w-auto translate-x-0 delay-300'}`}>
+                  {safeT('common.logout', 'Logout')}
+                </span>
               </button>
 
               {/* Tooltip for collapsed state */}
