@@ -409,24 +409,24 @@ const Layout = ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Enhanced Header */}
         <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200/50">
-          <div className="flex items-center justify-between h-20 px-8">
+          <div className="flex items-center justify-between h-16 px-6">
             <div className="flex items-center space-x-4">
               {/* Mobile menu button */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden group p-3 rounded-xl bg-gradient-to-r from-gray-50 to-blue-50 hover:from-gray-100 hover:to-blue-100 border border-gray-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                className="lg:hidden group p-2 rounded-lg bg-gradient-to-r from-gray-50 to-blue-50 hover:from-gray-100 hover:to-blue-100 border border-gray-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-md"
               >
-                <Menu className="h-6 w-6 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
+                <Menu className="h-5 w-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
               </button>
 
               {/* Enhanced Desktop sidebar toggle button */}
               <button
                 onClick={toggleSidebarCollapsed}
-                className="hidden lg:block group relative p-3 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:scale-105"
+                className="hidden lg:block group relative p-2 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border border-blue-200/50 hover:border-blue-300/50 transition-all duration-300 hover:shadow-md"
                 title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Menu className="h-5 w-5 text-blue-600 relative z-10 transition-transform duration-300 group-hover:rotate-180" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Menu className="h-4 w-4 text-blue-600 relative z-10 transition-transform duration-300 group-hover:rotate-180" />
               </button>
 
               {/* Breadcrumb or page indicator */}

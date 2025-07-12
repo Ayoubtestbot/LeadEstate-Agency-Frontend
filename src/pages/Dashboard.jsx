@@ -159,20 +159,20 @@ const Dashboard = () => {
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl" />
 
-        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                   {getText('common.welcomeBack', 'Welcome back')}, {user?.name}!
                 </h1>
               </div>
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                 {getText('dashboard.subtitle', "Here's what's happening with your real estate business today.")}
               </p>
-              <div className="flex items-center space-x-2 mt-3">
-                <div className="text-sm text-gray-500">
+              <div className="flex items-center space-x-2 mt-2">
+                <div className="text-xs text-gray-500">
                   {new Date().toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
@@ -181,27 +181,27 @@ const Dashboard = () => {
                   })}
                 </div>
                 <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                <div className="text-sm text-blue-600 font-medium">Live Dashboard</div>
+                <div className="text-xs text-blue-600 font-medium">Live Dashboard</div>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={() => alert('Reports functionality coming soon!')}
-                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 border border-gray-200/50 bg-white/80 text-gray-700 shadow-lg hover:shadow-xl hover:scale-105 hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 h-12 px-6 py-3 w-full sm:w-auto backdrop-blur-sm"
+                className="group relative inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 border border-gray-200/50 bg-white/80 text-gray-700 shadow-md hover:shadow-lg hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 h-10 px-4 py-2 w-full sm:w-auto backdrop-blur-sm"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-500/0 to-blue-500/0 group-hover:from-gray-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-300" />
-                <Eye className="h-5 w-5 mr-3 text-gray-500 group-hover:text-blue-600 transition-colors duration-300 drop-shadow-sm" />
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-500/0 to-blue-500/0 group-hover:from-gray-500/5 group-hover:to-blue-500/5 rounded-xl transition-all duration-300" />
+                <Eye className="h-4 w-4 mr-2 text-gray-500 group-hover:text-blue-600 transition-colors duration-300 drop-shadow-sm" />
                 <span className="hidden sm:inline relative z-10">{t('dashboard.viewReports') || 'View Reports'}</span>
                 <span className="sm:hidden relative z-10">{t('dashboard.reports') || 'Reports'}</span>
               </button>
 
               <button
                 onClick={() => setShowAddLead(true)}
-                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+                className="group relative inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md hover:shadow-lg h-10 px-4 py-2 w-full sm:w-auto"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-purple-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-purple-700/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Plus className="h-4 w-4 mr-2 drop-shadow-sm relative z-10" />
                 <span className="hidden sm:inline relative z-10">{t('dashboard.addLead') || 'Add Lead'}</span>
                 <span className="sm:hidden relative z-10">{t('common.add') || 'Add'}</span>
               </button>
