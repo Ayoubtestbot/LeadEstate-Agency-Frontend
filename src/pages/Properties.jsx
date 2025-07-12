@@ -45,34 +45,68 @@ const Properties = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Properties</h1>
-          <p className="text-sm sm:text-base text-gray-600">Manage your property listings</p>
+    <div className="space-y-8">
+      {/* Enhanced Header */}
+      <div className="relative">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-3xl" />
+
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 text-white shadow-lg">
+                  <Home className="h-6 w-6 drop-shadow-sm" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  Properties Management
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                Manage your property listings and showcase your real estate portfolio
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-green-600 font-medium">{properties.length} Total Properties</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-blue-600 font-medium">Active Listings</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowAddProperty(true)}
+                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-blue-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                <span className="relative z-10">Add Property</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => setShowAddProperty(true)}
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2 w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add Property
-        </button>
       </div>
 
-      {/* Properties List */}
+      {/* Enhanced Properties List */}
       {properties.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {properties.map((property) => (
-            <div key={property.id} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-              {/* Property Image */}
-              <div className="h-48 bg-gray-200 relative">
+            <div key={property.id} className="group relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105 overflow-hidden">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              {/* Enhanced Property Image */}
+              <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                 {property.image_url ? (
                   <img
                     src={property.image_url}
                     alt={property.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
@@ -80,95 +114,126 @@ const Properties = () => {
                   />
                 ) : null}
                 <div
-                  className="w-full h-full flex items-center justify-center"
+                  className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
                   style={{ display: property.image_url ? 'none' : 'flex' }}
                 >
-                  <Home className="h-16 w-16 text-gray-400" />
+                  <div className="p-4 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg">
+                    <Home className="h-16 w-16 text-gray-400" />
+                  </div>
+                </div>
+
+                {/* Property type badge */}
+                <div className="absolute top-4 left-4">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/90 backdrop-blur-sm text-gray-800 shadow-lg border border-white/20">
+                    🏠 {property.type}
+                  </span>
+                </div>
+
+                {/* Price badge */}
+                <div className="absolute top-4 right-4">
+                  <span className="inline-flex items-center px-4 py-2 rounded-2xl text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg">
+                    ${parseInt(property.price).toLocaleString()}
+                  </span>
                 </div>
               </div>
 
-              <div className="p-6">
-                {/* Property Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{property.title}</h3>
-                    <p className="text-sm text-gray-500 capitalize">{property.type}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-green-600">
-                      ${parseInt(property.price).toLocaleString()}
-                    </p>
+              <div className="relative p-6">
+                {/* Enhanced Property Header */}
+                <div className="mb-6">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors duration-300">
+                    {property.title}
+                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-sm text-gray-600 font-medium capitalize">{property.type} Property</span>
                   </div>
                 </div>
 
-                {/* Property Details */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <span className="text-gray-400 mr-2">📍</span>
-                    <span>{property.location || `${property.city}${property.state ? `, ${property.state}` : ''}`}</span>
+                {/* Enhanced Property Details */}
+                <div className="space-y-4 mb-6">
+                  <div className="p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-blue-50/50 border border-gray-200/50">
+                    <div className="flex items-center text-sm text-gray-700 mb-2">
+                      <div className="p-1 rounded-lg bg-blue-100 mr-3">
+                        <span className="text-blue-600">📍</span>
+                      </div>
+                      <span className="font-medium">{property.location || `${property.city}${property.state ? `, ${property.state}` : ''}`}</span>
+                    </div>
+                    {property.address && (
+                      <div className="flex items-center text-sm text-gray-600">
+                        <div className="p-1 rounded-lg bg-green-100 mr-3">
+                          <Home className="h-3 w-3 text-green-600" />
+                        </div>
+                        <span>{property.address}</span>
+                      </div>
+                    )}
                   </div>
-                  {property.address && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Home className="h-4 w-4 mr-2 text-gray-400" />
-                      <span>{property.address}</span>
+
+                  {/* Enhanced Property Specs */}
+                  {(property.bedrooms || property.bathrooms || property.area) && (
+                    <div className="grid grid-cols-3 gap-3">
+                      {property.bedrooms && (
+                        <div className="text-center p-3 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200/50">
+                          <div className="text-lg mb-1">🛏️</div>
+                          <div className="text-sm font-bold text-blue-800">{property.bedrooms}</div>
+                          <div className="text-xs text-blue-600">Bedroom{property.bedrooms !== '1' ? 's' : ''}</div>
+                        </div>
+                      )}
+                      {property.bathrooms && (
+                        <div className="text-center p-3 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 border border-green-200/50">
+                          <div className="text-lg mb-1">🚿</div>
+                          <div className="text-sm font-bold text-green-800">{property.bathrooms}</div>
+                          <div className="text-xs text-green-600">Bathroom{property.bathrooms !== '1' ? 's' : ''}</div>
+                        </div>
+                      )}
+                      {property.area && (
+                        <div className="text-center p-3 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200/50">
+                          <div className="text-lg mb-1">📐</div>
+                          <div className="text-sm font-bold text-purple-800">{parseInt(property.area).toLocaleString()}</div>
+                          <div className="text-xs text-purple-600">Sq Ft</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Enhanced Description */}
+                  {property.description && (
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-gray-50/50 to-gray-100/50 border border-gray-200/50">
+                      <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                        {property.description}
+                      </p>
                     </div>
                   )}
                 </div>
 
-                {/* Property Specs */}
-                {(property.bedrooms || property.bathrooms || property.area) && (
-                  <div className="flex items-center space-x-4 mb-4 text-sm text-gray-600">
-                    {property.bedrooms && (
-                      <span className="flex items-center">
-                        🛏️ {property.bedrooms} bed{property.bedrooms !== '1' ? 's' : ''}
-                      </span>
-                    )}
-                    {property.bathrooms && (
-                      <span className="flex items-center">
-                        🚿 {property.bathrooms} bath{property.bathrooms !== '1' ? 's' : ''}
-                      </span>
-                    )}
-                    {property.area && (
-                      <span className="flex items-center">
-                        📐 {parseInt(property.area).toLocaleString()} sq ft
-                      </span>
-                    )}
+                {/* Enhanced Footer */}
+                <div className="flex items-center justify-between pt-6 border-t border-gray-200/50">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full" />
+                    <span className="text-xs text-gray-500 font-medium">
+                      Added {new Date(property.created_at || property.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                )}
-
-                {/* Description */}
-                {property.description && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {property.description}
-                  </p>
-                )}
-
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <span className="text-xs text-gray-500">
-                    Added {new Date(property.created_at || property.createdAt).toLocaleDateString()}
-                  </span>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleViewProperty(property)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="group p-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-200/50 transition-all duration-300 hover:scale-110"
                       title="View Property"
                     >
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" />
                     </button>
                     <button
                       onClick={() => handleEditProperty(property)}
-                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="group p-2 rounded-xl bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 border border-green-200/50 transition-all duration-300 hover:scale-110"
                       title="Edit Property"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-4 w-4 text-green-600 group-hover:text-green-700 transition-colors duration-300" />
                     </button>
                     <button
                       onClick={() => handleDeleteProperty(property)}
-                      className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                      className="group p-2 rounded-xl bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 border border-red-200/50 transition-all duration-300 hover:scale-110"
                       title="Delete Property"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4 text-red-600 group-hover:text-red-700 transition-colors duration-300" />
                     </button>
                   </div>
                 </div>
@@ -177,23 +242,34 @@ const Properties = () => {
           ))}
         </div>
       ) : (
-        /* Empty State */
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="p-8 text-center">
-            <div className="mx-auto h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <Home className="h-12 w-12 text-gray-400" />
+        /* Enhanced Empty State */
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-blue-500/5 rounded-3xl" />
+          <div className="relative p-12 text-center">
+            <div className="relative mx-auto mb-8">
+              <div className="h-32 w-32 rounded-3xl bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center mx-auto shadow-lg">
+                <Home className="h-16 w-16 text-green-600" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                <Plus className="h-4 w-4 text-white" />
+              </div>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Properties Yet</h3>
-            <p className="text-gray-500 mb-6">
-              Start building your property portfolio by adding your first property listing.
+
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+              No Properties Yet
+            </h3>
+            <p className="text-gray-600 text-lg leading-relaxed mb-8 max-w-md mx-auto">
+              Start building your property portfolio by adding your first property listing and showcase your real estate offerings.
             </p>
-            <div className="mt-6">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => setShowAddProperty(true)}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2"
+                className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-8 py-3"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Property
+                <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-blue-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                <span className="relative z-10">Add Your First Property</span>
               </button>
             </div>
           </div>
