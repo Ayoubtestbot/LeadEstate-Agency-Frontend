@@ -204,24 +204,24 @@ const Automation = () => {
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-3xl" />
 
-        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="p-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg">
-                  <Zap className="h-6 w-6 drop-shadow-sm" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg">
+                  <Zap className="h-5 w-5 drop-shadow-sm" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                   {t('automation.title') || 'Automation Hub'}
                 </h1>
               </div>
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-3">
                 {t('automation.subtitle') || 'Automate your lead management and follow-up processes with intelligent workflows'}
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-purple-600 font-medium">{workflows.length} Active Workflows</span>
+                  <span className="text-xs text-purple-600 font-medium">{workflows.length} Active Workflows</span>
                 </div>
                 <div className="w-1 h-1 bg-gray-400 rounded-full" />
                 <div className="flex items-center space-x-2">

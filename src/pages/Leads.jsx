@@ -358,29 +358,29 @@ const Leads = () => {
         {/* Background gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl" />
 
-        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 shadow-xl p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
-                  <Users className="h-6 w-6 drop-shadow-sm" />
+                <div className="p-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
+                  <Users className="h-5 w-5 drop-shadow-sm" />
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
                   Leads Management
                 </h1>
               </div>
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-3">
                 Manage your real estate leads and track your sales pipeline
               </p>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-blue-600 font-medium">{filteredLeads.length} Total Leads</span>
+                  <span className="text-xs text-blue-600 font-medium">{filteredLeads.length} Total Leads</span>
                 </div>
                 <div className="w-1 h-1 bg-gray-400 rounded-full" />
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-sm text-green-600 font-medium">
+                  <span className="text-xs text-green-600 font-medium">
                     {filteredLeads.filter(l => l.status === 'qualified').length} Qualified
                   </span>
                 </div>
