@@ -809,6 +809,7 @@ const Leads = () => {
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
           <KanbanView
             leads={filteredLeads}
+            teamMembers={teamMembers}
             onUpdateLead={updateLead}
             onViewLead={handleViewLead}
             onEditLead={handleEditLead}

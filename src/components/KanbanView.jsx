@@ -5,6 +5,7 @@ import ProtectedComponent from './ProtectedComponent'
 
 const KanbanView = ({
   leads,
+  teamMembers = [], // Add teamMembers prop
   onUpdateLead,
   onViewLead,
   onEditLead,
@@ -36,9 +37,21 @@ const KanbanView = ({
     { id: 'closed-lost', title: 'Closed Lost', color: 'bg-red-50 border-red-200', headerColor: 'bg-red-100' }
   ]
 
-  // Get unique agents for filter dropdown
-  const uniqueAgents = [...new Set(leads.map(lead => lead.assignedAgent || lead.assigned_agent).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b))
+  // Helper function to get agent name from UUID
+  const getAgentName = (assignedTo) => {
+    if (!assignedTo) return null
+    const agent = teamMembers.find(member => member.id === assignedTo)
+    return agent ? agent.name : assignedTo // Fallback to UUID if name not found
+  }
+
+  // Get unique agents for filter dropdown (only assigned agents)
+  const assignedAgentIds = [...new Set(leads.map(lead => lead.assignedTo).filter(Boolean))]
+  const uniqueAgents = assignedAgentIds
+    .map(id => {
+      const agent = teamMembers.find(member => member.id === id)
+      return agent ? { id: agent.id, name: agent.name } : { id, name: id }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   // Filter leads based on search term and agent
   const filteredLeads = leads.filter(lead => {
@@ -48,9 +61,7 @@ const KanbanView = ({
       lead.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesAgent = agentFilter === 'all' ||
-      lead.assignedAgent === agentFilter ||
-      lead.assigned_agent === agentFilter
+    const matchesAgent = agentFilter === 'all' || lead.assignedTo === agentFilter
 
     return matchesSearch && matchesAgent
   })
@@ -180,11 +191,14 @@ const KanbanView = ({
               value={agentFilter}
               onChange={(e) => setAgentFilter(e.target.value)}
               className="pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px]"
+              disabled={uniqueAgents.length === 0}
             >
-              <option value="all">All Agents</option>
+              <option value="all">
+                {uniqueAgents.length === 0 ? 'No agents assigned' : 'All Agents'}
+              </option>
               {uniqueAgents.map(agent => (
-                <option key={agent} value={agent}>
-                  {agent}
+                <option key={agent.id} value={agent.id}>
+                  {agent.name}
                 </option>
               ))}
             </select>
@@ -217,7 +231,7 @@ const KanbanView = ({
                   onClick={() => setAgentFilter('all')}
                   className="text-blue-600 hover:text-blue-800"
                 >
-                  Clear agent filter
+                  Clear agent filter ({getAgentName(agentFilter) || 'Unknown'})
                 </button>
               )}
               {(searchTerm || agentFilter !== 'all') && (
