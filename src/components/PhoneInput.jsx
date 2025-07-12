@@ -2,37 +2,37 @@ import { useState, useEffect } from 'react'
 import { Phone, ChevronDown } from 'lucide-react'
 import { useAuth } from '../App'
 
-// Comprehensive country codes with flags and timezone info for smart detection
+// Comprehensive country codes with flags, timezone info, and phone examples for smart detection
 const COUNTRY_CODES = [
-  { code: '+212', country: 'Morocco', flag: '🇲🇦', name: 'MA', timezone: 'Africa/Casablanca' },
-  { code: '+33', country: 'France', flag: '🇫🇷', name: 'FR', timezone: 'Europe/Paris' },
-  { code: '+1', country: 'United States', flag: '🇺🇸', name: 'US', timezone: 'America/New_York' },
-  { code: '+1', country: 'Canada', flag: '🇨🇦', name: 'CA', timezone: 'America/Toronto' },
-  { code: '+44', country: 'United Kingdom', flag: '🇬🇧', name: 'GB', timezone: 'Europe/London' },
-  { code: '+49', country: 'Germany', flag: '🇩🇪', name: 'DE', timezone: 'Europe/Berlin' },
-  { code: '+34', country: 'Spain', flag: '🇪🇸', name: 'ES', timezone: 'Europe/Madrid' },
-  { code: '+39', country: 'Italy', flag: '🇮🇹', name: 'IT', timezone: 'Europe/Rome' },
-  { code: '+31', country: 'Netherlands', flag: '🇳🇱', name: 'NL', timezone: 'Europe/Amsterdam' },
-  { code: '+32', country: 'Belgium', flag: '🇧🇪', name: 'BE', timezone: 'Europe/Brussels' },
-  { code: '+41', country: 'Switzerland', flag: '🇨🇭', name: 'CH', timezone: 'Europe/Zurich' },
-  { code: '+43', country: 'Austria', flag: '🇦🇹', name: 'AT', timezone: 'Europe/Vienna' },
-  { code: '+351', country: 'Portugal', flag: '🇵🇹', name: 'PT', timezone: 'Europe/Lisbon' },
-  { code: '+971', country: 'UAE', flag: '🇦🇪', name: 'AE', timezone: 'Asia/Dubai' },
-  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', name: 'SA', timezone: 'Asia/Riyadh' },
-  { code: '+213', country: 'Algeria', flag: '🇩🇿', name: 'DZ', timezone: 'Africa/Algiers' },
-  { code: '+216', country: 'Tunisia', flag: '🇹🇳', name: 'TN', timezone: 'Africa/Tunis' },
-  { code: '+20', country: 'Egypt', flag: '🇪🇬', name: 'EG', timezone: 'Africa/Cairo' },
-  { code: '+90', country: 'Turkey', flag: '🇹🇷', name: 'TR', timezone: 'Europe/Istanbul' },
-  { code: '+7', country: 'Russia', flag: '🇷🇺', name: 'RU', timezone: 'Europe/Moscow' },
-  { code: '+86', country: 'China', flag: '🇨🇳', name: 'CN', timezone: 'Asia/Shanghai' },
-  { code: '+91', country: 'India', flag: '🇮🇳', name: 'IN', timezone: 'Asia/Kolkata' },
-  { code: '+81', country: 'Japan', flag: '🇯🇵', name: 'JP', timezone: 'Asia/Tokyo' },
-  { code: '+82', country: 'South Korea', flag: '🇰🇷', name: 'KR', timezone: 'Asia/Seoul' },
-  { code: '+55', country: 'Brazil', flag: '🇧🇷', name: 'BR', timezone: 'America/Sao_Paulo' },
-  { code: '+52', country: 'Mexico', flag: '🇲🇽', name: 'MX', timezone: 'America/Mexico_City' },
-  { code: '+61', country: 'Australia', flag: '🇦🇺', name: 'AU', timezone: 'Australia/Sydney' },
-  { code: '+64', country: 'New Zealand', flag: '🇳🇿', name: 'NZ', timezone: 'Pacific/Auckland' },
-  { code: '+27', country: 'South Africa', flag: '🇿🇦', name: 'ZA', timezone: 'Africa/Johannesburg' },
+  { code: '+212', country: 'Morocco', flag: '🇲🇦', name: 'MA', timezone: 'Africa/Casablanca', example: '600000000' },
+  { code: '+33', country: 'France', flag: '🇫🇷', name: 'FR', timezone: 'Europe/Paris', example: '612345678' },
+  { code: '+1', country: 'United States', flag: '🇺🇸', name: 'US', timezone: 'America/New_York', example: '2025551234' },
+  { code: '+1', country: 'Canada', flag: '🇨🇦', name: 'CA', timezone: 'America/Toronto', example: '4165551234' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧', name: 'GB', timezone: 'Europe/London', example: '7400123456' },
+  { code: '+49', country: 'Germany', flag: '🇩🇪', name: 'DE', timezone: 'Europe/Berlin', example: '1512345678' },
+  { code: '+34', country: 'Spain', flag: '🇪🇸', name: 'ES', timezone: 'Europe/Madrid', example: '612345678' },
+  { code: '+39', country: 'Italy', flag: '🇮🇹', name: 'IT', timezone: 'Europe/Rome', example: '3123456789' },
+  { code: '+31', country: 'Netherlands', flag: '🇳🇱', name: 'NL', timezone: 'Europe/Amsterdam', example: '612345678' },
+  { code: '+32', country: 'Belgium', flag: '🇧🇪', name: 'BE', timezone: 'Europe/Brussels', example: '470123456' },
+  { code: '+41', country: 'Switzerland', flag: '🇨🇭', name: 'CH', timezone: 'Europe/Zurich', example: '781234567' },
+  { code: '+43', country: 'Austria', flag: '🇦🇹', name: 'AT', timezone: 'Europe/Vienna', example: '6641234567' },
+  { code: '+351', country: 'Portugal', flag: '🇵🇹', name: 'PT', timezone: 'Europe/Lisbon', example: '912345678' },
+  { code: '+971', country: 'UAE', flag: '🇦🇪', name: 'AE', timezone: 'Asia/Dubai', example: '501234567' },
+  { code: '+966', country: 'Saudi Arabia', flag: '🇸🇦', name: 'SA', timezone: 'Asia/Riyadh', example: '501234567' },
+  { code: '+213', country: 'Algeria', flag: '🇩🇿', name: 'DZ', timezone: 'Africa/Algiers', example: '551234567' },
+  { code: '+216', country: 'Tunisia', flag: '🇹🇳', name: 'TN', timezone: 'Africa/Tunis', example: '20123456' },
+  { code: '+20', country: 'Egypt', flag: '🇪🇬', name: 'EG', timezone: 'Africa/Cairo', example: '1001234567' },
+  { code: '+90', country: 'Turkey', flag: '🇹🇷', name: 'TR', timezone: 'Europe/Istanbul', example: '5321234567' },
+  { code: '+7', country: 'Russia', flag: '🇷🇺', name: 'RU', timezone: 'Europe/Moscow', example: '9123456789' },
+  { code: '+86', country: 'China', flag: '🇨🇳', name: 'CN', timezone: 'Asia/Shanghai', example: '13812345678' },
+  { code: '+91', country: 'India', flag: '🇮🇳', name: 'IN', timezone: 'Asia/Kolkata', example: '9876543210' },
+  { code: '+81', country: 'Japan', flag: '🇯🇵', name: 'JP', timezone: 'Asia/Tokyo', example: '9012345678' },
+  { code: '+82', country: 'South Korea', flag: '🇰🇷', name: 'KR', timezone: 'Asia/Seoul', example: '1012345678' },
+  { code: '+55', country: 'Brazil', flag: '🇧🇷', name: 'BR', timezone: 'America/Sao_Paulo', example: '11987654321' },
+  { code: '+52', country: 'Mexico', flag: '🇲🇽', name: 'MX', timezone: 'America/Mexico_City', example: '5512345678' },
+  { code: '+61', country: 'Australia', flag: '🇦🇺', name: 'AU', timezone: 'Australia/Sydney', example: '412345678' },
+  { code: '+64', country: 'New Zealand', flag: '🇳🇿', name: 'NZ', timezone: 'Pacific/Auckland', example: '212345678' },
+  { code: '+27', country: 'South Africa', flag: '🇿🇦', name: 'ZA', timezone: 'Africa/Johannesburg', example: '821234567' },
   // Additional countries for comprehensive coverage
   { code: '+46', country: 'Sweden', flag: '🇸🇪', name: 'SE', timezone: 'Europe/Stockholm' },
   { code: '+47', country: 'Norway', flag: '🇳🇴', name: 'NO', timezone: 'Europe/Oslo' },
@@ -238,6 +238,22 @@ const PhoneInput = ({
     setPhoneNumber(cleaned)
   }
 
+  // Get dynamic placeholder based on selected country
+  const getDynamicPlaceholder = () => {
+    if (selectedCountry.example) {
+      return selectedCountry.example
+    }
+    // Fallback placeholders based on country code
+    switch (selectedCountry.code) {
+      case '+212': return '600000000'
+      case '+33': return '612345678'
+      case '+1': return '2025551234'
+      case '+44': return '7400123456'
+      case '+49': return '1512345678'
+      default: return 'Enter phone number'
+    }
+  }
+
   return (
     <div className={`relative ${className}`}>
       <div className="flex">
@@ -246,15 +262,18 @@ const PhoneInput = ({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 min-w-[100px]"
+            className="flex items-center justify-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 min-w-[120px]"
           >
-            <span className="text-lg mr-2" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>
+            <span className="text-lg mr-2 flex-shrink-0" style={{ fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif' }}>
               {selectedCountry.flag}
             </span>
-            <span className="text-sm font-medium text-gray-700 mr-1">
+            <span className="text-sm font-medium text-gray-700 mr-1 flex-shrink-0">
               {selectedCountry.code}
             </span>
-            <ChevronDown className="h-4 w-4 text-gray-400" />
+            <span className="text-xs text-gray-500 mr-1 flex-shrink-0">
+              {selectedCountry.name}
+            </span>
+            <ChevronDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
           </button>
 
           {/* Dropdown Menu */}
@@ -292,10 +311,14 @@ const PhoneInput = ({
             type="tel"
             value={phoneNumber}
             onChange={handlePhoneChange}
-            placeholder={placeholder}
+            placeholder={getDynamicPlaceholder()}
             required={required}
-            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
+            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 placeholder-gray-400"
           />
+          {/* Helper text */}
+          <div className="absolute -bottom-5 left-0 text-xs text-gray-500">
+            Format: {selectedCountry.code} {getDynamicPlaceholder()}
+          </div>
         </div>
       </div>
 
