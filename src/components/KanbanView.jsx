@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User, Search, Filter } from 'lucide-react'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
 import ProtectedComponent from './ProtectedComponent'
@@ -63,7 +63,7 @@ const KanbanView = ({
   )
 
   // Auto-cleanup orphaned leads silently
-  React.useEffect(() => {
+  useEffect(() => {
     if (orphanedLeads.length > 0 && onUpdateLead) {
       console.log('🧹 Auto-cleaning orphaned leads:', orphanedLeads.length)
 
