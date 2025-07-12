@@ -47,10 +47,19 @@ const KanbanView = ({
   // Get unique agents for filter dropdown (only current team members who have assigned leads)
   const assignedAgentIds = [...new Set(leads.map(lead => lead.assignedTo).filter(Boolean))]
 
-  // Debug: Check for orphaned assignments
+  // Debug: Check for orphaned assignments and data issues
   const orphanedAssignments = assignedAgentIds.filter(id =>
     !teamMembers.find(member => member.id === id)
   )
+
+  console.log('🔍 Debug Agent Filtering:')
+  console.log('📊 Total leads:', leads.length)
+  console.log('👥 Team members:', teamMembers.length, teamMembers.map(m => ({ id: m.id, name: m.name })))
+  console.log('🎯 Assigned agent IDs:', assignedAgentIds)
+  console.log('❌ Orphaned assignments:', orphanedAssignments)
+  console.log('📋 Unassigned leads count:', leads.filter(lead => !lead.assignedTo).length)
+  console.log('✅ Valid agents with leads:', uniqueAgents)
+
   if (orphanedAssignments.length > 0) {
     console.warn('🚨 Found orphaned lead assignments:', orphanedAssignments)
     console.warn('📋 Current team members:', teamMembers.map(m => ({ id: m.id, name: m.name })))
@@ -66,6 +75,9 @@ const KanbanView = ({
 
   // Check if there are unassigned leads
   const hasUnassignedLeads = leads.some(lead => !lead.assignedTo)
+  const unassignedCount = leads.filter(lead => !lead.assignedTo).length
+
+  console.log('🔢 Unassigned leads check:', { hasUnassignedLeads, unassignedCount })
 
   // Filter leads based on search term and agent
   const filteredLeads = leads.filter(lead => {
@@ -80,6 +92,14 @@ const KanbanView = ({
       lead.assignedTo === agentFilter
 
     return matchesSearch && matchesAgent
+  })
+
+  console.log('🎯 Filtering results:', {
+    agentFilter,
+    searchTerm,
+    totalLeads: leads.length,
+    filteredLeads: filteredLeads.length,
+    unassignedInFiltered: filteredLeads.filter(lead => !lead.assignedTo).length
   })
 
   // Performance optimization: limit total leads if no search or agent filter
@@ -214,7 +234,7 @@ const KanbanView = ({
               </option>
               {hasUnassignedLeads && (
                 <option value="unassigned">
-                  Unassigned ({leads.filter(lead => !lead.assignedTo).length})
+                  Unassigned ({unassignedCount})
                 </option>
               )}
               {uniqueAgents.map(agent => (
