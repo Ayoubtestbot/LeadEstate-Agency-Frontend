@@ -37,26 +37,36 @@ const KanbanView = ({
     { id: 'closed-lost', title: 'Closed Lost', color: 'bg-red-50 border-red-200', headerColor: 'bg-red-100' }
   ]
 
-  // Helper function to get agent name from UUID
+  // Helper function to get agent name (since assignedTo already contains names)
   const getAgentName = (assignedTo) => {
     if (!assignedTo) return null
-    const agent = teamMembers.find(member => member.id === assignedTo)
-    return agent ? agent.name : assignedTo // Fallback to UUID if name not found
+    // assignedTo already contains the name, so just return it
+    return assignedTo
   }
 
-  // Get unique agents for filter dropdown (only current team members who have assigned leads)
-  const assignedAgentIds = [...new Set(leads.map(lead => lead.assignedTo).filter(Boolean))]
+  // Get unique agents for filter dropdown
+  // IMPORTANT: assignedTo field contains NAMES, not UUIDs!
+  const assignedAgentNames = [...new Set(leads.map(lead => lead.assignedTo).filter(Boolean))]
+
+  // Map agent names to team member objects
+  const uniqueAgents = assignedAgentNames
+    .map(name => {
+      const agent = teamMembers.find(member => member.name === name)
+      return agent ? { id: agent.id, name: agent.name, assignedName: name } : null
+    })
+    .filter(Boolean) // Remove null entries (agents not in current team)
+    .sort((a, b) => a.name.localeCompare(b.name))
 
   // Debug: Check for orphaned assignments and data issues
-  const orphanedAssignments = assignedAgentIds.filter(id =>
-    !teamMembers.find(member => member.id === id)
+  const orphanedAssignments = assignedAgentNames.filter(name =>
+    !teamMembers.find(member => member.name === name)
   )
 
-  console.log('🔍 Debug Agent Filtering:')
+  console.log('🔍 Debug Agent Filtering (FIXED):')
   console.log('📊 Total leads:', leads.length)
   console.log('👥 Team members:', teamMembers.length, teamMembers.map(m => ({ id: m.id, name: m.name })))
-  console.log('🎯 Assigned agent IDs:', assignedAgentIds)
-  console.log('❌ Orphaned assignments:', orphanedAssignments)
+  console.log('🎯 Assigned agent NAMES:', assignedAgentNames)
+  console.log('❌ Orphaned assignments (names not in team):', orphanedAssignments)
   console.log('📋 Unassigned leads count:', leads.filter(lead => !lead.assignedTo).length)
   console.log('✅ Valid agents with leads:', uniqueAgents)
 
@@ -64,14 +74,6 @@ const KanbanView = ({
     console.warn('🚨 Found orphaned lead assignments:', orphanedAssignments)
     console.warn('📋 Current team members:', teamMembers.map(m => ({ id: m.id, name: m.name })))
   }
-
-  const uniqueAgents = assignedAgentIds
-    .map(id => {
-      const agent = teamMembers.find(member => member.id === id)
-      return agent ? { id: agent.id, name: agent.name } : null // Only return if agent exists in team
-    })
-    .filter(Boolean) // Remove null entries (orphaned assignments)
-    .sort((a, b) => a.name.localeCompare(b.name))
 
   // Check if there are unassigned leads
   const hasUnassignedLeads = leads.some(lead => !lead.assignedTo)
@@ -87,9 +89,10 @@ const KanbanView = ({
       lead.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
 
+    // Since assignedTo contains names, we need to match by name
     const matchesAgent = agentFilter === 'all' ||
       (agentFilter === 'unassigned' && !lead.assignedTo) ||
-      lead.assignedTo === agentFilter
+      lead.assignedTo === agentFilter // agentFilter will be the agent name
 
     return matchesSearch && matchesAgent
   })
@@ -238,8 +241,8 @@ const KanbanView = ({
                 </option>
               )}
               {uniqueAgents.map(agent => (
-                <option key={agent.id} value={agent.id}>
-                  {agent.name} ({leads.filter(lead => lead.assignedTo === agent.id).length})
+                <option key={agent.id} value={agent.name}>
+                  {agent.name} ({leads.filter(lead => lead.assignedTo === agent.name).length})
                 </option>
               ))}
             </select>
