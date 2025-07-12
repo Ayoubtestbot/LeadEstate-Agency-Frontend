@@ -302,13 +302,566 @@ const Analytics = () => {
         </div>
       </div>
 
-      {/* Simple Analytics Content for now */}
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics Overview</h2>
-        <p className="text-gray-600">Premium analytics dashboard is loading...</p>
-        <div className="mt-4 text-sm text-gray-500">
-          Last updated: {lastUpdated.toLocaleTimeString()}
+      {/* Premium Tab Navigation */}
+      <div className="relative">
+        <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-2">
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: 'overview', label: 'Overview', icon: Eye },
+              { id: 'agents', label: 'Agent Performance', icon: Users },
+              { id: 'sources', label: 'Source Analysis', icon: Target },
+              { id: 'geography', label: 'Geographic Insights', icon: MapPin },
+              { id: 'behavior', label: 'Behavioral Analysis', icon: Activity },
+              { id: 'revenue', label: 'Revenue Analytics', icon: DollarSign }
+            ].map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 ${
+                    activeTab === tab.id
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg scale-105'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </button>
+              )
+            })}
+          </div>
         </div>
+      </div>
+
+      {/* Premium Analytics Content */}
+      <div className="space-y-6">
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* KPI Cards */}
+            <div className="xl:col-span-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    title: 'Total Revenue',
+                    value: '$1,245,000',
+                    change: '+12.5%',
+                    trend: 'up',
+                    icon: DollarSign,
+                    gradient: 'from-green-500 to-emerald-600'
+                  },
+                  {
+                    title: 'Active Leads',
+                    value: '2,847',
+                    change: '+8.3%',
+                    trend: 'up',
+                    icon: Users,
+                    gradient: 'from-blue-500 to-indigo-600'
+                  },
+                  {
+                    title: 'Conversion Rate',
+                    value: '18.7%',
+                    change: '+2.1%',
+                    trend: 'up',
+                    icon: Target,
+                    gradient: 'from-purple-500 to-pink-600'
+                  },
+                  {
+                    title: 'Avg Deal Size',
+                    value: '$125,000',
+                    change: '-3.2%',
+                    trend: 'down',
+                    icon: Briefcase,
+                    gradient: 'from-orange-500 to-red-600'
+                  }
+                ].map((kpi, index) => {
+                  const Icon = kpi.icon
+                  const TrendIcon = kpi.trend === 'up' ? ArrowUp : ArrowDown
+                  return (
+                    <div key={index} className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-br opacity-20 rounded-2xl blur-xl group-hover:opacity-30 transition-opacity duration-300" style={{background: `linear-gradient(to bottom right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                      <div className="relative bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6 hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`p-3 rounded-xl bg-gradient-to-r ${kpi.gradient} text-white shadow-lg`}>
+                            <Icon className="w-6 h-6" />
+                          </div>
+                          <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                            kpi.trend === 'up' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            <TrendIcon className="w-3 h-3" />
+                            {kpi.change}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-gray-900 mb-1">{kpi.value}</p>
+                          <p className="text-sm text-gray-600 font-medium">{kpi.title}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="xl:col-span-2 bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Revenue Trends</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={analyticsData.revenueAnalysis}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                      formatter={(value) => [`$${(value / 1000).toFixed(0)}K`, 'Revenue']}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRevenue)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Lead Sources Pie Chart */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Sources</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={analyticsData.leadsBySource}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="count"
+                      label={({ source, percent }) => `${source}: ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {analyticsData.leadsBySource.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'agents' && (
+          <div className="space-y-6">
+            {/* Agent Performance Grid */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Agent Performance Dashboard</h2>
+                  <p className="text-gray-600">Comprehensive KPIs, comparatives, and trends analysis</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                {analyticsData.agentPerformance.map((agent, index) => (
+                  <div key={agent.name} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300" />
+                    <div className="relative bg-white/95 backdrop-blur-sm rounded-xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                            {agent.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{agent.name}</h3>
+                            <p className="text-sm text-gray-600">Real Estate Agent</p>
+                          </div>
+                        </div>
+                        <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
+                          agent.trend === 'up' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {agent.trend === 'up' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
+                          {agent.trendValue}%
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                          <p className="text-2xl font-bold text-blue-600">{agent.leadsGenerated}</p>
+                          <p className="text-xs text-gray-600">Leads Generated</p>
+                        </div>
+                        <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
+                          <p className="text-2xl font-bold text-green-600">{agent.conversionRate}%</p>
+                          <p className="text-xs text-gray-600">Conversion Rate</p>
+                        </div>
+                        <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
+                          <p className="text-2xl font-bold text-purple-600">${(agent.revenue / 1000).toFixed(0)}K</p>
+                          <p className="text-xs text-gray-600">Revenue</p>
+                        </div>
+                        <div className="text-center p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg">
+                          <p className="text-2xl font-bold text-orange-600">{agent.closedDeals}</p>
+                          <p className="text-xs text-gray-600">Closed Deals</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Satisfaction Score</span>
+                          <span className="font-semibold text-gray-900">{agent.satisfaction}%</span>
+                        </div>
+                        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${agent.satisfaction}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Agent Comparison Chart */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Agent Performance Comparison</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analyticsData.agentPerformance}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar dataKey="leadsGenerated" fill="#3B82F6" name="Leads Generated" />
+                    <Bar dataKey="closedDeals" fill="#10B981" name="Closed Deals" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'sources' && (
+          <div className="space-y-6">
+            {/* Source ROI Analysis */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">Source ROI Analysis</h2>
+                  <p className="text-gray-600">Investment returns, conversion rates, and cost analysis</p>
+                </div>
+              </div>
+
+              {/* ROI Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                {analyticsData.sourceROI.map((source, index) => (
+                  <div key={source.source} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br opacity-20 rounded-xl blur-xl group-hover:opacity-30 transition-opacity duration-300" style={{background: `linear-gradient(to bottom right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                    <div className="relative bg-white/95 backdrop-blur-sm rounded-xl border border-white/30 shadow-lg p-4 hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-gray-900">{source.source}</h3>
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br" style={{background: `linear-gradient(to bottom right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">ROI</span>
+                          <span className="font-semibold text-green-600">{source.roi}%</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Investment</span>
+                          <span className="font-semibold text-gray-900">${source.investment.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Revenue</span>
+                          <span className="font-semibold text-blue-600">${source.revenue.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Leads</span>
+                          <span className="font-semibold text-purple-600">{source.leads}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">CPL</span>
+                          <span className="font-semibold text-orange-600">${source.cpl}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ROI Comparison Chart */}
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={analyticsData.sourceROI}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="source" />
+                    <YAxis yAxisId="left" />
+                    <YAxis yAxisId="right" orientation="right" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar yAxisId="left" dataKey="roi" fill="#3B82F6" name="ROI %" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" dataKey="conversions" stroke="#10B981" strokeWidth={3} name="Conversions" />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'geography' && (
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Geographic Heat Map</h2>
+                <p className="text-gray-600">Regional performance and market activity analysis</p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-full border border-blue-200/50">
+                <Globe className="w-4 h-4 text-blue-600" />
+                <span className="text-sm text-blue-700 font-semibold">Live Market Data</span>
+              </div>
+            </div>
+
+            {/* Geographic Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {analyticsData.geographicalData.map((location, index) => (
+                <div key={location.city} className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br opacity-20 rounded-xl blur-xl group-hover:opacity-30 transition-opacity duration-300" style={{background: `linear-gradient(to bottom right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                  <div className="relative bg-white/95 backdrop-blur-sm rounded-xl border border-white/30 shadow-lg p-4 hover:shadow-xl transition-all duration-300">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-semibold text-gray-900">{location.city}</h3>
+                      </div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br" style={{background: `linear-gradient(to bottom right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Active Leads</span>
+                        <span className="font-semibold text-blue-600">{location.leads}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Conversions</span>
+                        <span className="font-semibold text-green-600">{location.conversions}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Avg Property Value</span>
+                        <span className="font-semibold text-purple-600">${(location.avgPropertyValue / 1000).toFixed(0)}K</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Market Activity</span>
+                        <span className="font-semibold text-orange-600">{location.marketActivity}%</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-600">Conversion Rate</span>
+                        <span className="font-semibold text-gray-900">{((location.conversions / location.leads) * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-400 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${(location.conversions / location.leads) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'behavior' && (
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Behavioral Analysis</h2>
+                <p className="text-gray-600">User interaction patterns and engagement metrics</p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full border border-purple-200/50">
+                <Activity className="w-4 h-4 text-purple-600" />
+                <span className="text-sm text-purple-700 font-semibold">AI Insights</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Behavior Metrics */}
+              <div className="space-y-4">
+                {analyticsData.behavioralAnalysis.map((behavior, index) => (
+                  <div key={behavior.behavior} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r opacity-10 rounded-lg blur-sm group-hover:opacity-20 transition-opacity duration-300" style={{background: `linear-gradient(to right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`}} />
+                    <div className="relative bg-white/80 backdrop-blur-sm rounded-lg border border-white/30 p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900">{behavior.behavior}</h3>
+                        <span className="text-sm font-semibold text-green-600">{behavior.conversion}%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                        <span>Total Count</span>
+                        <span className="font-semibold text-gray-900">{behavior.count.toLocaleString()}</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${behavior.conversion}%`,
+                            background: `linear-gradient(to right, ${COLORS[index]}, ${COLORS[index + 1] || COLORS[0]})`
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Behavior Chart */}
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={analyticsData.behavioralAnalysis}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="count"
+                      label={({ behavior, conversion }) => `${behavior}: ${conversion}%`}
+                    >
+                      {analyticsData.behavioralAnalysis.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'revenue' && (
+          <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Revenue Analytics</h2>
+                <p className="text-gray-600">Financial performance and growth trends</p>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-50 to-emerald-50 rounded-full border border-green-200/50">
+                <DollarSign className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-green-700 font-semibold">Revenue Tracking</span>
+              </div>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="h-80 mb-6">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={analyticsData.revenueAnalysis}>
+                  <defs>
+                    <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0.1}/>
+                    </linearGradient>
+                    <linearGradient id="colorTarget" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(10px)',
+                      border: 'none',
+                      borderRadius: '12px',
+                      boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                    }}
+                    formatter={(value) => [`$${(value / 1000).toFixed(0)}K`, '']}
+                  />
+                  <Legend />
+                  <Area type="monotone" dataKey="revenue" stroke="#10B981" fillOpacity={1} fill="url(#colorRevenue2)" name="Actual Revenue" />
+                  <Area type="monotone" dataKey="target" stroke="#3B82F6" fillOpacity={1} fill="url(#colorTarget)" name="Target Revenue" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Revenue Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200/50">
+                <div className="flex items-center justify-between mb-2">
+                  <DollarSign className="w-8 h-8 text-green-600" />
+                  <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-1 rounded-full">+15.2%</span>
+                </div>
+                <p className="text-2xl font-bold text-green-700">$1.07M</p>
+                <p className="text-sm text-green-600">Total Revenue</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200/50">
+                <div className="flex items-center justify-between mb-2">
+                  <Target className="w-8 h-8 text-blue-600" />
+                  <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2 py-1 rounded-full">108%</span>
+                </div>
+                <p className="text-2xl font-bold text-blue-700">$970K</p>
+                <p className="text-sm text-blue-600">Target Achievement</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200/50">
+                <div className="flex items-center justify-between mb-2">
+                  <Briefcase className="w-8 h-8 text-purple-600" />
+                  <span className="text-xs font-semibold text-purple-700 bg-purple-100 px-2 py-1 rounded-full">128</span>
+                </div>
+                <p className="text-2xl font-bold text-purple-700">$8.4K</p>
+                <p className="text-sm text-purple-600">Avg Deal Size</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
