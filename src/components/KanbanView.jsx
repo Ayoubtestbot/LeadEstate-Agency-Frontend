@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User } from 'lucide-react'
+import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User, Search, Filter } from 'lucide-react'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
 import ProtectedComponent from './ProtectedComponent'
 
@@ -14,6 +14,8 @@ const KanbanView = ({
   onDeleteLead
 }) => {
   const [draggedLead, setDraggedLead] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
   const { hasPermission } = usePermissions()
 
   const columns = [
@@ -26,8 +28,19 @@ const KanbanView = ({
     { id: 'closed-lost', title: 'Closed Lost', color: 'bg-red-50 border-red-200', headerColor: 'bg-red-100' }
   ]
 
+  // Filter leads based on search term
+  const filteredLeads = leads.filter(lead => {
+    const matchesSearch = searchTerm === '' ||
+      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.city?.toLowerCase().includes(searchTerm.toLowerCase())
+
+    return matchesSearch
+  })
+
   const getLeadsByStatus = (status) => {
-    return leads.filter(lead => lead.status === status)
+    return filteredLeads.filter(lead => lead.status === status)
   }
 
   const handleDragStart = (e, lead) => {
@@ -70,7 +83,37 @@ const KanbanView = ({
   }
 
   return (
-    <div className="flex space-x-3 overflow-x-auto pb-4">
+    <div className="space-y-4">
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+        {/* Search */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search leads by name, email, phone, or city..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+
+        {/* Quick Stats */}
+        <div className="flex items-center space-x-4 text-sm text-gray-600">
+          <span>Total: {filteredLeads.length} leads</span>
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              Clear search
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Kanban Board */}
+      <div className="flex space-x-3 overflow-x-auto pb-4">
       {columns.map((column) => {
         const columnLeads = getLeadsByStatus(column.id)
 
@@ -224,14 +267,19 @@ const KanbanView = ({
               {/* Empty State */}
               {columnLeads.length === 0 && (
                 <div className="text-center py-8 text-gray-400">
-                  <div className="text-sm">No leads in this stage</div>
-                  <div className="text-xs mt-1">Drag leads here to update status</div>
+                  <div className="text-sm">
+                    {searchTerm ? 'No matching leads' : 'No leads in this stage'}
+                  </div>
+                  <div className="text-xs mt-1">
+                    {searchTerm ? 'Try adjusting your search' : 'Drag leads here to update status'}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         )
       })}
+      </div>
     </div>
   )
 }
