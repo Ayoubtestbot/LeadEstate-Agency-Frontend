@@ -351,117 +351,160 @@ const Leads = () => {
         <GoogleSheetsConfig onNewLeads={handleGoogleSheetsLeads} />
       </ProtectedComponent>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Leads</h1>
-          <p className="text-sm sm:text-base text-gray-600">Manage your real estate leads</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* View Toggle */}
-          <div className="flex rounded-md border border-gray-300 bg-white">
-            <button
-              onClick={() => setViewMode('table')}
-              className={`px-3 py-2 text-sm font-medium rounded-l-md transition-colors ${
-                viewMode === 'table'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <List className="h-4 w-4 mr-1 inline" />
-              Table
-            </button>
-            <button
-              onClick={() => setViewMode('kanban')}
-              className={`px-3 py-2 text-sm font-medium rounded-r-md transition-colors ${
-                viewMode === 'kanban'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <Grid className="h-4 w-4 mr-1 inline" />
-              Kanban
-            </button>
-          </div>
+      {/* Enhanced Header */}
+      <div className="relative">
+        {/* Background gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-3xl" />
 
-          <div className="flex flex-col sm:flex-row gap-2">
-            {/* Import Leads - Super Agent and Manager only */}
-            <ProtectedComponent permission={PERMISSIONS.IMPORT_LEADS}>
-              <button
-                onClick={() => setShowImport(true)}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 bg-green-600 text-white shadow hover:bg-green-700 h-9 px-4 py-2 w-full sm:w-auto"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Import
-              </button>
-            </ProtectedComponent>
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="p-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg">
+                  <Users className="h-6 w-6 drop-shadow-sm" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent truncate">
+                  Leads Management
+                </h1>
+              </div>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-4">
+                Manage your real estate leads and track your sales pipeline
+              </p>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-blue-600 font-medium">{filteredLeads.length} Total Leads</span>
+                </div>
+                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-sm text-green-600 font-medium">
+                    {filteredLeads.filter(l => l.status === 'qualified').length} Qualified
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            {/* Add Lead - Super Agent and Manager only */}
-            <ProtectedComponent permission={PERMISSIONS.ADD_LEAD}>
-              <button
-                onClick={() => setShowAddLead(true)}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 bg-blue-600 text-white shadow hover:bg-blue-700 h-9 px-4 py-2 w-full sm:w-auto"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Lead
-              </button>
-            </ProtectedComponent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Enhanced View Toggle */}
+              <div className="flex rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm shadow-lg p-1">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`group relative px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                    viewMode === 'table'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                  }`}
+                >
+                  {viewMode === 'table' && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-purple-700/20 rounded-xl" />
+                  )}
+                  <div className="relative flex items-center space-x-2">
+                    <List className="h-4 w-4 drop-shadow-sm" />
+                    <span>Table</span>
+                  </div>
+                </button>
+                <button
+                  onClick={() => setViewMode('kanban')}
+                  className={`group relative px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                    viewMode === 'kanban'
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                  }`}
+                >
+                  {viewMode === 'kanban' && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-purple-700/20 rounded-xl" />
+                  )}
+                  <div className="relative flex items-center space-x-2">
+                    <Grid className="h-4 w-4 drop-shadow-sm" />
+                    <span>Kanban</span>
+                  </div>
+                </button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* Enhanced Import Leads - Super Agent and Manager only */}
+                <ProtectedComponent permission={PERMISSIONS.IMPORT_LEADS}>
+                  <button
+                    onClick={() => setShowImport(true)}
+                    className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-700/20 to-emerald-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Upload className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                    <span className="relative z-10">Import Leads</span>
+                  </button>
+                </ProtectedComponent>
+
+                {/* Enhanced Add Lead - Super Agent and Manager only */}
+                <ProtectedComponent permission={PERMISSIONS.ADD_LEAD}>
+                  <button
+                    onClick={() => setShowAddLead(true)}
+                    className="group relative inline-flex items-center justify-center rounded-2xl text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 h-12 px-6 py-3 w-full sm:w-auto"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-700/20 to-purple-700/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <Plus className="h-5 w-5 mr-3 drop-shadow-sm relative z-10" />
+                    <span className="relative z-10">Add Lead</span>
+                  </button>
+                </ProtectedComponent>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Filters - Only show for table view */}
+      {/* Enhanced Filters - Only show for table view */}
       {viewMode === 'table' && (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <div className="p-4 lg:p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              {/* Search */}
+        <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl border border-gray-200/50 shadow-xl">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-500/5 to-blue-500/5 rounded-3xl" />
+          <div className="relative p-8">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Enhanced Search */}
               <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <div className="relative group">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-600 transition-colors duration-300" />
                   <input
                     type="text"
-                    placeholder="Search leads..."
+                    placeholder="Search leads by name, email, phone..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 pl-10 text-sm shadow-sm transition-colors placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-12 w-full rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 pl-12 text-sm font-medium shadow-lg transition-all duration-300 placeholder:text-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 hover:shadow-xl"
                   />
                 </div>
               </div>
 
-              {/* Filters */}
-              <div className="flex flex-col sm:flex-row gap-4 lg:gap-2">
-                {/* Status Filter */}
-                <div className="sm:w-48">
+              {/* Enhanced Filters */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Enhanced Status Filter */}
+                <div className="sm:w-56">
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-12 w-full rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 hover:shadow-xl cursor-pointer"
                   >
-                    <option value="all">All Status</option>
-                    <option value="new">New</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="qualified">Qualified</option>
-                    <option value="proposal">Proposal</option>
-                    <option value="negotiation">Negotiation</option>
-                    <option value="closed-won">Closed Won</option>
-                    <option value="closed-lost">Closed Lost</option>
+                    <option value="all">🔍 All Status</option>
+                    <option value="new">🆕 New</option>
+                    <option value="contacted">📞 Contacted</option>
+                    <option value="qualified">✅ Qualified</option>
+                    <option value="proposal">📋 Proposal</option>
+                    <option value="negotiation">🤝 Negotiation</option>
+                    <option value="closed-won">🎉 Closed Won</option>
+                    <option value="closed-lost">❌ Closed Lost</option>
                   </select>
                 </div>
 
-                {/* Agent Filter - Manager and Super Agent only */}
+                {/* Enhanced Agent Filter - Manager and Super Agent only */}
                 {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && (
-                  <div className="sm:w-48">
+                  <div className="sm:w-56">
                     <select
                       value={agentFilter}
                       onChange={(e) => setAgentFilter(e.target.value)}
-                      className="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-12 w-full rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500/50 hover:shadow-xl cursor-pointer"
                     >
-                      <option value="all">All Agents</option>
-                      <option value="">Unassigned</option>
+                      <option value="all">👥 All Agents</option>
+                      <option value="">🔄 Unassigned</option>
                       {teamMembers.map(member => (
                         <option key={member.id} value={member.name}>
-                          {member.name}
+                          👤 {member.name}
                         </option>
                       ))}
                     </select>
