@@ -262,27 +262,32 @@ const PhoneInput = ({
           <button
             type="button"
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center px-2 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 w-auto"
+            className="flex items-center px-3 py-2 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10"
+            style={{ minWidth: '110px' }}
           >
-            <div className="flex items-center space-x-1">
-              <span
-                className="text-base leading-none"
-                style={{
-                  fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-                  fontSize: '16px',
-                  lineHeight: '1'
-                }}
-              >
-                {selectedCountry.flag}
-              </span>
-              <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                {selectedCountry.code}
-              </span>
-              <span className="text-xs text-gray-500 whitespace-nowrap">
-                {selectedCountry.name}
-              </span>
-              <ChevronDown className="h-3 w-3 text-gray-400 ml-1" />
-            </div>
+            {/* Flag */}
+            <span
+              className="mr-2"
+              style={{
+                fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
+                fontSize: '18px',
+                display: 'inline-block',
+                width: '20px',
+                textAlign: 'center'
+              }}
+            >
+              {selectedCountry.flag || selectedCountry.name}
+            </span>
+            {/* Country Code */}
+            <span className="text-sm font-medium text-gray-700 mr-1">
+              {selectedCountry.code}
+            </span>
+            {/* Country Name */}
+            <span className="text-xs text-gray-500 mr-1">
+              {selectedCountry.name}
+            </span>
+            {/* Dropdown Arrow */}
+            <ChevronDown className="h-4 w-4 text-gray-400" />
           </button>
 
           {/* Dropdown Menu */}
@@ -296,12 +301,13 @@ const PhoneInput = ({
                   className="w-full flex items-center px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
                 >
                   <span
-                    className="text-base mr-3 flex-shrink-0"
+                    className="mr-3"
                     style={{
                       fontFamily: 'Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif',
-                      minWidth: '20px',
-                      fontSize: '16px',
-                      lineHeight: '1'
+                      fontSize: '18px',
+                      display: 'inline-block',
+                      width: '24px',
+                      textAlign: 'center'
                     }}
                   >
                     {country.flag}
