@@ -462,15 +462,9 @@ const Layout = ({ children }) => {
         </header>
 
         {/* Enhanced Page content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="relative">
-              {/* Subtle background pattern */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-3xl pointer-events-none" />
-              <div className="relative z-10">
-                {children}
-              </div>
-            </div>
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+          <div className="h-full w-full p-6">
+            {children}
           </div>
         </main>
       </div>

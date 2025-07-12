@@ -17,14 +17,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Sidebar styles */
-.sidebar-item {
-  @apply flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 hover:bg-gray-100;
-}
 
-.sidebar-item.active {
-  @apply bg-blue-100 text-blue-700;
-}
 
 .btn-primary {
   background-color: #2563eb;

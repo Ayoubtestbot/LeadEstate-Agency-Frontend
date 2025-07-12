@@ -724,39 +724,7 @@ const Login = () => {
   )
 }
 
-// Sidebar Component
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
-  const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Leads', href: '/leads', icon: Users },
-    { name: 'Properties', href: '/properties', icon: Building },
-    { name: 'Team', href: '/team', icon: UserCheck },
-    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-    { name: 'Settings', href: '/settings', icon: SettingsIcon },
-  ]
 
-  return (
-    <div className={`${sidebarOpen ? 'block' : 'hidden'} fixed inset-0 z-40 lg:relative lg:inset-0 lg:block lg:w-64 lg:flex-shrink-0`}>
-      <div className="flex flex-col w-64 bg-white border-r border-gray-200 h-full">
-        <div className="flex items-center h-16 px-6 border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">LeadEstate</h1>
-        </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
-            >
-              <item.icon className="w-5 h-5 mr-3" />
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
-    </div>
-  )
-}
 
 // Header Component
 const Header = ({ setSidebarOpen }) => {
