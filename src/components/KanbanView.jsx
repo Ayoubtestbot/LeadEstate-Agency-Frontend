@@ -62,20 +62,32 @@ const KanbanView = ({
     lead.assignedTo && !teamMembers.find(member => member.name === lead.assignedTo)
   )
 
-  // Auto-cleanup orphaned leads silently
+  // Auto-cleanup orphaned leads silently with rate limiting
   useEffect(() => {
     if (orphanedLeads.length > 0 && onUpdateLead) {
       console.log('🧹 Auto-cleaning orphaned leads:', orphanedLeads.length)
 
-      // Silently unassign orphaned leads
-      orphanedLeads.forEach(async (lead) => {
-        try {
-          await onUpdateLead(lead.id, { assignedTo: null })
-          console.log(`✅ Auto-unassigned: ${lead.name} (was assigned to: ${lead.assignedTo})`)
-        } catch (error) {
-          console.error(`❌ Failed to auto-unassign lead ${lead.name}:`, error)
+      // Rate-limited cleanup to avoid overwhelming the server
+      const cleanupLeadsSequentially = async () => {
+        for (let i = 0; i < orphanedLeads.length; i++) {
+          const lead = orphanedLeads[i]
+          try {
+            await onUpdateLead(lead.id, { assignedTo: null })
+            console.log(`✅ Auto-unassigned (${i + 1}/${orphanedLeads.length}): ${lead.name} (was assigned to: ${lead.assignedTo})`)
+
+            // Add delay between requests to avoid overwhelming server
+            if (i < orphanedLeads.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 500)) // 500ms delay
+            }
+          } catch (error) {
+            console.error(`❌ Failed to auto-unassign lead ${lead.name}:`, error)
+            // Continue with next lead even if one fails
+          }
         }
-      })
+        console.log('🎉 Orphaned leads cleanup completed')
+      }
+
+      cleanupLeadsSequentially()
     }
   }, [orphanedLeads.length, onUpdateLead])
 
