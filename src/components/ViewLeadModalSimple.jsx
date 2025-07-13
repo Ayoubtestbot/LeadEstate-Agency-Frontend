@@ -17,12 +17,24 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
   const [loading, setLoading] = React.useState(false)
   const [dataLoaded, setDataLoaded] = React.useState(false)
 
-  // Fetch real data when modal opens
+  // Fetch real data when modal opens or lead changes
   React.useEffect(() => {
     if (isOpen && lead?.id && !dataLoaded) {
       fetchRealData()
     }
   }, [isOpen, lead?.id, dataLoaded])
+
+  // Refresh data when lead assignment changes
+  React.useEffect(() => {
+    if (isOpen && lead?.id && dataLoaded) {
+      // Refresh assignment history when lead data might have changed
+      const refreshTimer = setTimeout(() => {
+        fetchRealData()
+      }, 1000) // Small delay to allow backend to process
+
+      return () => clearTimeout(refreshTimer)
+    }
+  }, [lead?.assignedTo, lead?.updatedAt])
 
   const fetchRealData = async () => {
     setLoading(true)
@@ -50,28 +62,48 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
   }
 
   const handleAddNote = async () => {
-    if (!newNote.trim()) return
+    if (!newNote.trim()) {
+      console.log('Note is empty, not adding')
+      return
+    }
+
+    console.log('Adding note:', newNote.trim(), 'to lead:', lead.id)
+    setLoading(true)
 
     try {
+      const noteData = {
+        content: newNote.trim(),
+        type: 'note',
+        createdBy: 'Current User' // You can get this from auth context
+      }
+
+      console.log('Sending note data:', noteData)
+
       const response = await fetch(`${API_URL}/leads/${lead.id}/notes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          content: newNote.trim(),
-          type: 'note',
-          createdBy: 'Current User' // You can get this from auth context
-        })
+        body: JSON.stringify(noteData)
       })
 
-      if (response.ok) {
-        const result = await response.json()
+      console.log('Response status:', response.status)
+      const result = await response.json()
+      console.log('Response data:', result)
+
+      if (response.ok && result.success) {
         setNotes(prev => [result.data, ...prev])
         setNewNote('')
+        console.log('Note added successfully')
+      } else {
+        console.error('Failed to add note:', result.message)
+        alert('Failed to add note: ' + (result.message || 'Unknown error'))
       }
     } catch (error) {
       console.error('Error adding note:', error)
+      alert('Error adding note: ' + error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -108,8 +140,8 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4">
           <div className="flex justify-between items-start">

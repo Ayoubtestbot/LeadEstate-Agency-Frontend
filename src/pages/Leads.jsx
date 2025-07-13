@@ -76,7 +76,14 @@ const Leads = () => {
   }
 
   const handleAssignSubmit = (assignedTo) => {
-    updateLead(assignLead.id, { assignedTo })
+    const oldAssignedTo = assignLead.assignedTo
+    updateLead(assignLead.id, {
+      assignedTo,
+      changedBy: user?.name || 'Current User',
+      assignmentReason: assignedTo
+        ? (oldAssignedTo ? `Reassigned from ${oldAssignedTo} to ${assignedTo}` : `Initially assigned to ${assignedTo}`)
+        : 'Lead unassigned'
+    })
     const message = assignedTo
       ? `Lead assigned to ${assignedTo} successfully!`
       : `Lead unassigned successfully!`
@@ -232,7 +239,11 @@ const Leads = () => {
     selectedLeads.forEach(leadId => {
       const lead = leads.find(l => l.id === leadId)
       if (lead) {
-        updateLead(leadId, { ...lead, assignedTo: agentName })
+        updateLead(leadId, {
+          assignedTo: agentName,
+          changedBy: user?.name || 'Current User',
+          assignmentReason: `Bulk assignment to ${agentName}`
+        })
       }
     })
     showToast(`${selectedLeads.length} leads assigned to ${agentName}`, 'success')
