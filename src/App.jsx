@@ -607,15 +607,24 @@ const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token')
     const userData = localStorage.getItem('user')
 
+    console.log('🔄 AuthProvider useEffect - checking stored auth data')
+    console.log('🔄 Token exists:', !!token)
+    console.log('🔄 User data exists:', !!userData)
+
     if (token && userData) {
       try {
         const parsedUser = JSON.parse(userData)
+        console.log('🔄 Parsed user from localStorage:', parsedUser)
         setUser(parsedUser)
       } catch (error) {
         console.error('Error parsing user data:', error)
         localStorage.removeItem('token')
         localStorage.removeItem('user')
+        setUser(null)
       }
+    } else {
+      console.log('🔄 No stored auth data found')
+      setUser(null)
     }
 
     setLoading(false)
@@ -625,12 +634,18 @@ const AuthProvider = ({ children }) => {
     try {
       setLoading(true)
 
+      // Clear any existing user data first
+      setUser(null)
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+
       // Handle both object and separate parameters
       const { email, password } = typeof credentials === 'object'
         ? credentials
         : { email: arguments[0], password: arguments[1] }
 
       console.log('🔐 Attempting login for:', email)
+      console.log('🔐 Cleared existing user data')
 
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -645,10 +660,16 @@ const AuthProvider = ({ children }) => {
       console.log('🔐 Login response data:', result)
 
       if (response.ok && result.success) {
+        // Store new user data
         localStorage.setItem('token', result.token)
         localStorage.setItem('user', JSON.stringify(result.user))
+
+        // Update state with new user
         setUser(result.user)
-        console.log('✅ Login successful for:', result.user.name)
+
+        console.log('✅ Login successful for:', result.user.name, 'Role:', result.user.role)
+        console.log('✅ User state updated:', result.user)
+
         return { success: true, user: result.user }
       } else {
         console.error('❌ Login failed:', result.message)
@@ -750,8 +771,12 @@ function App() {
 function AppWithAuth() {
   const { user, loading } = useAuth()
 
-  // Debug: Log user object
-  console.log('AppWithAuth user:', user)
+  // Debug: Log user object with detailed info
+  console.log('🔍 AppWithAuth - Current user:', user)
+  console.log('🔍 AppWithAuth - User name:', user?.name)
+  console.log('🔍 AppWithAuth - User role:', user?.role)
+  console.log('🔍 AppWithAuth - User email:', user?.email)
+  console.log('🔍 AppWithAuth - Loading:', loading)
 
   // Show loading spinner while checking auth
   if (loading) {
