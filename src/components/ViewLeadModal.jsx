@@ -32,6 +32,8 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   // Define fetchNotesAndHistory function first
   const fetchNotesAndHistory = useCallback(async () => {
+    if (!lead?.id) return
+
     try {
       setLoading(true)
 
@@ -64,8 +66,8 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
         {
           id: 1,
           fromAgent: null,
-          toAgent: lead.assignedTo,
-          changedAt: lead.createdAt,
+          toAgent: lead?.assignedTo || 'Unknown',
+          changedAt: lead?.createdAt || new Date().toISOString(),
           changedBy: 'System',
           reason: 'Initial assignment'
         }
@@ -73,7 +75,7 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
     } finally {
       setLoading(false)
     }
-  }, [lead?.id, user?.name])
+  }, [lead?.id, lead?.assignedTo, lead?.createdAt, user?.name])
 
   // Fetch notes and history when modal opens
   useEffect(() => {
