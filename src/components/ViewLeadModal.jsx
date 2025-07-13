@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import {
   User, Phone, Mail, MapPin, Calendar, Tag, Home, DollarSign,
   MessageSquare, Clock, Edit3, Send, History, UserCheck,
@@ -30,84 +30,65 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   if (!lead) return null
 
-  // Handle modal state changes
-  useEffect(() => {
-    if (!isOpen) {
-      setNotes([])
-      setAssigneeHistory([])
-      setNewNote('')
-      setActiveTab('details')
-    }
-  }, [isOpen])
+  // Simple data fetching function
+  const fetchNotesAndHistory = async () => {
+    if (!lead?.id) return
 
-  // Handle data fetching separately
-  useEffect(() => {
-    if (!isOpen || !lead || !lead.id) return
+    setLoading(true)
 
-    let isMounted = true
-
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-
-        // Fetch notes
-        try {
-          const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
-          if (notesResponse.ok && isMounted) {
-            const notesData = await notesResponse.json()
-            setNotes(notesData.data || [])
-          }
-        } catch (notesError) {
-          console.log('Notes fetch failed:', notesError.message)
-        }
-
-        // Fetch assignee history
-        try {
-          const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
-          if (historyResponse.ok && isMounted) {
-            const historyData = await historyResponse.json()
-            setAssigneeHistory(historyData.data || [])
-          }
-        } catch (historyError) {
-          console.log('History fetch failed:', historyError.message)
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        if (isMounted) {
-          // Fallback mock data
-          setNotes([
-            {
-              id: 1,
-              content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
-              createdAt: new Date().toISOString(),
-              createdBy: 'System',
-              type: 'note'
-            }
-          ])
-          setAssigneeHistory([
-            {
-              id: 1,
-              fromAgent: null,
-              toAgent: lead.assignedTo || 'Unknown',
-              changedAt: lead.createdAt || new Date().toISOString(),
-              changedBy: 'System',
-              reason: 'Initial assignment'
-            }
-          ])
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
+    try {
+      // Fetch notes
+      const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
+      if (notesResponse.ok) {
+        const notesData = await notesResponse.json()
+        setNotes(notesData.data || [])
       }
+    } catch (error) {
+      console.log('Notes fetch failed:', error.message)
+      setNotes([{
+        id: 1,
+        content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
+        createdAt: new Date().toISOString(),
+        createdBy: 'System',
+        type: 'note'
+      }])
     }
 
-    fetchData()
-
-    return () => {
-      isMounted = false
+    try {
+      // Fetch assignee history
+      const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json()
+        setAssigneeHistory(historyData.data || [])
+      }
+    } catch (error) {
+      console.log('History fetch failed:', error.message)
+      setAssigneeHistory([{
+        id: 1,
+        fromAgent: null,
+        toAgent: lead.assignedTo || 'Unknown',
+        changedAt: lead.createdAt || new Date().toISOString(),
+        changedBy: 'System',
+        reason: 'Initial assignment'
+      }])
     }
-  }, [isOpen, lead])
+
+    setLoading(false)
+  }
+
+  // Handle modal opening
+  const handleModalOpen = () => {
+    if (isOpen && lead?.id) {
+      setActiveTab('details')
+      setNewNote('')
+      fetchNotesAndHistory()
+    }
+  }
+
+  // Call handleModalOpen when modal opens
+  if (isOpen && notes.length === 0 && assigneeHistory.length === 0 && !loading) {
+    handleModalOpen()
+  }
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
