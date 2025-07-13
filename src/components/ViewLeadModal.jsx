@@ -30,58 +30,58 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   if (!lead) return null
 
-  // Define fetchNotesAndHistory function first
-  const fetchNotesAndHistory = useCallback(async () => {
-    if (!lead?.id) return
-
-    try {
-      setLoading(true)
-
-      // Fetch notes
-      const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
-      if (notesResponse.ok) {
-        const notesData = await notesResponse.json()
-        setNotes(notesData.data || [])
-      }
-
-      // Fetch assignee history
-      const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
-      if (historyResponse.ok) {
-        const historyData = await historyResponse.json()
-        setAssigneeHistory(historyData.data || [])
-      }
-    } catch (error) {
-      console.error('Error fetching notes and history:', error)
-      // For now, use mock data if API fails
-      setNotes([
-        {
-          id: 1,
-          content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
-          createdAt: new Date().toISOString(),
-          createdBy: user?.name || 'System',
-          type: 'note'
-        }
-      ])
-      setAssigneeHistory([
-        {
-          id: 1,
-          fromAgent: null,
-          toAgent: lead?.assignedTo || 'Unknown',
-          changedAt: lead?.createdAt || new Date().toISOString(),
-          changedBy: 'System',
-          reason: 'Initial assignment'
-        }
-      ])
-    } finally {
-      setLoading(false)
-    }
-  }, [lead?.id, lead?.assignedTo, lead?.createdAt, user?.name])
-
   // Fetch notes and history when modal opens
   useEffect(() => {
+    const fetchNotesAndHistory = async () => {
+      if (!lead?.id) return
+
+      try {
+        setLoading(true)
+
+        // Fetch notes
+        const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
+        if (notesResponse.ok) {
+          const notesData = await notesResponse.json()
+          setNotes(notesData.data || [])
+        }
+
+        // Fetch assignee history
+        const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json()
+          setAssigneeHistory(historyData.data || [])
+        }
+      } catch (error) {
+        console.error('Error fetching notes and history:', error)
+        // For now, use mock data if API fails
+        setNotes([
+          {
+            id: 1,
+            content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
+            createdAt: new Date().toISOString(),
+            createdBy: user?.name || 'System',
+            type: 'note'
+          }
+        ])
+        setAssigneeHistory([
+          {
+            id: 1,
+            fromAgent: null,
+            toAgent: lead?.assignedTo || 'Unknown',
+            changedAt: lead?.createdAt || new Date().toISOString(),
+            changedBy: 'System',
+            reason: 'Initial assignment'
+          }
+        ])
+      } finally {
+        setLoading(false)
+      }
+    }
+
     if (isOpen && lead?.id) {
       fetchNotesAndHistory()
     }
+
     // Reset state when modal closes
     if (!isOpen) {
       setNotes([])
@@ -89,7 +89,7 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
       setNewNote('')
       setActiveTab('details')
     }
-  }, [isOpen, lead?.id, fetchNotesAndHistory])
+  }, [isOpen, lead?.id, lead?.assignedTo, lead?.createdAt, user?.name])
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
