@@ -660,17 +660,26 @@ const AuthProvider = ({ children }) => {
       console.log('🔐 Login response data:', result)
 
       if (response.ok && result.success) {
+        // Handle both response structures: result.user or result.data.user
+        const userData = result.data?.user || result.user
+        const token = result.data?.token || result.token
+
+        if (!userData || !token) {
+          console.error('❌ Invalid response structure:', result)
+          return { success: false, message: 'Invalid response from server' }
+        }
+
         // Store new user data
-        localStorage.setItem('token', result.token)
-        localStorage.setItem('user', JSON.stringify(result.user))
+        localStorage.setItem('token', token)
+        localStorage.setItem('user', JSON.stringify(userData))
 
         // Update state with new user
-        setUser(result.user)
+        setUser(userData)
 
-        console.log('✅ Login successful for:', result.user.name, 'Role:', result.user.role)
-        console.log('✅ User state updated:', result.user)
+        console.log('✅ Login successful for:', userData.name, 'Role:', userData.role)
+        console.log('✅ User state updated:', userData)
 
-        return { success: true, user: result.user }
+        return { success: true, user: userData }
       } else {
         console.error('❌ Login failed:', result.message)
         return { success: false, message: result.message || 'Login failed' }
