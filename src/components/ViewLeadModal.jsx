@@ -30,20 +30,7 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   if (!lead) return null
 
-  // Fetch notes and history when modal opens
-  useEffect(() => {
-    if (isOpen && lead?.id) {
-      fetchNotesAndHistory()
-    }
-    // Reset state when modal closes
-    if (!isOpen) {
-      setNotes([])
-      setAssigneeHistory([])
-      setNewNote('')
-      setActiveTab('details')
-    }
-  }, [isOpen, lead?.id, fetchNotesAndHistory])
-
+  // Define fetchNotesAndHistory function first
   const fetchNotesAndHistory = useCallback(async () => {
     try {
       setLoading(true)
@@ -87,6 +74,20 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
       setLoading(false)
     }
   }, [lead?.id, user?.name])
+
+  // Fetch notes and history when modal opens
+  useEffect(() => {
+    if (isOpen && lead?.id) {
+      fetchNotesAndHistory()
+    }
+    // Reset state when modal closes
+    if (!isOpen) {
+      setNotes([])
+      setAssigneeHistory([])
+      setNewNote('')
+      setActiveTab('details')
+    }
+  }, [isOpen, lead?.id, fetchNotesAndHistory])
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
