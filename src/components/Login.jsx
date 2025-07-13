@@ -12,7 +12,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Real team member accounts for testing
+  // Your actual team member accounts for testing
   const demoAccounts = [
     {
       role: 'Manager',
@@ -39,6 +39,13 @@ const Login = () => {
       role: 'Agent',
       name: 'Julien Martin',
       email: 'julien.martin@leadestate.com',
+      password: 'agent123',
+      description: 'Can only view assigned leads'
+    },
+    {
+      role: 'Agent',
+      name: 'Camille Laurent',
+      email: 'camille.laurent@leadestate.com',
       password: 'agent123',
       description: 'Can only view assigned leads'
     },
