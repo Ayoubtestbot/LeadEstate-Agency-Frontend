@@ -76,17 +76,27 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
     setLoading(false)
   }
 
-  // Handle modal opening
+  // Handle modal opening - only fetch data once
+  const [dataFetched, setDataFetched] = useState(false)
+
   const handleModalOpen = () => {
-    if (isOpen && lead?.id) {
-      setActiveTab('details')
+    if (isOpen && lead?.id && !dataFetched) {
       setNewNote('')
       fetchNotesAndHistory()
+      setDataFetched(true)
     }
   }
 
+  // Reset when modal closes
+  if (!isOpen && dataFetched) {
+    setDataFetched(false)
+    setNotes([])
+    setAssigneeHistory([])
+    setActiveTab('details')
+  }
+
   // Call handleModalOpen when modal opens
-  if (isOpen && notes.length === 0 && assigneeHistory.length === 0 && !loading) {
+  if (isOpen && !dataFetched && !loading) {
     handleModalOpen()
   }
 
