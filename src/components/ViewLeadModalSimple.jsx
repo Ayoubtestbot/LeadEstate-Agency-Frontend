@@ -39,18 +39,28 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
   const fetchRealData = async () => {
     setLoading(true)
     try {
+      console.log('🔄 Fetching data for lead:', lead.id)
+
       // Fetch notes
       const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
+      console.log('📝 Notes response status:', notesResponse.status)
       if (notesResponse.ok) {
         const notesData = await notesResponse.json()
+        console.log('📝 Notes data:', notesData)
         setNotes(notesData.data || [])
+      } else {
+        console.error('❌ Failed to fetch notes:', notesResponse.status)
       }
 
       // Fetch assignment history
       const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
+      console.log('📋 History response status:', historyResponse.status)
       if (historyResponse.ok) {
         const historyData = await historyResponse.json()
+        console.log('📋 History data:', historyData)
         setAssigneeHistory(historyData.data || [])
+      } else {
+        console.error('❌ Failed to fetch history:', historyResponse.status)
       }
 
       setDataLoaded(true)
