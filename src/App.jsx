@@ -29,6 +29,7 @@ import Clients from './pages/Clients'
 import Tasks from './pages/Tasks'
 import Reports from './pages/Reports'
 import Profile from './pages/Profile'
+import Login from './components/Login'
 
 // Import components
 import Layout from './components/Layout'
@@ -603,24 +604,54 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    let token = localStorage.getItem('token')
+    const token = localStorage.getItem('token')
+    const userData = localStorage.getItem('user')
 
-    // If no token exists, create a demo token for development
-    if (!token) {
-      token = 'demo-token-' + Date.now()
-      localStorage.setItem('token', token)
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData)
+        setUser(parsedUser)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
     }
-
-    // Create a demo user
-    setUser({
-      firstName: 'Demo User',
-      name: 'Demo User',
-      role: 'manager',
-      email: 'demo@agency.com'
-    })
 
     setLoading(false)
   }, [])
+
+  const login = async (email, password) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password })
+      })
+
+      const result = await response.json()
+
+      if (response.ok && result.success) {
+        localStorage.setItem('token', result.data.token)
+        localStorage.setItem('user', JSON.stringify(result.data.user))
+        setUser(result.data.user)
+        return { success: true, user: result.data.user }
+      } else {
+        return { success: false, message: result.message || 'Login failed' }
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      return { success: false, message: 'Network error' }
+    }
+  }
+
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+  }
 
   const login = async (credentials) => {
     try {
@@ -793,10 +824,24 @@ function App() {
 
 // Component that has access to auth context
 function AppWithAuth() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
 
   // Debug: Log user object
   console.log('AppWithAuth user:', user)
+
+  // Show loading spinner while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  // Show login page if user is not authenticated
+  if (!user) {
+    return <Login />
+  }
 
   return (
     <PermissionsProvider userRole={user?.role || 'manager'}>
