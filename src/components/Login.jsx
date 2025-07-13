@@ -12,23 +12,40 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Demo accounts for easy testing
+  // Real team member accounts for testing
   const demoAccounts = [
     {
       role: 'Manager',
-      email: 'manager@leadestate.com',
+      name: 'Sophie Moreau',
+      email: 'sophie.moreau@leadestate.com',
       password: 'manager123',
       description: 'Full access to all features'
     },
     {
       role: 'Super Agent',
-      email: 'superagent@leadestate.com',
+      name: 'Antoine Dubois',
+      email: 'antoine.dubois@leadestate.com',
       password: 'superagent123',
       description: 'Can manage leads and view analytics'
     },
     {
       role: 'Agent',
-      email: 'agent@leadestate.com',
+      name: 'Émilie Rousseau',
+      email: 'emilie.rousseau@leadestate.com',
+      password: 'agent123',
+      description: 'Can only view assigned leads'
+    },
+    {
+      role: 'Agent',
+      name: 'Julien Martin',
+      email: 'julien.martin@leadestate.com',
+      password: 'agent123',
+      description: 'Can only view assigned leads'
+    },
+    {
+      role: 'Agent',
+      name: 'Ayoub Jada',
+      email: 'ayoubjada69@gmail.com',
       password: 'agent123',
       description: 'Can only view assigned leads'
     }
@@ -93,7 +110,7 @@ const Login = () => {
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <div className="font-medium text-gray-900">{account.role}</div>
+                    <div className="font-medium text-gray-900">{account.role} - {account.name}</div>
                     <div className="text-sm text-gray-500">{account.email}</div>
                     <div className="text-xs text-gray-400 mt-1">{account.description}</div>
                   </div>
