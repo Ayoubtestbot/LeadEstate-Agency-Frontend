@@ -20,7 +20,7 @@ import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
 import ProtectedComponent from '../components/ProtectedComponent'
 import { useToast } from '../components/Toast'
 import AddLeadModal from '../components/AddLeadModal'
-import ViewLeadModal from '../components/ViewLeadModal'
+import ViewLeadModalSimple from '../components/ViewLeadModalSimple'
 import EditLeadModal from '../components/EditLeadModal'
 import AssignLeadModal from '../components/AssignLeadModal'
 import LinkPropertyModal from '../components/LinkPropertyModal'
@@ -895,7 +895,7 @@ const Leads = () => {
         onSubmit={handleAddLead}
       />
 
-      <ViewLeadModal
+      <ViewLeadModalSimple
         isOpen={!!viewLead}
         onClose={() => setViewLead(null)}
         lead={viewLead}
