@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   User, Phone, Mail, MapPin, Calendar, Tag, Home, DollarSign,
   MessageSquare, Clock, Edit3, Send, History, UserCheck,
@@ -35,9 +35,16 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
     if (isOpen && lead?.id) {
       fetchNotesAndHistory()
     }
-  }, [isOpen, lead?.id])
+    // Reset state when modal closes
+    if (!isOpen) {
+      setNotes([])
+      setAssigneeHistory([])
+      setNewNote('')
+      setActiveTab('details')
+    }
+  }, [isOpen, lead?.id, fetchNotesAndHistory])
 
-  const fetchNotesAndHistory = async () => {
+  const fetchNotesAndHistory = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -79,7 +86,7 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [lead?.id, user?.name])
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
