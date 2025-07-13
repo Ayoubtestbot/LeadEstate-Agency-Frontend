@@ -105,29 +105,6 @@ const Login = () => {
           </p>
         </div>
 
-        {/* Demo Accounts */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Demo Accounts</h3>
-          <div className="space-y-3">
-            {demoAccounts.map((account, index) => (
-              <button
-                key={index}
-                onClick={() => handleDemoLogin(account)}
-                className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="font-medium text-gray-900">{account.role} - {account.name}</div>
-                    <div className="text-sm text-gray-500">{account.email}</div>
-                    <div className="text-xs text-gray-400 mt-1">{account.description}</div>
-                  </div>
-                  <div className="text-xs text-blue-600 font-medium">Click to use</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Login Form */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -192,9 +169,25 @@ const Login = () => {
           </form>
         </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-gray-500">
-          <p>Use the demo accounts above to test different user roles</p>
+        {/* Test Credentials */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-gray-900 mb-3">Test Credentials</h4>
+          <div className="space-y-2 text-xs">
+            {demoAccounts.map((account, index) => (
+              <div key={index} className="flex justify-between items-center p-2 bg-white rounded border">
+                <div>
+                  <span className="font-medium text-gray-700">{account.role}</span>
+                  <span className="text-gray-500 ml-2">{account.name}</span>
+                </div>
+                <button
+                  onClick={() => handleDemoLogin(account)}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Use
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
