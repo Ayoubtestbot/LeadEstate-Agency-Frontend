@@ -100,11 +100,23 @@ const Layout = ({ children }) => {
     }
   ]
 
-  // For demo purposes, show all navigation items (bypass permissions)
-  const navigation = navigationItems
+  // Filter navigation items based on user permissions
+  const navigation = navigationItems.filter(item => {
+    if (item.permission) {
+      // Single permission check
+      return hasPermission(item.permission)
+    } else if (item.permissions) {
+      // Multiple permissions check (user needs ANY of these permissions)
+      return hasAnyPermission(item.permissions)
+    }
+    // If no permissions specified, show the item
+    return true
+  })
 
-  // Debug: Log navigation items
-  console.log('Navigation items:', navigation.length, navigation.map(item => item.name))
+  // Debug: Log navigation items and user role
+  console.log('User role:', user?.role)
+  console.log('Available navigation items:', navigation.length, navigation.map(item => item.name))
+  console.log('All navigation items:', navigationItems.length, navigationItems.map(item => item.name))
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
