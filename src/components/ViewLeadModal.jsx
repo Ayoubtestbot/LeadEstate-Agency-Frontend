@@ -32,9 +32,18 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
 
   // Fetch notes and history when modal opens
   useEffect(() => {
-    const fetchNotesAndHistory = async () => {
-      if (!lead?.id) return
+    if (!isOpen) {
+      // Reset state when modal closes
+      setNotes([])
+      setAssigneeHistory([])
+      setNewNote('')
+      setActiveTab('details')
+      return
+    }
 
+    if (!lead?.id) return
+
+    const fetchNotesAndHistory = async () => {
       try {
         setLoading(true)
 
@@ -54,12 +63,16 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
       } catch (error) {
         console.error('Error fetching notes and history:', error)
         // For now, use mock data if API fails
+        const userName = user?.name || 'System'
+        const assignedTo = lead?.assignedTo || 'Unknown'
+        const createdAt = lead?.createdAt || new Date().toISOString()
+
         setNotes([
           {
             id: 1,
             content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
             createdAt: new Date().toISOString(),
-            createdBy: user?.name || 'System',
+            createdBy: userName,
             type: 'note'
           }
         ])
@@ -67,8 +80,8 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
           {
             id: 1,
             fromAgent: null,
-            toAgent: lead?.assignedTo || 'Unknown',
-            changedAt: lead?.createdAt || new Date().toISOString(),
+            toAgent: assignedTo,
+            changedAt: createdAt,
             changedBy: 'System',
             reason: 'Initial assignment'
           }
@@ -78,18 +91,8 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
       }
     }
 
-    if (isOpen && lead?.id) {
-      fetchNotesAndHistory()
-    }
-
-    // Reset state when modal closes
-    if (!isOpen) {
-      setNotes([])
-      setAssigneeHistory([])
-      setNewNote('')
-      setActiveTab('details')
-    }
-  }, [isOpen, lead?.id, lead?.assignedTo, lead?.createdAt, user?.name])
+    fetchNotesAndHistory()
+  }, [isOpen, lead?.id])
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return
