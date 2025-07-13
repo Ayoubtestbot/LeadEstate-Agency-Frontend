@@ -621,8 +621,17 @@ const AuthProvider = ({ children }) => {
     setLoading(false)
   }, [])
 
-  const login = async (email, password) => {
+  const login = async (credentials) => {
     try {
+      setLoading(true)
+
+      // Handle both object and separate parameters
+      const { email, password } = typeof credentials === 'object'
+        ? credentials
+        : { email: arguments[0], password: arguments[1] }
+
+      console.log('🔐 Attempting login for:', email)
+
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -631,19 +640,25 @@ const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password })
       })
 
+      console.log('🔐 Login response status:', response.status)
       const result = await response.json()
+      console.log('🔐 Login response data:', result)
 
       if (response.ok && result.success) {
         localStorage.setItem('token', result.data.token)
         localStorage.setItem('user', JSON.stringify(result.data.user))
         setUser(result.data.user)
+        console.log('✅ Login successful for:', result.data.user.name)
         return { success: true, user: result.data.user }
       } else {
+        console.error('❌ Login failed:', result.message)
         return { success: false, message: result.message || 'Login failed' }
       }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('❌ Login error:', error)
       return { success: false, message: 'Network error' }
+    } finally {
+      setLoading(false)
     }
   }
 
