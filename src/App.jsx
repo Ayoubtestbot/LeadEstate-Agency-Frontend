@@ -645,11 +645,11 @@ const AuthProvider = ({ children }) => {
       console.log('🔐 Login response data:', result)
 
       if (response.ok && result.success) {
-        localStorage.setItem('token', result.data.token)
-        localStorage.setItem('user', JSON.stringify(result.data.user))
-        setUser(result.data.user)
-        console.log('✅ Login successful for:', result.data.user.name)
-        return { success: true, user: result.data.user }
+        localStorage.setItem('token', result.token)
+        localStorage.setItem('user', JSON.stringify(result.user))
+        setUser(result.user)
+        console.log('✅ Login successful for:', result.user.name)
+        return { success: true, user: result.user }
       } else {
         console.error('❌ Login failed:', result.message)
         return { success: false, message: result.message || 'Login failed' }
