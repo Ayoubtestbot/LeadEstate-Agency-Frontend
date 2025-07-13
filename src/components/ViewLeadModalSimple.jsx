@@ -1,42 +1,90 @@
 import React from 'react'
 import {
   User, Phone, Mail, MapPin, Calendar, Tag, Home, DollarSign,
-  MessageSquare, Clock, History, UserCheck, FileText, X
+  MessageSquare, Clock, History, UserCheck, FileText, X, Plus, Send
 } from 'lucide-react'
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend-9fih.onrender.com/api'
 
 const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
   if (!isOpen || !lead) return null
 
-  // Static mock data to avoid any state management issues
-  const mockNotes = [
-    {
-      id: 1,
-      content: 'Initial contact made via phone. Client interested in 3-bedroom apartments.',
-      createdAt: new Date().toISOString(),
-      createdBy: 'Sarah Johnson',
-      type: 'note'
-    },
-    {
-      id: 2,
-      content: 'Follow-up call scheduled for tomorrow at 2 PM.',
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      createdBy: 'Sarah Johnson',
-      type: 'reminder'
-    }
-  ]
-
-  const mockHistory = [
-    {
-      id: 1,
-      fromAgent: null,
-      toAgent: lead.assignedTo || 'Sarah Johnson',
-      changedAt: lead.createdAt || new Date().toISOString(),
-      changedBy: 'System',
-      reason: 'Initial assignment'
-    }
-  ]
-
+  // Real data state management - minimal hooks to avoid React Error #310
   const [activeTab, setActiveTab] = React.useState('details')
+  const [notes, setNotes] = React.useState([])
+  const [assigneeHistory, setAssigneeHistory] = React.useState([])
+  const [newNote, setNewNote] = React.useState('')
+  const [loading, setLoading] = React.useState(false)
+  const [dataLoaded, setDataLoaded] = React.useState(false)
+
+  // Fetch real data when modal opens
+  React.useEffect(() => {
+    if (isOpen && lead?.id && !dataLoaded) {
+      fetchRealData()
+    }
+  }, [isOpen, lead?.id, dataLoaded])
+
+  const fetchRealData = async () => {
+    setLoading(true)
+    try {
+      // Fetch notes
+      const notesResponse = await fetch(`${API_URL}/leads/${lead.id}/notes`)
+      if (notesResponse.ok) {
+        const notesData = await notesResponse.json()
+        setNotes(notesData.data || [])
+      }
+
+      // Fetch assignment history
+      const historyResponse = await fetch(`${API_URL}/leads/${lead.id}/assignee-history`)
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json()
+        setAssigneeHistory(historyData.data || [])
+      }
+
+      setDataLoaded(true)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return
+
+    try {
+      const response = await fetch(`${API_URL}/leads/${lead.id}/notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newNote.trim(),
+          type: 'note',
+          createdBy: 'Current User' // You can get this from auth context
+        })
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setNotes(prev => [result.data, ...prev])
+        setNewNote('')
+      }
+    } catch (error) {
+      console.error('Error adding note:', error)
+    }
+  }
+
+  // Reset data when modal closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setNotes([])
+      setAssigneeHistory([])
+      setNewNote('')
+      setDataLoaded(false)
+      setActiveTab('details')
+    }
+  }, [isOpen])
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -179,23 +227,55 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
           {/* Notes Tab */}
           {activeTab === 'notes' && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Notes & Comments</h3>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                  Add Note
-                </button>
-              </div>
-              
-              <div className="space-y-3">
-                {mockNotes.map((note) => (
-                  <div key={note.id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="font-medium text-gray-900">{note.createdBy}</span>
-                      <span className="text-sm text-gray-500">{formatDate(note.createdAt)}</span>
-                    </div>
-                    <p className="text-gray-700">{note.content}</p>
+              {/* Add New Note */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 className="text-base font-semibold mb-3 flex items-center">
+                  <Plus className="w-4 h-4 mr-2 text-blue-600" />
+                  Add New Note
+                </h3>
+                <div className="space-y-3">
+                  <textarea
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="Enter your note or comment..."
+                    className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    rows={3}
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleAddNote}
+                      disabled={!newNote.trim() || loading}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>Add Note</span>
+                    </button>
                   </div>
-                ))}
+                </div>
+              </div>
+
+              {/* Notes List */}
+              <div className="space-y-3">
+                {loading && notes.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">Loading notes...</div>
+                ) : notes.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">No notes yet. Add the first note above.</div>
+                ) : (
+                  notes.map((note) => (
+                    <div key={note.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-medium text-gray-900">{note.createdBy}</span>
+                        <span className="text-sm text-gray-500">{formatDate(note.createdAt)}</span>
+                      </div>
+                      <p className="text-gray-700">{note.content}</p>
+                      {note.type && note.type !== 'note' && (
+                        <span className="inline-block mt-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          {note.type}
+                        </span>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -203,23 +283,47 @@ const ViewLeadModalSimple = ({ isOpen, onClose, lead }) => {
           {/* History Tab */}
           {activeTab === 'history' && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Assignment History</h3>
-              
+              <h3 className="text-base font-semibold flex items-center">
+                <History className="w-4 h-4 mr-2 text-blue-600" />
+                Assignment History
+              </h3>
+
               <div className="space-y-3">
-                {mockHistory.map((record) => (
-                  <div key={record.id} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <span className="font-medium text-gray-900">
-                          {record.fromAgent ? `${record.fromAgent} → ${record.toAgent}` : `Assigned to ${record.toAgent}`}
-                        </span>
-                        <p className="text-sm text-gray-600 mt-1">{record.reason}</p>
-                      </div>
-                      <span className="text-sm text-gray-500">{formatDate(record.changedAt)}</span>
-                    </div>
-                    <p className="text-xs text-gray-500">Changed by: {record.changedBy}</p>
+                {loading && assigneeHistory.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">Loading assignment history...</div>
+                ) : assigneeHistory.length === 0 ? (
+                  <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
+                    <History className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                    <p>No assignment history available.</p>
+                    <p className="text-sm mt-1">Assignment changes will appear here.</p>
                   </div>
-                ))}
+                ) : (
+                  assigneeHistory.map((record) => (
+                    <div key={record.id} className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <span className="font-medium text-gray-900">
+                            {record.fromAgent ? `${record.fromAgent} → ${record.toAgent}` : `Assigned to ${record.toAgent}`}
+                          </span>
+                          {record.reason && (
+                            <p className="text-sm text-gray-600 mt-1">{record.reason}</p>
+                          )}
+                          {record.actionType && (
+                            <span className={`inline-block mt-2 px-2 py-1 text-xs rounded-full ${
+                              record.actionType === 'initial_assignment'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}>
+                              {record.actionType === 'initial_assignment' ? 'Initial Assignment' : 'Reassignment'}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm text-gray-500">{formatDate(record.changedAt)}</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Changed by: {record.changedBy}</p>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
