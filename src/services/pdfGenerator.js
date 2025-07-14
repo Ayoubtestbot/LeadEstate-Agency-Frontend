@@ -36,16 +36,258 @@ export class PropertyPDFGenerator {
     return this.pdfMake
   }
 
-  // Generate professional property PDF using pdfmake
+  // Generate professional property PDF using simple HTML approach
   async generatePropertyPDF(property, agencyInfo = {}) {
     try {
-      const pdfMake = await this.loadPdfMake()
-      const docDefinition = this.createDocumentDefinition(property, agencyInfo)
-      return pdfMake.createPdf(docDefinition)
+      console.log('🔄 Starting PDF generation for:', property.title)
+
+      // Use simple HTML-to-PDF approach (more reliable than pdfmake)
+      return await this.generateSimplePDF(property, agencyInfo)
+
     } catch (error) {
       console.error('Error generating PDF:', error)
       throw error
     }
+  }
+
+  // Simple PDF generation using browser's print functionality
+  async generateSimplePDF(property, agencyInfo) {
+    const htmlContent = this.generateHTMLContent(property, agencyInfo)
+
+    // Create a new window for PDF generation
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
+
+    // Wait a moment for content to load
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Return a simple object that mimics pdfmake's interface
+    return {
+      download: (filename) => {
+        printWindow.print()
+        setTimeout(() => printWindow.close(), 1000)
+        return true
+      }
+    }
+  }
+
+  // Generate HTML content for PDF
+  generateHTMLContent(property, agencyInfo) {
+    const price = property.price ? `$${parseInt(property.price).toLocaleString()}` : 'Price on Request'
+    const location = property.address || property.city || property.location || 'Prime Location'
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Property Brochure - ${property.title}</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+          }
+          .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+          }
+          .header {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+          }
+          .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+          }
+          .content {
+            padding: 40px;
+          }
+          .property-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+          }
+          .property-subtitle {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+          }
+          .price-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 30px;
+          }
+          .details-section {
+            margin-bottom: 30px;
+          }
+          .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+          }
+          .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+          }
+          .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+          }
+          .detail-value {
+            color: #34495e;
+          }
+          .description {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.6;
+            color: #34495e;
+            margin-bottom: 30px;
+          }
+          .contact-section {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+          }
+          .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+          }
+          .contact-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          .footer {
+            text-align: center;
+            padding: 20px;
+            background: #34495e;
+            color: white;
+            font-size: 12px;
+          }
+          @media print {
+            body { background: white; }
+            .container { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>${agencyInfo.name || 'LeadEstate Agency'}</h1>
+            <p>Your Trusted Real Estate Partner</p>
+          </div>
+
+          <div class="content">
+            <div class="property-title">${property.title || 'Beautiful Property'}</div>
+            <div class="property-subtitle">${property.type || 'Property'} • ${location}</div>
+            <div class="price-badge">${price}</div>
+
+            <div class="details-section">
+              <div class="section-title">Property Details</div>
+              <div class="details-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Property Type:</span>
+                  <span class="detail-value">${property.type || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Location:</span>
+                  <span class="detail-value">${location}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Surface Area:</span>
+                  <span class="detail-value">${property.surface ? `${property.surface} m²` : property.area ? `${property.area} m²` : 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Bedrooms:</span>
+                  <span class="detail-value">${property.bedrooms || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Bathrooms:</span>
+                  <span class="detail-value">${property.bathrooms || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Status:</span>
+                  <span class="detail-value">${property.status || 'Available'}</span>
+                </div>
+              </div>
+            </div>
+
+            ${property.description ? `
+              <div class="details-section">
+                <div class="section-title">Description</div>
+                <div class="description">${property.description}</div>
+              </div>
+            ` : ''}
+
+            <div class="contact-section">
+              <div class="section-title">Contact Information</div>
+              <div class="contact-grid">
+                <div class="contact-item">
+                  <strong>📞 Phone:</strong><br>
+                  ${agencyInfo.phone || '+212 600 000 000'}
+                </div>
+                <div class="contact-item">
+                  <strong>📧 Email:</strong><br>
+                  ${agencyInfo.email || 'contact@leadestate.com'}
+                </div>
+                <div class="contact-item">
+                  <strong>🌐 Website:</strong><br>
+                  ${agencyInfo.website || 'www.leadestate.com'}
+                </div>
+                <div class="contact-item">
+                  <strong>📍 Address:</strong><br>
+                  ${agencyInfo.address || 'Casablanca, Morocco'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer">
+            Generated by LeadEstate CRM • ${new Date().toLocaleDateString()}
+          </div>
+        </div>
+      </body>
+      </html>
+    `
   }
 
   createDocumentDefinition(property, agencyInfo) {
