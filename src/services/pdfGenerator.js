@@ -7,13 +7,31 @@ export class PropertyPDFGenerator {
     this.pdfMake = null
   }
 
-  // Lazy load pdfmake to avoid build issues
+  // Lazy load pdfmake with better error handling
   async loadPdfMake() {
     if (!this.pdfMake) {
-      const pdfMake = await import('pdfmake/build/pdfmake')
-      const pdfFonts = await import('pdfmake/build/vfs_fonts')
-      pdfMake.default.vfs = pdfFonts.default.pdfMake.vfs
-      this.pdfMake = pdfMake.default
+      try {
+        const pdfMake = await import('pdfmake/build/pdfmake')
+        const pdfFonts = await import('pdfmake/build/vfs_fonts')
+
+        // Handle different import structures
+        const pdfMakeInstance = pdfMake.default || pdfMake
+        const fontsInstance = pdfFonts.default || pdfFonts
+
+        // Set fonts with fallback
+        if (fontsInstance.pdfMake && fontsInstance.pdfMake.vfs) {
+          pdfMakeInstance.vfs = fontsInstance.pdfMake.vfs
+        } else if (fontsInstance.vfs) {
+          pdfMakeInstance.vfs = fontsInstance.vfs
+        } else {
+          console.warn('⚠️ PDF fonts not found, using basic fonts')
+        }
+
+        this.pdfMake = pdfMakeInstance
+      } catch (error) {
+        console.error('❌ Error loading pdfMake:', error)
+        throw new Error('Failed to load PDF generator')
+      }
     }
     return this.pdfMake
   }
@@ -351,15 +369,24 @@ export const DEFAULT_AGENCY_INFO = {
 // Utility function to generate and download property PDF
 export const downloadPropertyPDF = async (property, agencyInfo = DEFAULT_AGENCY_INFO) => {
   try {
+    console.log('🔄 Starting PDF generation for:', property.title)
     const generator = new PropertyPDFGenerator()
     const pdfDoc = await generator.generatePropertyPDF(property, agencyInfo)
 
     const filename = `${property.title || 'Property'}_Brochure`.replace(/[^a-zA-Z0-9]/g, '_')
+    console.log('📄 Generated PDF, downloading as:', filename)
     const success = await generator.downloadPDFFile(pdfDoc, filename)
+
+    if (success) {
+      console.log('✅ PDF downloaded successfully')
+    } else {
+      console.log('❌ PDF download failed')
+    }
 
     return success
   } catch (error) {
-    console.error('Error downloading property PDF:', error)
+    console.error('❌ Error downloading property PDF:', error)
+    alert(`Error generating PDF: ${error.message}`)
     return false
   }
 }

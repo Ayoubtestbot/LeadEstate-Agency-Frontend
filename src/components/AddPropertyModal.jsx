@@ -10,49 +10,69 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
     city: '',
     surface: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    bedrooms: '',
+    bathrooms: ''
   })
 
-  const [selectedImage, setSelectedImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
+  const [selectedImages, setSelectedImages] = useState([])
+  const [imagePreviews, setImagePreviews] = useState([])
   const [uploading, setUploading] = useState(false)
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      setSelectedImage(file)
+    const files = Array.from(e.target.files)
+    if (files.length > 0) {
+      setSelectedImages(files)
 
-      // Create preview
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setImagePreview(e.target.result)
-      }
-      reader.readAsDataURL(file)
+      // Create previews for all selected images
+      const previews = []
+      files.forEach((file, index) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          previews[index] = e.target.result
+          if (previews.length === files.length) {
+            setImagePreviews([...previews])
+          }
+        }
+        reader.readAsDataURL(file)
+      })
     }
   }
 
-  const uploadImage = async () => {
-    if (!selectedImage) return null
+  const removeImage = (index) => {
+    const newImages = selectedImages.filter((_, i) => i !== index)
+    const newPreviews = imagePreviews.filter((_, i) => i !== index)
+    setSelectedImages(newImages)
+    setImagePreviews(newPreviews)
+  }
+
+  const uploadImages = async () => {
+    if (selectedImages.length === 0) return []
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append('image', selectedImage)
+      const uploadPromises = selectedImages.map(async (image) => {
+        const formData = new FormData()
+        formData.append('image', image)
 
-      const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties/upload', {
-        method: 'POST',
-        body: formData
+        const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (response.ok) {
+          const result = await response.json()
+          return `https://leadestate-backend-9fih.onrender.com${result.data.imageUrl}`
+        } else {
+          throw new Error('Failed to upload image')
+        }
       })
 
-      if (response.ok) {
-        const result = await response.json()
-        return `https://leadestate-backend-9fih.onrender.com${result.data.imageUrl}`
-      } else {
-        throw new Error('Failed to upload image')
-      }
+      const uploadedUrls = await Promise.all(uploadPromises)
+      return uploadedUrls.filter(url => url !== null)
     } catch (error) {
-      console.error('Error uploading image:', error)
-      return null
+      console.error('Error uploading images:', error)
+      return []
     } finally {
       setUploading(false)
     }
@@ -61,10 +81,10 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Upload image first if selected
-    let imageUrl = ''
-    if (selectedImage) {
-      imageUrl = await uploadImage()
+    // Upload images first if selected
+    let imageUrls = []
+    if (selectedImages.length > 0) {
+      imageUrls = await uploadImages()
     }
 
     // Format data for backend compatibility
@@ -76,7 +96,10 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       city: formData.city,
       surface: parseFloat(formData.surface) || 0,
       description: formData.description,
-      image_url: imageUrl
+      bedrooms: parseInt(formData.bedrooms) || 0,
+      bathrooms: parseInt(formData.bathrooms) || 0,
+      image_url: imageUrls[0] || '', // Main image (first one)
+      images: imageUrls // All images
     }
 
     console.log('🏠 Submitting property data:', propertyData)
@@ -91,10 +114,12 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
       city: '',
       surface: '',
       description: '',
-      image_url: ''
+      image_url: '',
+      bedrooms: '',
+      bathrooms: ''
     })
-    setSelectedImage(null)
-    setImagePreview(null)
+    setSelectedImages([])
+    setImagePreviews([])
     onClose()
   }
 
@@ -242,56 +267,91 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
               />
             </div>
 
-            {/* Image Upload */}
+            {/* Bedrooms and Bathrooms */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bedrooms
+                </label>
+                <input
+                  type="number"
+                  name="bedrooms"
+                  value={formData.bedrooms}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., 3"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bathrooms
+                </label>
+                <input
+                  type="number"
+                  name="bathrooms"
+                  value={formData.bathrooms}
+                  onChange={handleChange}
+                  min="0"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., 2"
+                />
+              </div>
+            </div>
+
+            {/* Multiple Images Upload */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Property Image
+                Property Images (Multiple)
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
-                <div className="space-y-1 text-center">
-                  {imagePreview ? (
-                    <div className="relative">
+
+              {/* Image Previews */}
+              {imagePreviews.length > 0 && (
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative">
                       <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="mx-auto h-32 w-32 object-cover rounded-md"
+                        src={preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-md"
                       />
                       <button
                         type="button"
-                        onClick={() => {
-                          setSelectedImage(null)
-                          setImagePreview(null)
-                        }}
+                        onClick={() => removeImage(index)}
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                       >
                         ×
                       </button>
                     </div>
-                  ) : (
-                    <>
-                      <Image className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="image-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                        >
-                          <span>Upload an image</span>
-                          <input
-                            id="image-upload"
-                            name="image-upload"
-                            type="file"
-                            accept="image/*"
-                            className="sr-only"
-                            onChange={handleImageChange}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        PNG, JPG, GIF up to 5MB
-                      </p>
-                    </>
-                  )}
+                  ))}
+                </div>
+              )}
+
+              {/* Upload Area */}
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-gray-400 transition-colors">
+                <div className="space-y-1 text-center">
+                  <Image className="mx-auto h-12 w-12 text-gray-400" />
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="image-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                    >
+                      <span>Upload images</span>
+                      <input
+                        id="image-upload"
+                        name="image-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="sr-only"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">
+                    PNG, JPG, GIF up to 5MB each (Multiple files allowed)
+                  </p>
                 </div>
               </div>
             </div>
