@@ -55,18 +55,29 @@ export class PropertyPDFGenerator {
     const htmlContent = this.generateHTMLContent(property, agencyInfo)
 
     // Create a new window for PDF generation
-    const printWindow = window.open('', '_blank')
+    const printWindow = window.open('', '_blank', 'width=800,height=600')
     printWindow.document.write(htmlContent)
     printWindow.document.close()
 
     // Wait a moment for content to load
     await new Promise(resolve => setTimeout(resolve, 500))
 
+    // Add print button and instructions to the window
+    const printButton = printWindow.document.createElement('div')
+    printButton.innerHTML = `
+      <div style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);" onclick="window.print()">
+        📄 Save as PDF
+      </div>
+      <div style="position: fixed; top: 60px; right: 10px; z-index: 1000; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);" onclick="window.close()">
+        ✖ Close
+      </div>
+    `
+    printWindow.document.body.appendChild(printButton)
+
     // Return a simple object that mimics pdfmake's interface
     return {
       download: (filename) => {
-        printWindow.print()
-        setTimeout(() => printWindow.close(), 1000)
+        // Don't auto-print, let user control it
         return true
       }
     }

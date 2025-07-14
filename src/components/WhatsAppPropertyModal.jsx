@@ -37,11 +37,12 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
       message += `📐 ${property.surface || property.area || 'N/A'} m²\n\n`
     })
 
-    message += `📎 I'm sending you detailed PDF brochures with:\n`
+    message += `📎 I'm attaching detailed PDF brochures with:\n`
     message += `• High-quality property photos\n`
-    message += `• Complete specifications\n`
-    message += `• Professional layout\n`
-    message += `• Our agency contact information\n\n`
+    message += `• Complete specifications & floor plans\n`
+    message += `• Professional layout & design\n`
+    message += `• Our agency contact information\n`
+    message += `• Pricing and availability details\n\n`
 
     if (customMessage.trim()) {
       message += `${customMessage}\n\n`
@@ -65,7 +66,7 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
       // Generate PDFs for selected properties
       const selectedProps = properties.filter(p => selectedProperties.includes(p.id))
 
-      // Open print dialogs for each property
+      // Open PDF windows for each property
       const printPromises = selectedProps.map(async (property) => {
         const result = await generatePropertyPDFBlob(property, DEFAULT_AGENCY_INFO)
         return { property: property.title, success: result.success }
@@ -80,9 +81,38 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
         const phoneNumber = lead.phone.replace(/\D/g, '') // Remove non-digits
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
 
-        // Show success message and open WhatsApp
-        alert(`✅ ${successCount} PDF brochure${successCount === 1 ? '' : 's'} ready for printing!\n\nPrint the PDFs using Ctrl+P or Cmd+P, then attach them to WhatsApp.\n\nOpening WhatsApp now...`)
-        window.open(whatsappUrl, '_blank')
+        // Show detailed instructions
+        const instructionModal = document.createElement('div')
+        instructionModal.innerHTML = `
+          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+              <h2 style="color: #2c3e50; margin-bottom: 20px;">📄 PDF Brochures Ready!</h2>
+              <p style="color: #34495e; margin-bottom: 20px; line-height: 1.6;">
+                <strong>${successCount} property brochure${successCount === 1 ? '' : 's'} opened in new window${successCount === 1 ? '' : 's'}!</strong>
+              </p>
+              <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
+                <h3 style="color: #2c3e50; margin-bottom: 15px;">📋 How to send via WhatsApp:</h3>
+                <ol style="color: #34495e; line-height: 1.8; margin: 0; padding-left: 20px;">
+                  <li><strong>Save PDFs:</strong> Click "📄 Save as PDF" button in each window</li>
+                  <li><strong>Choose location:</strong> Save to Downloads or Desktop</li>
+                  <li><strong>Open WhatsApp:</strong> Click "Open WhatsApp" below</li>
+                  <li><strong>Attach files:</strong> Use 📎 attachment button in WhatsApp</li>
+                  <li><strong>Select PDFs:</strong> Choose the saved PDF files</li>
+                  <li><strong>Send message:</strong> Your message is already prepared!</li>
+                </ol>
+              </div>
+              <div style="display: flex; gap: 15px; justify-content: center;">
+                <button onclick="window.open('${whatsappUrl}', '_blank')" style="background: #25d366; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                  📱 Open WhatsApp
+                </button>
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                  ✖ Close
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+        document.body.appendChild(instructionModal)
         onClose()
       } else {
         alert('❌ Failed to generate PDF brochures. Please try again.')
