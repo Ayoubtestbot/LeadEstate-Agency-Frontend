@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Sample Data - LeadEstate</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        .log { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; height: 400px; overflow-y: auto; font-family: monospace; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 LeadEstate - Add Sample Data</h1>
+        <p>This will add sample leads, properties, and team members to your database.</p>
+        
+        <button onclick="addSampleData()">🔄 Add All Sample Data</button>
+        <button onclick="addSampleLeads()">👥 Add Sample Leads</button>
+        <button onclick="addSampleProperties()">🏠 Add Sample Properties</button>
+        <button onclick="addSampleTeam()">👨‍💼 Add Sample Team</button>
+        <button onclick="clearLog()">🗑️ Clear Log</button>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        async function addSampleData() {
+            log('🚀 Starting to add all sample data...');
+            await addSampleTeam();
+            await addSampleLeads();
+            await addSampleProperties();
+            log('✅ All sample data added successfully!', 'success');
+        }
+        
+        async function addSampleTeam() {
+            log('👨‍💼 Adding sample team members...');
+            
+            const teamMembers = [
+                {
+                    name: 'Ahmed Benali',
+                    email: 'ahmed.benali@leadestate.com',
+                    phone: '+212 600 111 111',
+                    role: 'manager',
+                    department: 'Sales'
+                },
+                {
+                    name: 'Fatima Zahra',
+                    email: 'fatima.zahra@leadestate.com',
+                    phone: '+212 600 222 222',
+                    role: 'super_agent',
+                    department: 'Sales'
+                },
+                {
+                    name: 'Youssef Alami',
+                    email: 'youssef.alami@leadestate.com',
+                    phone: '+212 600 333 333',
+                    role: 'agent',
+                    department: 'Sales'
+                },
+                {
+                    name: 'Khadija Mansouri',
+                    email: 'khadija.mansouri@leadestate.com',
+                    phone: '+212 600 444 444',
+                    role: 'agent',
+                    department: 'Sales'
+                },
+                {
+                    name: 'Omar Tazi',
+                    email: 'omar.tazi@leadestate.com',
+                    phone: '+212 600 555 555',
+                    role: 'agent',
+                    department: 'Sales'
+                },
+                {
+                    name: 'Aicha Berrada',
+                    email: 'aicha.berrada@leadestate.com',
+                    phone: '+212 600 666 666',
+                    role: 'agent',
+                    department: 'Sales'
+                }
+            ];
+            
+            for (const member of teamMembers) {
+                try {
+                    const response = await fetch(`${API_URL}/team`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(member)
+                    });
+                    
+                    if (response.ok) {
+                        log(`✅ Added team member: ${member.name}`, 'success');
+                    } else {
+                        log(`❌ Failed to add team member: ${member.name}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Error adding team member ${member.name}: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function addSampleLeads() {
+            log('👥 Adding sample leads...');
+            
+            const leads = [
+                {
+                    first_name: 'Ayoub',
+                    last_name: 'Jaad',
+                    email: 'ayoub.jaad@gmail.com',
+                    phone: '+212 600 123 456',
+                    whatsapp: '+212 600 123 456',
+                    source: 'Website',
+                    budget: '250000',
+                    notes: 'Interested in modern villa',
+                    status: 'qualified',
+                    assigned_to: 'Ahmed Benali',
+                    language: 'fr'
+                },
+                {
+                    first_name: 'Sara',
+                    last_name: 'Bennani',
+                    email: 'sara.bennani@gmail.com',
+                    phone: '+212 600 789 012',
+                    whatsapp: '+212 600 789 012',
+                    source: 'Facebook',
+                    budget: '180000',
+                    notes: 'Looking for apartment in Casablanca',
+                    status: 'new',
+                    assigned_to: 'Fatima Zahra',
+                    language: 'ar'
+                },
+                {
+                    first_name: 'Mohamed',
+                    last_name: 'Alaoui',
+                    email: 'mohamed.alaoui@gmail.com',
+                    phone: '+212 600 345 678',
+                    whatsapp: '+212 600 345 678',
+                    source: 'Referral',
+                    budget: '320000',
+                    notes: 'Wants luxury property',
+                    status: 'contacted',
+                    assigned_to: 'Youssef Alami',
+                    language: 'en'
+                },
+                {
+                    first_name: 'Laila',
+                    last_name: 'Fassi',
+                    email: 'laila.fassi@gmail.com',
+                    phone: '+212 600 901 234',
+                    whatsapp: '+212 600 901 234',
+                    source: 'Google Ads',
+                    budget: '150000',
+                    notes: 'First-time buyer',
+                    status: 'qualified',
+                    assigned_to: 'Khadija Mansouri',
+                    language: 'fr'
+                },
+                {
+                    first_name: 'Rachid',
+                    last_name: 'Benjelloun',
+                    email: 'rachid.benjelloun@gmail.com',
+                    phone: '+212 600 567 890',
+                    whatsapp: '+212 600 567 890',
+                    source: 'Website',
+                    budget: '280000',
+                    notes: 'Investment property',
+                    status: 'new',
+                    assigned_to: 'Omar Tazi',
+                    language: 'ar'
+                }
+            ];
+            
+            for (const lead of leads) {
+                try {
+                    const response = await fetch(`${API_URL}/leads`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(lead)
+                    });
+                    
+                    if (response.ok) {
+                        log(`✅ Added lead: ${lead.first_name} ${lead.last_name}`, 'success');
+                    } else {
+                        log(`❌ Failed to add lead: ${lead.first_name} ${lead.last_name}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Error adding lead ${lead.first_name}: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        async function addSampleProperties() {
+            log('🏠 Adding sample properties...');
+            
+            const properties = [
+                {
+                    title: 'Villa Moderne à Kenitra',
+                    type: 'Villa',
+                    price: 250000,
+                    address: 'Quartier Administratif, Kenitra',
+                    city: 'Kenitra',
+                    surface: 200,
+                    description: 'Belle villa moderne avec jardin, 4 chambres, 3 salles de bain, garage double.',
+                    image_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6'
+                },
+                {
+                    title: 'Appartement Centre Casablanca',
+                    type: 'Apartment',
+                    price: 180000,
+                    address: 'Maarif, Casablanca',
+                    city: 'Casablanca',
+                    surface: 120,
+                    description: 'Appartement moderne au cœur de Casablanca, 3 chambres, 2 salles de bain.',
+                    image_url: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00'
+                },
+                {
+                    title: 'Villa de Luxe Rabat',
+                    type: 'Villa',
+                    price: 450000,
+                    address: 'Souissi, Rabat',
+                    city: 'Rabat',
+                    surface: 350,
+                    description: 'Villa de luxe avec piscine, 6 chambres, 4 salles de bain, grand jardin.',
+                    image_url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811'
+                },
+                {
+                    title: 'Appartement Vue Mer Tanger',
+                    type: 'Apartment',
+                    price: 220000,
+                    address: 'Malabata, Tanger',
+                    city: 'Tanger',
+                    surface: 140,
+                    description: 'Appartement avec vue mer panoramique, 3 chambres, 2 salles de bain.',
+                    image_url: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688'
+                },
+                {
+                    title: 'Maison Traditionnelle Fès',
+                    type: 'House',
+                    price: 160000,
+                    address: 'Médina, Fès',
+                    city: 'Fès',
+                    surface: 180,
+                    description: 'Maison traditionnelle rénovée, 4 chambres, patio central.',
+                    image_url: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be'
+                }
+            ];
+            
+            for (const property of properties) {
+                try {
+                    const response = await fetch(`${API_URL}/properties`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(property)
+                    });
+                    
+                    if (response.ok) {
+                        log(`✅ Added property: ${property.title}`, 'success');
+                    } else {
+                        log(`❌ Failed to add property: ${property.title}`, 'error');
+                    }
+                } catch (error) {
+                    log(`❌ Error adding property ${property.title}: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // Auto-start when page loads
+        window.onload = function() {
+            log('🚀 Sample Data Generator Ready!');
+            log('Click "Add All Sample Data" to populate your database.');
+        };
+    </script>
+</body>
+</html>
