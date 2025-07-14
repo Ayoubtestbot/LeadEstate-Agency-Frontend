@@ -102,10 +102,10 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
                 </ol>
               </div>
               <div style="display: flex; gap: 15px; justify-content: center;">
-                <button onclick="window.open('${whatsappUrl}', '_blank')" style="background: #25d366; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button onclick="window.open('${whatsappUrl}', '_blank'); this.parentElement.parentElement.parentElement.remove();" style="background: #25d366; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);">
                   📱 Open WhatsApp
                 </button>
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 10px rgba(149, 165, 166, 0.3);">
                   ✖ Close
                 </button>
               </div>

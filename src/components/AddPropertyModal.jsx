@@ -21,16 +21,47 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files)
+
     if (files.length > 0) {
+      // Validate number of images (max 10)
+      if (files.length > 10) {
+        alert('❌ Maximum 10 images allowed. Please select fewer images.')
+        e.target.value = '' // Clear the input
+        return
+      }
+
+      // Validate file sizes (max 10MB each)
+      const maxSize = 10 * 1024 * 1024 // 10MB in bytes
+      const oversizedFiles = files.filter(file => file.size > maxSize)
+
+      if (oversizedFiles.length > 0) {
+        alert(`❌ Some images are larger than 10MB:\n${oversizedFiles.map(f => `• ${f.name} (${(f.size / 1024 / 1024).toFixed(1)}MB)`).join('\n')}\n\nPlease compress or choose smaller images.`)
+        e.target.value = '' // Clear the input
+        return
+      }
+
+      // Validate file types
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+      const invalidFiles = files.filter(file => !allowedTypes.includes(file.type))
+
+      if (invalidFiles.length > 0) {
+        alert(`❌ Invalid file types:\n${invalidFiles.map(f => `• ${f.name}`).join('\n')}\n\nPlease select only JPG, PNG, GIF, or WebP images.`)
+        e.target.value = '' // Clear the input
+        return
+      }
+
       setSelectedImages(files)
 
       // Create previews for all selected images
       const previews = []
+      let loadedCount = 0
+
       files.forEach((file, index) => {
         const reader = new FileReader()
         reader.onload = (e) => {
           previews[index] = e.target.result
-          if (previews.length === files.length) {
+          loadedCount++
+          if (loadedCount === files.length) {
             setImagePreviews([...previews])
           }
         }
@@ -350,7 +381,7 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">
-                    PNG, JPG, GIF up to 5MB each (Multiple files allowed)
+                    PNG, JPG, GIF, WebP up to 10MB each (Max 10 images)
                   </p>
                 </div>
               </div>
