@@ -11,8 +11,8 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
 
   if (!isOpen || !lead) return null
 
-  // Filter available properties (you could add more sophisticated filtering)
-  const availableProperties = properties.filter(property => property.status === 'available')
+  // Show all properties (remove status filtering to show all available properties)
+  const availableProperties = properties || []
 
   const togglePropertySelection = (propertyId) => {
     setSelectedProperties(prev => 
