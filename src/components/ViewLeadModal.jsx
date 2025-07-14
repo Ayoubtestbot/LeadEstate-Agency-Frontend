@@ -5,8 +5,11 @@ import {
   FileText, Plus, ChevronDown, ChevronUp
 } from 'lucide-react'
 import Modal from './Modal'
+import { useData } from '../App'
 
 const ViewLeadModal = ({ isOpen, onClose, lead }) => {
+  const { properties } = useData()
+
   if (!lead) return null
 
   // Static data - no state management to avoid React hook issues
@@ -113,6 +116,9 @@ const ViewLeadModal = ({ isOpen, onClose, lead }) => {
     )
   })
 
+  console.log('🔍 ViewLeadModal - Lead data:', lead)
+  console.log('🔍 ViewLeadModal - interestedProperties:', lead.interestedProperties)
+  console.log('🔍 ViewLeadModal - Available properties:', properties)
   console.log('🔍 ViewLeadModal - Linked properties found:', linkedProperties)
 
   const getStatusColor = (status) => {
