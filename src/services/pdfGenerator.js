@@ -1,244 +1,265 @@
-import jsPDF from 'jspdf'
+// Simple HTML-based PDF Generator using browser print functionality
+// This approach is more reliable and doesn't have build issues
 
 // Professional PDF Generator for Property Brochures
 export class PropertyPDFGenerator {
   constructor() {
-    this.doc = null
-    this.pageWidth = 210 // A4 width in mm
-    this.pageHeight = 297 // A4 height in mm
-    this.margin = 20
-    this.contentWidth = this.pageWidth - (this.margin * 2)
+    this.printWindow = null
   }
 
-  // Generate professional property PDF
+  // Generate professional property PDF using HTML and browser print
   async generatePropertyPDF(property, agencyInfo = {}) {
-    this.doc = new jsPDF()
-    
     try {
-      // Set up document
-      this.setupDocument()
-      
-      // Add header with agency branding
-      this.addHeader(agencyInfo)
-      
-      // Add property title and hero section
-      this.addPropertyHero(property)
-      
-      // Add property details
-      this.addPropertyDetails(property)
-      
-      // Add property description
-      this.addPropertyDescription(property)
-      
-      // Add contact information
-      this.addContactInfo(agencyInfo)
-      
-      // Add footer
-      this.addFooter(agencyInfo)
-      
-      return this.doc
+      const htmlContent = this.generateHTMLContent(property, agencyInfo)
+      return htmlContent
     } catch (error) {
       console.error('Error generating PDF:', error)
       throw error
     }
   }
 
-  setupDocument() {
-    // Set document properties
-    this.doc.setProperties({
-      title: 'Property Brochure',
-      subject: 'Real Estate Property Information',
-      author: 'LeadEstate Agency',
-      creator: 'LeadEstate CRM'
-    })
-  }
-
-  addHeader(agencyInfo) {
-    const y = 20
-    
-    // Agency name/logo area
-    this.doc.setFillColor(41, 128, 185) // Professional blue
-    this.doc.rect(0, 0, this.pageWidth, 25, 'F')
-    
-    // Agency name
-    this.doc.setTextColor(255, 255, 255)
-    this.doc.setFontSize(20)
-    this.doc.setFont('helvetica', 'bold')
-    this.doc.text(agencyInfo.name || 'LeadEstate Agency', this.margin, 15)
-    
-    // Tagline
-    this.doc.setFontSize(10)
-    this.doc.setFont('helvetica', 'normal')
-    this.doc.text('Your Trusted Real Estate Partner', this.margin, 20)
-    
-    // Contact info in header
-    this.doc.setFontSize(9)
-    const headerContact = `${agencyInfo.phone || '+212 600 000 000'} | ${agencyInfo.email || 'contact@leadestate.com'}`
-    this.doc.text(headerContact, this.pageWidth - this.margin - this.doc.getTextWidth(headerContact), 15)
-  }
-
-  addPropertyHero(property) {
-    let y = 40
-    
-    // Property title
-    this.doc.setTextColor(0, 0, 0)
-    this.doc.setFontSize(24)
-    this.doc.setFont('helvetica', 'bold')
-    this.doc.text(property.title || 'Beautiful Property', this.margin, y)
-    y += 10
-    
-    // Property type and location
-    this.doc.setFontSize(14)
-    this.doc.setFont('helvetica', 'normal')
-    this.doc.setTextColor(100, 100, 100)
-    const subtitle = `${property.type || 'Property'} • ${property.city || property.location || 'Prime Location'}`
-    this.doc.text(subtitle, this.margin, y)
-    y += 15
-    
-    // Price - prominent display
-    this.doc.setFillColor(46, 204, 113) // Green background
-    this.doc.roundedRect(this.margin, y, 60, 12, 2, 2, 'F')
-    this.doc.setTextColor(255, 255, 255)
-    this.doc.setFontSize(16)
-    this.doc.setFont('helvetica', 'bold')
+  generateHTMLContent(property, agencyInfo) {
     const price = property.price ? `$${parseInt(property.price).toLocaleString()}` : 'Price on Request'
-    this.doc.text(price, this.margin + 5, y + 8)
-    
-    return y + 20
+    const location = property.address || property.city || property.location || 'Prime Location'
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Property Brochure - ${property.title || 'Property'}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            background: white;
+        }
+        .header {
+            background: linear-gradient(135deg, #2980b9, #3498db);
+            color: white;
+            padding: 20px;
+            margin: -20mm -20mm 20px -20mm;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .property-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .property-subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .price-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .details-section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            display: flex;
+            align-items: center;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #34495e;
+            min-width: 120px;
+        }
+        .detail-value {
+            color: #2c3e50;
+        }
+        .description {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        .contact-section {
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        .contact-icon {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+        @media print {
+            body { -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>${agencyInfo.name || 'LeadEstate Agency'}</h1>
+            <p>Your Trusted Real Estate Partner</p>
+        </div>
+
+        <!-- Property Title -->
+        <div class="property-title">${property.title || 'Beautiful Property'}</div>
+        <div class="property-subtitle">${property.type || 'Property'} • ${location}</div>
+
+        <!-- Price -->
+        <div class="price-badge">${price}</div>
+
+        <!-- Property Details -->
+        <div class="details-section">
+            <div class="section-title">Property Details</div>
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Property Type:</span>
+                    <span class="detail-value">${property.type || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Location:</span>
+                    <span class="detail-value">${location}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Surface Area:</span>
+                    <span class="detail-value">${property.surface ? `${property.surface} m²` : property.area ? `${property.area} m²` : 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Bedrooms:</span>
+                    <span class="detail-value">${property.bedrooms || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Bathrooms:</span>
+                    <span class="detail-value">${property.bathrooms || 'N/A'}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value">${property.status || 'Available'}</span>
+                </div>
+            </div>
+        </div>
+
+        ${property.description ? `
+        <!-- Description -->
+        <div class="details-section">
+            <div class="section-title">Description</div>
+            <div class="description">
+                ${property.description}
+            </div>
+        </div>
+        ` : ''}
+
+        <!-- Contact Information -->
+        <div class="details-section">
+            <div class="section-title">Contact Information</div>
+            <div class="contact-section">
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <span class="contact-icon">📞</span>
+                        <span>Phone: ${agencyInfo.phone || '+212 600 000 000'}</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span>Email: ${agencyInfo.email || 'contact@leadestate.com'}</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">🌐</span>
+                        <span>Website: ${agencyInfo.website || 'www.leadestate.com'}</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <span>Address: ${agencyInfo.address || 'Casablanca, Morocco'}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Generated by LeadEstate CRM • ${new Date().toLocaleDateString()}
+        </div>
+    </div>
+</body>
+</html>
+    `
   }
 
-  addPropertyDetails(property) {
-    let y = 90
-    
-    // Details section header
-    this.doc.setTextColor(0, 0, 0)
-    this.doc.setFontSize(16)
-    this.doc.setFont('helvetica', 'bold')
-    this.doc.text('Property Details', this.margin, y)
-    y += 10
-    
-    // Details grid
-    this.doc.setFontSize(11)
-    this.doc.setFont('helvetica', 'normal')
-    
-    const details = [
-      { label: 'Property Type:', value: property.type || 'N/A' },
-      { label: 'Location:', value: property.address || property.city || property.location || 'N/A' },
-      { label: 'Surface Area:', value: property.surface ? `${property.surface} m²` : property.area ? `${property.area} m²` : 'N/A' },
-      { label: 'Bedrooms:', value: property.bedrooms || 'N/A' },
-      { label: 'Bathrooms:', value: property.bathrooms || 'N/A' },
-      { label: 'Status:', value: property.status || 'Available' }
-    ]
-    
-    details.forEach((detail, index) => {
-      const row = Math.floor(index / 2)
-      const col = index % 2
-      const x = this.margin + (col * (this.contentWidth / 2))
-      const rowY = y + (row * 8)
-      
-      // Label
-      this.doc.setFont('helvetica', 'bold')
-      this.doc.setTextColor(80, 80, 80)
-      this.doc.text(detail.label, x, rowY)
-      
-      // Value
-      this.doc.setFont('helvetica', 'normal')
-      this.doc.setTextColor(0, 0, 0)
-      this.doc.text(detail.value, x + 35, rowY)
-    })
-    
-    return y + (Math.ceil(details.length / 2) * 8) + 10
-  }
+  // Open print dialog for PDF generation
+  openPrintDialog(htmlContent, filename) {
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
 
-  addPropertyDescription(property) {
-    let y = 150
-    
-    if (property.description) {
-      // Description header
-      this.doc.setTextColor(0, 0, 0)
-      this.doc.setFontSize(16)
-      this.doc.setFont('helvetica', 'bold')
-      this.doc.text('Description', this.margin, y)
-      y += 10
-      
-      // Description text
-      this.doc.setFontSize(11)
-      this.doc.setFont('helvetica', 'normal')
-      this.doc.setTextColor(60, 60, 60)
-      
-      // Split text into lines that fit the page width
-      const lines = this.doc.splitTextToSize(property.description, this.contentWidth)
-      lines.forEach(line => {
-        this.doc.text(line, this.margin, y)
-        y += 6
-      })
-      
-      y += 10
+    // Wait for content to load, then trigger print
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print()
+      }, 500)
     }
-    
-    return y
-  }
 
-  addContactInfo(agencyInfo) {
-    let y = 220
-    
-    // Contact section with background
-    this.doc.setFillColor(248, 249, 250)
-    this.doc.rect(this.margin, y - 5, this.contentWidth, 35, 'F')
-    
-    // Contact header
-    this.doc.setTextColor(0, 0, 0)
-    this.doc.setFontSize(16)
-    this.doc.setFont('helvetica', 'bold')
-    this.doc.text('Contact Information', this.margin + 5, y + 5)
-    
-    // Contact details
-    this.doc.setFontSize(11)
-    this.doc.setFont('helvetica', 'normal')
-    this.doc.setTextColor(60, 60, 60)
-    
-    const contacts = [
-      `📞 Phone: ${agencyInfo.phone || '+212 600 000 000'}`,
-      `📧 Email: ${agencyInfo.email || 'contact@leadestate.com'}`,
-      `🌐 Website: ${agencyInfo.website || 'www.leadestate.com'}`,
-      `📍 Address: ${agencyInfo.address || 'Casablanca, Morocco'}`
-    ]
-    
-    contacts.forEach((contact, index) => {
-      this.doc.text(contact, this.margin + 5, y + 15 + (index * 5))
-    })
-  }
-
-  addFooter(agencyInfo) {
-    const y = this.pageHeight - 15
-    
-    // Footer background
-    this.doc.setFillColor(41, 128, 185)
-    this.doc.rect(0, y - 5, this.pageWidth, 20, 'F')
-    
-    // Footer text
-    this.doc.setTextColor(255, 255, 255)
-    this.doc.setFontSize(9)
-    this.doc.setFont('helvetica', 'normal')
-    
-    const footerText = `Generated by LeadEstate CRM • ${new Date().toLocaleDateString()}`
-    const textWidth = this.doc.getTextWidth(footerText)
-    this.doc.text(footerText, (this.pageWidth - textWidth) / 2, y)
-  }
-
-  // Download PDF
-  downloadPDF(filename) {
-    if (this.doc) {
-      this.doc.save(filename)
-    }
-  }
-
-  // Get PDF as blob for WhatsApp sharing
-  getPDFBlob() {
-    if (this.doc) {
-      return this.doc.output('blob')
-    }
-    return null
+    return printWindow
   }
 }
 
@@ -255,11 +276,11 @@ export const DEFAULT_AGENCY_INFO = {
 export const downloadPropertyPDF = async (property, agencyInfo = DEFAULT_AGENCY_INFO) => {
   try {
     const generator = new PropertyPDFGenerator()
-    await generator.generatePropertyPDF(property, agencyInfo)
-    
+    const htmlContent = await generator.generatePropertyPDF(property, agencyInfo)
+
     const filename = `${property.title || 'Property'}_Brochure.pdf`.replace(/[^a-zA-Z0-9]/g, '_')
-    generator.downloadPDF(filename)
-    
+    generator.openPrintDialog(htmlContent, filename)
+
     return true
   } catch (error) {
     console.error('Error downloading property PDF:', error)
@@ -267,15 +288,18 @@ export const downloadPropertyPDF = async (property, agencyInfo = DEFAULT_AGENCY_
   }
 }
 
-// Utility function to generate PDF blob for WhatsApp
+// Utility function to generate PDF for WhatsApp (opens print dialog)
 export const generatePropertyPDFBlob = async (property, agencyInfo = DEFAULT_AGENCY_INFO) => {
   try {
     const generator = new PropertyPDFGenerator()
-    await generator.generatePropertyPDF(property, agencyInfo)
-    
-    return generator.getPDFBlob()
+    const htmlContent = await generator.generatePropertyPDF(property, agencyInfo)
+
+    const filename = `${property.title || 'Property'}_Brochure.pdf`.replace(/[^a-zA-Z0-9]/g, '_')
+    const printWindow = generator.openPrintDialog(htmlContent, filename)
+
+    return { success: true, printWindow }
   } catch (error) {
-    console.error('Error generating property PDF blob:', error)
-    return null
+    console.error('Error generating property PDF:', error)
+    return { success: false, error }
   }
 }

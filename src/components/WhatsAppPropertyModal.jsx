@@ -64,30 +64,14 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
     try {
       // Generate PDFs for selected properties
       const selectedProps = properties.filter(p => selectedProperties.includes(p.id))
-      const pdfPromises = selectedProps.map(async (property) => {
-        const blob = await generatePropertyPDFBlob(property, DEFAULT_AGENCY_INFO)
-        if (blob) {
-          // Create download link for each PDF
-          const url = URL.createObjectURL(blob)
-          const filename = `${property.title || 'Property'}_Brochure.pdf`.replace(/[^a-zA-Z0-9]/g, '_')
 
-          // Auto-download the PDF
-          const link = document.createElement('a')
-          link.href = url
-          link.download = filename
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-
-          // Clean up the URL after a delay
-          setTimeout(() => URL.revokeObjectURL(url), 1000)
-
-          return { property: property.title, success: true }
-        }
-        return { property: property.title, success: false }
+      // Open print dialogs for each property
+      const printPromises = selectedProps.map(async (property) => {
+        const result = await generatePropertyPDFBlob(property, DEFAULT_AGENCY_INFO)
+        return { property: property.title, success: result.success }
       })
 
-      const results = await Promise.all(pdfPromises)
+      const results = await Promise.all(printPromises)
       const successCount = results.filter(r => r.success).length
 
       if (successCount > 0) {
@@ -97,7 +81,7 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
 
         // Show success message and open WhatsApp
-        alert(`✅ ${successCount} PDF brochure${successCount === 1 ? '' : 's'} downloaded!\n\nNow opening WhatsApp to send the message. You can attach the downloaded PDFs manually.`)
+        alert(`✅ ${successCount} PDF brochure${successCount === 1 ? '' : 's'} ready for printing!\n\nPrint the PDFs using Ctrl+P or Cmd+P, then attach them to WhatsApp.\n\nOpening WhatsApp now...`)
         window.open(whatsappUrl, '_blank')
         onClose()
       } else {
