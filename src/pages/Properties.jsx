@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Plus, Search, Filter, Home, Eye, Edit, Trash2 } from 'lucide-react'
+import { Plus, Search, Filter, Home, Eye, Edit, Trash2, Download } from 'lucide-react'
 import { useData } from '../App'
 import { useToast } from '../components/Toast'
 import AddPropertyModal from '../components/AddPropertyModal'
 import ViewPropertyModal from '../components/ViewPropertyModal'
 import EditPropertyModal from '../components/EditPropertyModal'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { downloadPropertyPDF } from '../services/pdfGenerator'
 
 const Properties = () => {
   const { properties, addProperty, updateProperty, deleteProperty } = useData()
@@ -42,6 +43,21 @@ const Properties = () => {
     deleteProperty(deleteConfirm.id)
     showToast(`${deleteConfirm.title} deleted successfully!`, 'success')
     setDeleteConfirm(null)
+  }
+
+  const handleDownloadPDF = async (property) => {
+    try {
+      showToast('Generating PDF...', 'info')
+      const success = await downloadPropertyPDF(property)
+      if (success) {
+        showToast(`PDF for "${property.title}" downloaded successfully!`, 'success')
+      } else {
+        showToast('Failed to generate PDF. Please try again.', 'error')
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error)
+      showToast('Failed to generate PDF. Please try again.', 'error')
+    }
   }
 
   return (
@@ -227,6 +243,13 @@ const Properties = () => {
                       title="Edit Property"
                     >
                       <Edit className="h-4 w-4 text-green-600 group-hover:text-green-700 transition-colors duration-300" />
+                    </button>
+                    <button
+                      onClick={() => handleDownloadPDF(property)}
+                      className="group p-2 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200/50 transition-all duration-300 hover:scale-110"
+                      title="Download PDF Brochure"
+                    >
+                      <Download className="h-4 w-4 text-purple-600 group-hover:text-purple-700 transition-colors duration-300" />
                     </button>
                     <button
                       onClick={() => handleDeleteProperty(property)}

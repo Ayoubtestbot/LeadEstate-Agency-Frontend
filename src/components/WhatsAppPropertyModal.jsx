@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { X, MessageCircle, Send, Image, MapPin, DollarSign, Home } from 'lucide-react'
+import { X, MessageCircle, Send, Image, MapPin, DollarSign, Home, FileText, Download } from 'lucide-react'
 import { useData } from '../App'
+import { generatePropertyPDFBlob, DEFAULT_AGENCY_INFO } from '../services/pdfGenerator'
 
 const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
   const { properties } = useData()
   const [selectedProperties, setSelectedProperties] = useState([])
   const [customMessage, setCustomMessage] = useState('')
+  const [isGeneratingPDFs, setIsGeneratingPDFs] = useState(false)
 
   if (!isOpen || !lead) return null
 
@@ -22,46 +24,91 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
 
   const generateWhatsAppMessage = () => {
     const selectedProps = properties.filter(p => selectedProperties.includes(p.id))
-    
+
     let message = `Hi ${lead.name}! 👋\n\n`
-    message += `I found some amazing properties that might interest you:\n\n`
-    
+    message += `I've prepared professional property brochures for you! 📄✨\n\n`
+    message += `Here are ${selectedProps.length} amazing propert${selectedProps.length === 1 ? 'y' : 'ies'} that might interest you:\n\n`
+
     selectedProps.forEach((property, index) => {
-      message += `🏠 *${property.title}*\n`
-      message += `📍 ${property.location}\n`
-      message += `💰 $${property.price?.toLocaleString()}\n`
-      message += `🛏️ ${property.bedrooms} bed, ${property.bathrooms} bath\n`
-      message += `📐 ${property.area} sq ft\n`
-      
-      if (property.description) {
-        message += `📝 ${property.description.substring(0, 100)}${property.description.length > 100 ? '...' : ''}\n`
-      }
-      
-      message += `\n`
+      message += `📋 *${property.title}*\n`
+      message += `📍 ${property.location || property.city || 'Prime Location'}\n`
+      message += `💰 ${property.price ? `$${parseInt(property.price).toLocaleString()}` : 'Price on Request'}\n`
+      message += `🏠 ${property.bedrooms || 'N/A'} bed • ${property.bathrooms || 'N/A'} bath\n`
+      message += `📐 ${property.surface || property.area || 'N/A'} m²\n\n`
     })
-    
+
+    message += `📎 I'm sending you detailed PDF brochures with:\n`
+    message += `• High-quality property photos\n`
+    message += `• Complete specifications\n`
+    message += `• Professional layout\n`
+    message += `• Our agency contact information\n\n`
+
     if (customMessage.trim()) {
       message += `${customMessage}\n\n`
     }
-    
+
     message += `Would you like to schedule a viewing? Let me know! 😊\n\n`
-    message += `Best regards,\nYour Real Estate Agent`
-    
+    message += `Best regards,\n${DEFAULT_AGENCY_INFO.name}\n📞 ${DEFAULT_AGENCY_INFO.phone}`
+
     return encodeURIComponent(message)
   }
 
-  const sendWhatsAppMessage = () => {
+  const sendWhatsAppMessage = async () => {
     if (selectedProperties.length === 0) {
       alert('Please select at least one property to share.')
       return
     }
 
-    const message = generateWhatsAppMessage()
-    const phoneNumber = lead.phone.replace(/\D/g, '') // Remove non-digits
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
-    
-    window.open(whatsappUrl, '_blank')
-    onClose()
+    setIsGeneratingPDFs(true)
+
+    try {
+      // Generate PDFs for selected properties
+      const selectedProps = properties.filter(p => selectedProperties.includes(p.id))
+      const pdfPromises = selectedProps.map(async (property) => {
+        const blob = await generatePropertyPDFBlob(property, DEFAULT_AGENCY_INFO)
+        if (blob) {
+          // Create download link for each PDF
+          const url = URL.createObjectURL(blob)
+          const filename = `${property.title || 'Property'}_Brochure.pdf`.replace(/[^a-zA-Z0-9]/g, '_')
+
+          // Auto-download the PDF
+          const link = document.createElement('a')
+          link.href = url
+          link.download = filename
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+
+          // Clean up the URL after a delay
+          setTimeout(() => URL.revokeObjectURL(url), 1000)
+
+          return { property: property.title, success: true }
+        }
+        return { property: property.title, success: false }
+      })
+
+      const results = await Promise.all(pdfPromises)
+      const successCount = results.filter(r => r.success).length
+
+      if (successCount > 0) {
+        // Generate WhatsApp message
+        const message = generateWhatsAppMessage()
+        const phoneNumber = lead.phone.replace(/\D/g, '') // Remove non-digits
+        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
+
+        // Show success message and open WhatsApp
+        alert(`✅ ${successCount} PDF brochure${successCount === 1 ? '' : 's'} downloaded!\n\nNow opening WhatsApp to send the message. You can attach the downloaded PDFs manually.`)
+        window.open(whatsappUrl, '_blank')
+        onClose()
+      } else {
+        alert('❌ Failed to generate PDF brochures. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error generating PDFs:', error)
+      alert('❌ Error generating PDF brochures. Please try again.')
+    } finally {
+      setIsGeneratingPDFs(false)
+    }
   }
 
   const PropertyCard = ({ property }) => {
@@ -143,10 +190,10 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
             <MessageCircle className="h-6 w-6 text-green-600 mr-3" />
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                Send Properties via WhatsApp
+                Send Property Brochures via WhatsApp
               </h2>
               <p className="text-sm text-gray-600">
-                Share properties with {lead.name} ({lead.phone})
+                Generate professional PDF brochures for {lead.name} ({lead.phone})
               </p>
             </div>
           </div>
@@ -222,11 +269,20 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
             </button>
             <button
               onClick={sendWhatsAppMessage}
-              disabled={selectedProperties.length === 0}
+              disabled={selectedProperties.length === 0 || isGeneratingPDFs}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
             >
-              <Send className="h-4 w-4 mr-2" />
-              Send via WhatsApp
+              {isGeneratingPDFs ? (
+                <>
+                  <FileText className="h-4 w-4 mr-2 animate-pulse" />
+                  Generating PDFs...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Generate PDFs & Send
+                </>
+              )}
             </button>
           </div>
         </div>
