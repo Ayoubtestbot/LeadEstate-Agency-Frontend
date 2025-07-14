@@ -628,10 +628,8 @@ const Leads = () => {
                     <div>
                       <div className="flex items-center space-x-2">
                         <span className="font-medium text-gray-900">{lead.name}</span>
-                        {/* Debug: Log lead data */}
-                        {console.log('🔍 Lead in table:', lead.name, 'interestedProperties:', lead.interestedProperties)}
                         {lead.interestedProperties?.length > 0 && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-blue-500 text-white ml-2 shadow-sm">
                             {lead.interestedProperties.length} 🏠
                           </span>
                         )}
