@@ -30,17 +30,25 @@ const LinkPropertyModal = ({ isOpen, onClose, lead, properties, onLink, onUnlink
 
   console.log('🔗 LinkPropertyModal - All properties:', properties)
   console.log('🔗 LinkPropertyModal - Lead interested properties:', lead.interestedProperties)
+  console.log('🔗 LinkPropertyModal - Property IDs:', properties.map(p => ({ id: p.id, type: typeof p.id })))
 
-  // Get linked properties
-  const linkedProperties = properties.filter(property =>
-    lead.interestedProperties?.includes(property.id)
-  )
+  // Get linked properties - handle both string and number IDs
+  const linkedProperties = properties.filter(property => {
+    const interestedIds = lead.interestedProperties || []
+    return interestedIds.some(id =>
+      id == property.id || id === property.id || parseInt(id) === property.id || id === String(property.id)
+    )
+  })
 
   // Get available properties (not linked)
-  const availableProperties = properties.filter(property =>
-    !lead.interestedProperties?.includes(property.id)
-  )
+  const availableProperties = properties.filter(property => {
+    const interestedIds = lead.interestedProperties || []
+    return !interestedIds.some(id =>
+      id == property.id || id === property.id || parseInt(id) === property.id || id === String(property.id)
+    )
+  })
 
+  console.log('🔗 LinkPropertyModal - Linked properties:', linkedProperties)
   console.log('🔗 LinkPropertyModal - Available properties:', availableProperties)
 
   return (
