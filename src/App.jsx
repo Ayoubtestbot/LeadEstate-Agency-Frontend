@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, useNavigate, useLocation } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import axios from 'axios'
 import {
@@ -45,6 +45,51 @@ const API_URL = 'https://leadestate-backend-9fih.onrender.com/api'
 // Debug API URL
 console.log('🔧 Environment VITE_API_URL:', import.meta.env.VITE_API_URL)
 console.log('🔧 Final API_URL:', API_URL)
+
+// Navigation handler to prevent blank pages
+const NavigationHandler = ({ children }) => {
+  const location = useLocation()
+
+  useEffect(() => {
+    // Force page refresh on navigation to prevent blank pages
+    const handlePopState = (event) => {
+      // Small delay to ensure proper navigation
+      setTimeout(() => {
+        const mainContent = document.querySelector('#root')
+        if (!mainContent || mainContent.innerHTML.trim() === '' || mainContent.children.length === 0) {
+          console.log('🔄 Blank page detected, refreshing...')
+          window.location.reload()
+        }
+      }, 100)
+    }
+
+    // Listen for browser navigation events
+    window.addEventListener('popstate', handlePopState)
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
+  }, [location])
+
+  // Check if page is blank and force refresh
+  useEffect(() => {
+    const checkPageContent = () => {
+      const mainContent = document.querySelector('#root')
+      if (!mainContent || mainContent.innerHTML.trim() === '' || mainContent.children.length === 0) {
+        console.log('🔄 Blank page detected on route change, refreshing...')
+        window.location.reload()
+      }
+    }
+
+    // Check after a short delay
+    const timer = setTimeout(checkPageContent, 500)
+
+    return () => clearTimeout(timer)
+  }, [location.pathname])
+
+  return children
+}
 
 // Auth Context
 const AuthContext = createContext()
@@ -806,8 +851,9 @@ function AppWithAuth() {
       <ToastProvider>
         <DataProvider>
           <Router>
-          <div className="App">
-            <Routes>
+            <NavigationHandler>
+              <div className="App">
+                <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={
@@ -894,12 +940,13 @@ function AppWithAuth() {
                   </Layout>
                 </ProtectedRoute>
               } />
-            </Routes>
-            <Toaster position="top-right" />
+                </Routes>
+                <Toaster position="top-right" />
 
-            {/* PERFORMANCE: Performance monitor temporarily disabled due to scope issue */}
-          </div>
-        </Router>
+                {/* PERFORMANCE: Performance monitor temporarily disabled due to scope issue */}
+              </div>
+            </NavigationHandler>
+          </Router>
       </DataProvider>
     </ToastProvider>
     </PermissionsProvider>
