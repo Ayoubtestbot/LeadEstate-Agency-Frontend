@@ -16,47 +16,26 @@ const Properties = () => {
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
 
-  // AGGRESSIVE: Force complete data refresh when component mounts
+  // SIMPLE: Force data refresh when component mounts
   useEffect(() => {
-    const aggressiveRefresh = async () => {
+    const simpleRefresh = async () => {
       try {
-        console.log('🔄 Properties page: AGGRESSIVE refresh starting...')
+        console.log('🔄 Properties page: Starting data refresh...')
 
-        // STEP 1: Clear ALL possible caches
-        localStorage.clear()
-        sessionStorage.clear()
+        // Clear caches
+        localStorage.removeItem('leadEstate_dataCache')
+        sessionStorage.removeItem('leadEstate_dataCache')
 
-        // STEP 2: Force browser cache clear for API calls
-        const timestamp = Date.now()
-        const apiUrl = `https://leadestate-backend-9fih.onrender.com/api/properties?_t=${timestamp}`
-
-        console.log('🔄 Direct API call with cache busting...')
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error(`API Error: ${response.status}`)
-        }
-
-        const freshData = await response.json()
-        console.log('📋 Fresh API response:', freshData)
-
-        // STEP 3: Also try the context refresh
+        // Force refresh using context
         await refreshData(false)
 
-        console.log('✅ Properties page: AGGRESSIVE refresh completed')
+        console.log('✅ Properties page: Data refresh completed')
       } catch (error) {
-        console.error('❌ Properties page: AGGRESSIVE refresh failed:', error)
+        console.error('❌ Properties page: Data refresh failed:', error)
       }
     }
 
-    aggressiveRefresh()
+    simpleRefresh()
   }, [refreshData])
 
   // Debug: Log properties data when it changes
@@ -130,10 +109,19 @@ const Properties = () => {
   const handleRefreshData = async () => {
     try {
       console.log('🔄 Manual refresh triggered...')
-      await refreshData(true) // Force refresh without loading spinner
+
+      // Clear caches first
+      localStorage.removeItem('leadEstate_dataCache')
+      sessionStorage.removeItem('leadEstate_dataCache')
+
+      // Force refresh with loading
+      await refreshData(false)
+
+      showToast('Data refreshed successfully!', 'success')
       console.log('✅ Manual refresh completed')
     } catch (error) {
       console.error('❌ Error refreshing data:', error)
+      showToast('Failed to refresh data. Please try again.', 'error')
     }
   }
 
