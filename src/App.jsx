@@ -140,6 +140,19 @@ const DataProvider = ({ children }) => {
   const fetchAllData = async (forceRefresh = false) => {
     console.log('🚀 Starting optimized data loading...')
     console.log('🌐 API_URL:', API_URL)
+    console.log('🔄 Force refresh:', forceRefresh)
+
+    // FORCE REFRESH: Clear cache if requested
+    if (forceRefresh) {
+      console.log('🧹 Force refresh: Clearing all caches...')
+      setDataCache({
+        data: null,
+        timestamp: null,
+        isValid: false
+      })
+      localStorage.removeItem('leadEstate_dataCache')
+      sessionStorage.removeItem('leadEstate_dataCache')
+    }
 
     // Check cache first (unless force refresh)
     if (!forceRefresh && dataCache.isValid && dataCache.timestamp) {
@@ -158,8 +171,12 @@ const DataProvider = ({ children }) => {
     setLoading(true)
 
     try {
+      // Add cache busting for force refresh
+      const cacheBuster = forceRefresh ? `?_t=${Date.now()}&force=true` : ''
+      console.log('📡 API call with cache buster:', cacheBuster)
+
       // Try optimized single API call first
-      const dashboardRes = await fetch(`${API_URL}/dashboard/all-data`, {
+      const dashboardRes = await fetch(`${API_URL}/dashboard/all-data${cacheBuster}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -201,15 +218,15 @@ const DataProvider = ({ children }) => {
     // Fallback: Use parallel individual calls with limits
     try {
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads?limit=50`).catch((err) => {
+        fetch(`${API_URL}/leads?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching leads:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/properties?limit=50`).catch((err) => {
+        fetch(`${API_URL}/properties?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching properties:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/team?limit=50`).catch((err) => {
+        fetch(`${API_URL}/team?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching team:', err)
           return { ok: false }
         })

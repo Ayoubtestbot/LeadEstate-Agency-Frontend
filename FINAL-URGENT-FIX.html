@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🚨 FINAL URGENT FIX - LeadEstate</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%); }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        button { padding: 20px 40px; margin: 10px; background: #ff0000; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: 700; }
+        button:hover { background: #cc0000; transform: translateY(-2px); }
+        .log { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; height: 400px; overflow-y: auto; font-family: monospace; border: 2px solid #e9ecef; font-size: 12px; }
+        .success { color: #27ae60; font-weight: 600; }
+        .error { color: #e74c3c; font-weight: 600; }
+        .info { color: #3498db; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; font-size: 32px; }
+        .button-group { text-align: center; margin-bottom: 20px; }
+        .urgent { background: #ff0000; color: white; padding: 15px; border-radius: 10px; margin: 20px 0; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 FINAL URGENT FIX</h1>
+        <div class="urgent">
+            ⚡ EMERGENCY: This will bypass ALL caching and force immediate frontend update ⚡
+        </div>
+        
+        <div class="button-group">
+            <button onclick="finalFix()">🚨 FINAL FIX - BYPASS CACHE</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        async function finalFix() {
+            log('🚨 STARTING FINAL URGENT FIX...', 'error');
+            
+            try {
+                // Step 1: Get fresh data with cache busting
+                const timestamp = Date.now();
+                const url = `${API_URL}/properties?bust=${timestamp}&force=true&nocache=${Math.random()}`;
+                
+                log('📡 Fetching fresh data with aggressive cache busting...', 'info');
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const responseData = await response.json();
+                let properties = responseData.data || responseData.properties || responseData;
+                
+                log(`✅ Got ${properties.length} properties from API`, 'success');
+                
+                // Step 2: Check first property
+                const firstProp = properties[0];
+                log(`🔍 First property: ${firstProp.title}`, 'info');
+                log(`🔍 Has city: ${firstProp.city || 'MISSING'}`, firstProp.city ? 'success' : 'error');
+                log(`🔍 Has image_url: ${firstProp.image_url ? 'YES' : 'MISSING'}`, firstProp.image_url ? 'success' : 'error');
+                
+                // Step 3: If data is good, force frontend update
+                if (firstProp.city && firstProp.image_url) {
+                    log('✅ Database has correct data! Forcing frontend update...', 'success');
+                    
+                    // Clear ALL browser storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Clear service worker cache if exists
+                    if ('serviceWorker' in navigator) {
+                        const registrations = await navigator.serviceWorker.getRegistrations();
+                        for (let registration of registrations) {
+                            await registration.unregister();
+                        }
+                    }
+                    
+                    // Clear all caches
+                    if ('caches' in window) {
+                        const cacheNames = await caches.keys();
+                        await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    }
+                    
+                    log('🧹 Cleared all browser caches', 'success');
+                    
+                    // Force reload with cache bypass
+                    log('🔄 FORCING HARD RELOAD IN 3 SECONDS...', 'error');
+                    log('⚡ Your Properties page will reload with fresh data!', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'https://lead-estate-agency-frontend.vercel.app/properties?nocache=' + Date.now();
+                    }, 3000);
+                    
+                } else {
+                    log('❌ Database still missing data. Need to fix database first.', 'error');
+                    
+                    // Quick database fix
+                    log('🔧 Applying quick database fix...', 'info');
+                    
+                    for (const property of properties.slice(0, 5)) { // Fix first 5 properties
+                        if (!property.city || !property.image_url) {
+                            const fixedProperty = {
+                                ...property,
+                                city: property.title.includes('Kenitra') ? 'Kenitra' :
+                                      property.title.includes('Agadir') ? 'Agadir' :
+                                      property.title.includes('Nador') ? 'Nador' :
+                                      property.title.includes('Rabat') ? 'Rabat' : 'Casablanca',
+                                address: `Centre-ville, ${property.title.includes('Kenitra') ? 'Kenitra' :
+                                         property.title.includes('Agadir') ? 'Agadir' :
+                                         property.title.includes('Nador') ? 'Nador' :
+                                         property.title.includes('Rabat') ? 'Rabat' : 'Casablanca'}`,
+                                image_url: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                                bedrooms: 3,
+                                bathrooms: 2,
+                                images: [
+                                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                                    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop&auto=format'
+                                ]
+                            };
+                            
+                            log(`🔧 Fixing: ${property.title}`, 'info');
+                            
+                            const updateResponse = await fetch(`${API_URL}/properties/${property.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(fixedProperty)
+                            });
+                            
+                            if (updateResponse.ok) {
+                                log(`✅ Fixed: ${property.title}`, 'success');
+                            } else {
+                                log(`❌ Failed to fix: ${property.title}`, 'error');
+                            }
+                            
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                    }
+                    
+                    log('🔄 Database fix complete. Reloading in 3 seconds...', 'success');
+                    setTimeout(() => {
+                        window.location.reload(true);
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                log(`❌ FINAL FIX FAILED: ${error.message}`, 'error');
+                log('🔄 Trying force reload anyway...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'https://lead-estate-agency-frontend.vercel.app/properties?force=' + Date.now();
+                }, 2000);
+            }
+        }
+        
+        window.onload = function() {
+            log('🚨 FINAL URGENT FIX READY!', 'error');
+            log('This will bypass ALL caching and force immediate update.', 'info');
+            log('Click the red button to apply the final fix.', 'info');
+        };
+    </script>
+</body>
+</html>
