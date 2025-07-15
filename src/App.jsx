@@ -227,12 +227,14 @@ const DataProvider = ({ children }) => {
 
     // Fallback: Use parallel individual calls with limits
     try {
+      console.log('🔄 Using fallback individual API calls...')
+
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
         fetch(`${API_URL}/leads?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching leads:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/properties?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
+        fetch(`${API_URL}/properties${cacheBuster}`).catch((err) => {
           console.error('❌ Error fetching properties:', err)
           return { ok: false }
         }),
@@ -241,6 +243,8 @@ const DataProvider = ({ children }) => {
           return { ok: false }
         })
       ])
+
+      console.log('📡 Properties API response status:', propertiesRes.status, propertiesRes.ok)
 
       // Process all responses in parallel
       const [leadsData, propertiesData, teamData] = await Promise.all([
@@ -253,11 +257,14 @@ const DataProvider = ({ children }) => {
       console.log('📋 Properties API response:', propertiesData)
       console.log('📋 Properties response keys:', Object.keys(propertiesData))
 
-      // Handle different response structures
+      // Handle different response structures - FIXED to match direct API call
       let finalProperties = []
       if (Array.isArray(propertiesData)) {
         finalProperties = propertiesData
         console.log('✅ Properties: Direct array format')
+      } else if (propertiesData.success && propertiesData.data && Array.isArray(propertiesData.data)) {
+        finalProperties = propertiesData.data
+        console.log('✅ Properties: API success format with data array')
       } else if (propertiesData.data && Array.isArray(propertiesData.data)) {
         finalProperties = propertiesData.data
         console.log('✅ Properties: Nested in data field')
@@ -266,6 +273,7 @@ const DataProvider = ({ children }) => {
         console.log('✅ Properties: Nested in properties field')
       } else {
         console.log('❌ Unknown properties response structure:', propertiesData)
+        console.log('❌ Available keys:', Object.keys(propertiesData))
         finalProperties = []
       }
 
