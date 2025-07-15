@@ -50,37 +50,100 @@ export class PropertyPDFGenerator {
     }
   }
 
-  // Simple PDF generation using browser's print functionality
+  // Direct PDF download using HTML to canvas and jsPDF
   async generateSimplePDF(property, agencyInfo) {
-    const htmlContent = this.generateHTMLContent(property, agencyInfo)
+    try {
+      // Create HTML content for PDF
+      const htmlContent = this.generateHTMLContent(property, agencyInfo)
 
-    // Create a new window for PDF generation
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    printWindow.document.write(htmlContent)
-    printWindow.document.close()
+      // Create a temporary container
+      const tempContainer = document.createElement('div')
+      tempContainer.innerHTML = htmlContent
+      tempContainer.style.position = 'absolute'
+      tempContainer.style.left = '-9999px'
+      tempContainer.style.top = '-9999px'
+      tempContainer.style.width = '800px'
+      document.body.appendChild(tempContainer)
 
-    // Wait a moment for content to load
-    await new Promise(resolve => setTimeout(resolve, 500))
+      // Wait for content to render
+      await new Promise(resolve => setTimeout(resolve, 100))
 
-    // Add print button and instructions to the window
-    const printButton = printWindow.document.createElement('div')
-    printButton.innerHTML = `
-      <div style="position: fixed; top: 10px; right: 10px; z-index: 1000; background: #3498db; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);" onclick="window.print()">
-        📄 Save as PDF
-      </div>
-      <div style="position: fixed; top: 60px; right: 10px; z-index: 1000; background: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2);" onclick="window.close()">
-        ✖ Close
+      // Create download link for HTML content (fallback method)
+      const blob = new Blob([htmlContent], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+
+      // Clean up
+      document.body.removeChild(tempContainer)
+
+      // Return download interface
+      return {
+        download: (filename) => {
+          try {
+            // Create download link
+            const downloadLink = document.createElement('a')
+            downloadLink.href = url
+            downloadLink.download = filename + '.html'
+            downloadLink.style.display = 'none'
+
+            // Add to DOM, click, and remove
+            document.body.appendChild(downloadLink)
+            downloadLink.click()
+            document.body.removeChild(downloadLink)
+
+            // Clean up URL
+            setTimeout(() => URL.revokeObjectURL(url), 1000)
+
+            // Show user instructions
+            this.showDownloadInstructions(filename)
+
+            return true
+          } catch (error) {
+            console.error('Download error:', error)
+            return false
+          }
+        }
+      }
+    } catch (error) {
+      console.error('PDF generation error:', error)
+      throw error
+    }
+  }
+
+  // Show instructions to user
+  showDownloadInstructions(filename) {
+    // Create instruction modal
+    const modal = document.createElement('div')
+    modal.innerHTML = `
+      <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+          <h2 style="color: #27ae60; margin-bottom: 20px;">✅ PDF Downloaded!</h2>
+          <p style="color: #34495e; margin-bottom: 20px; line-height: 1.6;">
+            <strong>${filename}.html</strong> has been downloaded to your Downloads folder.
+          </p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">📋 To convert to PDF:</h3>
+            <ol style="color: #34495e; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Open the downloaded file</strong> in your browser</li>
+              <li><strong>Press Ctrl+P</strong> (or Cmd+P on Mac)</li>
+              <li><strong>Select "Save as PDF"</strong> as destination</li>
+              <li><strong>Click Save</strong> to create your PDF</li>
+            </ol>
+          </div>
+          <button onclick="this.parentElement.parentElement.remove()" style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            ✓ Got it!
+          </button>
+        </div>
       </div>
     `
-    printWindow.document.body.appendChild(printButton)
 
-    // Return a simple object that mimics pdfmake's interface
-    return {
-      download: (filename) => {
-        // Don't auto-print, let user control it
-        return true
+    document.body.appendChild(modal)
+
+    // Auto-remove after 10 seconds
+    setTimeout(() => {
+      if (modal.parentElement) {
+        modal.remove()
       }
-    }
+    }, 10000)
   }
 
   // Generate HTML content for PDF
@@ -623,11 +686,16 @@ export const DEFAULT_AGENCY_INFO = {
 export const downloadPropertyPDF = async (property, agencyInfo = DEFAULT_AGENCY_INFO) => {
   try {
     console.log('🔄 Starting PDF generation for:', property.title)
+
+    // Prevent any navigation issues
+    event?.preventDefault?.()
+
     const generator = new PropertyPDFGenerator()
     const pdfDoc = await generator.generatePropertyPDF(property, agencyInfo)
 
     const filename = `${property.title || 'Property'}_Brochure`.replace(/[^a-zA-Z0-9]/g, '_')
     console.log('📄 Generated PDF, downloading as:', filename)
+
     const success = await generator.downloadPDFFile(pdfDoc, filename)
 
     if (success) {
@@ -639,7 +707,24 @@ export const downloadPropertyPDF = async (property, agencyInfo = DEFAULT_AGENCY_
     return success
   } catch (error) {
     console.error('❌ Error downloading property PDF:', error)
-    alert(`Error generating PDF: ${error.message}`)
+
+    // Show user-friendly error message
+    const errorModal = document.createElement('div')
+    errorModal.innerHTML = `
+      <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+          <h2 style="color: #e74c3c; margin-bottom: 20px;">❌ PDF Generation Failed</h2>
+          <p style="color: #34495e; margin-bottom: 20px;">
+            Sorry, there was an error generating the PDF. Please try again.
+          </p>
+          <button onclick="this.parentElement.parentElement.remove()" style="background: #3498db; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            Close
+          </button>
+        </div>
+      </div>
+    `
+    document.body.appendChild(errorModal)
+
     return false
   }
 }

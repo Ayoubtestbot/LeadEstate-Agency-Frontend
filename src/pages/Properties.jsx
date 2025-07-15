@@ -45,12 +45,18 @@ const Properties = () => {
     setDeleteConfirm(null)
   }
 
-  const handleDownloadPDF = async (property) => {
+  const handleDownloadPDF = async (property, event) => {
+    // Prevent any default behavior or navigation
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+
     try {
       showToast('Generating PDF...', 'info')
       const success = await downloadPropertyPDF(property)
       if (success) {
-        showToast(`PDF for "${property.title}" downloaded successfully!`, 'success')
+        showToast(`PDF for "${property.title}" ready for download!`, 'success')
       } else {
         showToast('Failed to generate PDF. Please try again.', 'error')
       }
@@ -245,7 +251,7 @@ const Properties = () => {
                       <Edit className="h-4 w-4 text-green-600 group-hover:text-green-700 transition-colors duration-300" />
                     </button>
                     <button
-                      onClick={() => handleDownloadPDF(property)}
+                      onClick={(e) => handleDownloadPDF(property, e)}
                       className="group p-2 rounded-xl bg-gradient-to-r from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 border border-purple-200/50 transition-all duration-300 hover:scale-110"
                       title="Download PDF Brochure"
                     >

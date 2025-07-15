@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Update Properties with Images - LeadEstate</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        button { padding: 15px 30px; margin: 10px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
+        button:hover { background: #2980b9; transform: translateY(-2px); }
+        .log { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; height: 400px; overflow-y: auto; font-family: monospace; border: 2px solid #e9ecef; }
+        .success { color: #27ae60; font-weight: 600; }
+        .error { color: #e74c3c; font-weight: 600; }
+        .info { color: #3498db; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .button-group { text-align: center; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Update Properties with Multiple Images</h1>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">
+            This will update your existing properties with multiple high-quality images and enhanced details.
+        </p>
+        
+        <div class="button-group">
+            <button onclick="testAPI()">🔍 Test API Connection</button>
+            <button onclick="updateAllProperties()">🚀 Update All Properties</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testAPI() {
+            log('🔍 Testing API connection...', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/properties`);
+                log(`📡 API Response Status: ${response.status}`, 'info');
+
+                if (!response.ok) {
+                    log(`❌ API Error: ${response.status} - ${response.statusText}`, 'error');
+                    return;
+                }
+
+                const data = await response.json();
+                log(`📋 Raw API Response: ${JSON.stringify(data, null, 2)}`, 'info');
+
+                // Analyze the structure
+                if (Array.isArray(data)) {
+                    log(`✅ Found ${data.length} properties (direct array)`, 'success');
+                    data.forEach((prop, index) => {
+                        log(`  ${index + 1}. ${prop.title || prop.name || 'Unnamed'} (ID: ${prop.id})`, 'info');
+                    });
+                } else if (data.data && Array.isArray(data.data)) {
+                    log(`✅ Found ${data.data.length} properties (in data field)`, 'success');
+                    data.data.forEach((prop, index) => {
+                        log(`  ${index + 1}. ${prop.title || prop.name || 'Unnamed'} (ID: ${prop.id})`, 'info');
+                    });
+                } else {
+                    log(`⚠️ Unexpected response structure. Keys: ${Object.keys(data).join(', ')}`, 'info');
+                }
+
+            } catch (error) {
+                log(`❌ API Test Failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Enhanced property data with multiple images - Updated for actual property names
+        const propertyEnhancements = {
+            'Test Property Visibility': {
+                bedrooms: 3,
+                bathrooms: 2,
+                description: 'Modern test property with excellent visibility and great features. Perfect for testing the application functionality.',
+                address: 'Test Location, Casablanca',
+                city: 'Casablanca',
+                images: [
+                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Villa Moderne à Kenitra': {
+                bedrooms: 4,
+                bathrooms: 3,
+                description: 'Belle villa moderne avec jardin, 4 chambres, 3 salles de bain, garage double. Cuisine équipée, salon spacieux, terrasse avec vue panoramique.',
+                address: 'Quartier Administratif, Kenitra',
+                city: 'Kenitra',
+                images: [
+                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Appartement Centre Casablanca': {
+                bedrooms: 3,
+                bathrooms: 2,
+                description: 'Appartement moderne au cœur de Casablanca, 3 chambres, 2 salles de bain. Balcon avec vue, parking inclus, proche métro.',
+                address: 'Maarif, Casablanca',
+                city: 'Casablanca',
+                images: [
+                    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448075-bb485b067938?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560449752-c4b8b5c6b9b8?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Villa de Luxe Rabat': {
+                bedrooms: 6,
+                bathrooms: 4,
+                description: 'Villa de luxe avec piscine, 6 chambres, 4 salles de bain, grand jardin. Finitions haut de gamme, garage 3 voitures, sécurité 24h.',
+                address: 'Souissi, Rabat',
+                city: 'Rabat',
+                images: [
+                    'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1600607687644-aac4c3eac7f4?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Appartement Vue Mer Tanger': {
+                bedrooms: 3,
+                bathrooms: 2,
+                description: 'Appartement avec vue mer panoramique, 3 chambres, 2 salles de bain. Terrasse face à la mer, résidence sécurisée avec piscine.',
+                address: 'Malabata, Tanger',
+                city: 'Tanger',
+                images: [
+                    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1571055107734-b7e8d6b8e3b8?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1502672299235-8e4b8b6b8b8b?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Maison Traditionnelle Fès': {
+                bedrooms: 4,
+                bathrooms: 2,
+                description: 'Maison traditionnelle rénovée, 4 chambres, patio central. Architecture authentique, matériaux nobles, proche médina.',
+                address: 'Médina, Fès',
+                city: 'Fès',
+                images: [
+                    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop&auto=format'
+                ]
+            },
+            'Townhouse moderne à Agadir': {
+                bedrooms: 3,
+                bathrooms: 2,
+                description: 'Townhouse moderne proche plage, 3 chambres, 2 salles de bain. Terrasse sur toit, garage, résidence avec piscine.',
+                address: 'Centre-ville, Agadir',
+                city: 'Agadir',
+                images: [
+                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop&auto=format'
+                ]
+            }
+        };
+
+        // Generic enhancement for any property not in the list above
+        function getGenericEnhancement(propertyTitle) {
+            return {
+                bedrooms: 3,
+                bathrooms: 2,
+                description: `Enhanced ${propertyTitle} with modern amenities and excellent location. Updated with multiple high-quality images and complete property details.`,
+                address: propertyTitle.includes('Casablanca') ? 'Centre-ville, Casablanca' :
+                         propertyTitle.includes('Rabat') ? 'Centre-ville, Rabat' :
+                         propertyTitle.includes('Tanger') ? 'Centre-ville, Tanger' :
+                         propertyTitle.includes('Agadir') ? 'Centre-ville, Agadir' :
+                         propertyTitle.includes('Fès') ? 'Centre-ville, Fès' : 'Prime Location, Morocco',
+                city: propertyTitle.includes('Casablanca') ? 'Casablanca' :
+                      propertyTitle.includes('Rabat') ? 'Rabat' :
+                      propertyTitle.includes('Tanger') ? 'Tanger' :
+                      propertyTitle.includes('Agadir') ? 'Agadir' :
+                      propertyTitle.includes('Fès') ? 'Fès' : 'Morocco',
+                images: [
+                    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format'
+                ]
+            };
+        }
+        
+        async function updateAllProperties() {
+            log('🚀 Starting property updates with multiple images...', 'info');
+
+            try {
+                // Get all existing properties
+                const response = await fetch(`${API_URL}/properties`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch properties');
+                }
+
+                const responseData = await response.json();
+                log(`📋 API Response structure: ${JSON.stringify(Object.keys(responseData))}`, 'info');
+
+                // Handle different response formats
+                let properties = [];
+                if (Array.isArray(responseData)) {
+                    properties = responseData;
+                } else if (responseData.data && Array.isArray(responseData.data)) {
+                    properties = responseData.data;
+                } else if (responseData.properties && Array.isArray(responseData.properties)) {
+                    properties = responseData.properties;
+                } else {
+                    log(`❌ Unexpected API response format: ${JSON.stringify(responseData)}`, 'error');
+                    return;
+                }
+
+                log(`📋 Found ${properties.length} properties to update`, 'info');
+                
+                let updatedCount = 0;
+                
+                if (properties.length === 0) {
+                    log('⚠️ No properties found to update. Add some properties first!', 'info');
+                    return;
+                }
+
+                for (const property of properties) {
+                    log(`🔍 Processing property: ${property.title || property.name || 'Unknown'}`, 'info');
+
+                    // Get enhancement data (specific or generic)
+                    let enhancement = propertyEnhancements[property.title];
+                    if (!enhancement) {
+                        log(`📝 Using generic enhancement for: ${property.title}`, 'info');
+                        enhancement = getGenericEnhancement(property.title);
+                    }
+
+                    try {
+                        const updateData = {
+                            ...property,
+                            bedrooms: enhancement.bedrooms,
+                            bathrooms: enhancement.bathrooms,
+                            description: enhancement.description,
+                            address: enhancement.address,
+                            city: enhancement.city,
+                            image_url: enhancement.images[0], // Main image
+                            images: enhancement.images // All images
+                        };
+
+                        log(`📤 Sending update for: ${property.title}`, 'info');
+                        const updateResponse = await fetch(`${API_URL}/properties/${property.id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updateData)
+                        });
+
+                        if (updateResponse.ok) {
+                            const result = await updateResponse.json();
+                            log(`✅ Updated: ${property.title} (${enhancement.images.length} images, ${enhancement.bedrooms} bed, ${enhancement.bathrooms} bath)`, 'success');
+                            updatedCount++;
+                        } else {
+                            const errorText = await updateResponse.text();
+                            log(`❌ Failed to update ${property.title}: ${updateResponse.status} - ${errorText}`, 'error');
+                        }
+                    } catch (error) {
+                        log(`❌ Error updating ${property.title}: ${error.message}`, 'error');
+                    }
+
+                    // Small delay to avoid overwhelming the server
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                
+                log(`🎉 Update complete! ${updatedCount} properties enhanced with multiple images`, 'success');
+                log('🔄 Refresh your Properties page to see the changes!', 'info');
+                
+            } catch (error) {
+                log(`❌ Error during update: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-start message
+        window.onload = function() {
+            log('🖼️ Property Image Updater Ready!', 'info');
+            log('Click "Update All Properties" to enhance your properties with multiple images.', 'info');
+        };
+    </script>
+</body>
+</html>
