@@ -15,6 +15,19 @@ const Properties = () => {
   const [viewProperty, setViewProperty] = useState(null)
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // DEBUG: Log properties data structure
+  useEffect(() => {
+    console.log('🏠 Properties component received:', properties.length, 'properties')
+    if (properties.length > 0) {
+      console.log('🔍 First property structure:', properties[0])
+      console.log('🔍 First property fields:', Object.keys(properties[0]))
+      console.log('🔍 First property city:', properties[0].city)
+      console.log('🔍 First property address:', properties[0].address)
+      console.log('🔍 First property image_url:', properties[0].image_url)
+    }
+  }, [properties])
 
   // Only refresh on manual trigger, not on component mount
   // This prevents overwhelming the API with automatic requests
@@ -229,8 +242,14 @@ const Properties = () => {
                       </div>
                       <span className="font-medium">
                         {(() => {
-                          const city = property.city || property.location || 'Location not specified'
-                          console.log(`🏠 ${property.title} - City: "${property.city}", Location: "${property.location}", Final: "${city}"`)
+                          console.log(`🔍 PROPERTY DEBUG - ${property.title}:`)
+                          console.log(`   - property.city: "${property.city}"`)
+                          console.log(`   - property.address: "${property.address}"`)
+                          console.log(`   - property.location: "${property.location}"`)
+                          console.log(`   - All fields:`, Object.keys(property))
+
+                          const city = property.city || property.address || property.location || 'Location not specified'
+                          console.log(`   - Final display: "${city}"`)
                           return city
                         })()}
                       </span>
