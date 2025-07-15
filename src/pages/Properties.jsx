@@ -36,8 +36,42 @@ const Properties = () => {
     }
   }, [properties])
 
-  // Only refresh on manual trigger, not on component mount
-  // This prevents overwhelming the API with automatic requests
+  // AUTO-FIX: Load direct API data on component mount
+  useEffect(() => {
+    const loadDirectData = async () => {
+      try {
+        console.log('🚀 Auto-loading direct API data on page load...')
+
+        const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?autoload=true&t=' + Date.now())
+
+        if (directResponse.ok) {
+          const directData = await directResponse.json()
+
+          let directProperties = []
+          if (Array.isArray(directData)) {
+            directProperties = directData
+          } else if (directData.data) {
+            directProperties = directData.data
+          } else if (directData.properties) {
+            directProperties = directData.properties
+          }
+
+          if (directProperties.length > 0) {
+            console.log('✅ Auto-loaded direct API data:', directProperties.length, 'properties')
+            console.log('✅ First property city:', directProperties[0].city)
+
+            // Override context data immediately
+            setDirectProperties(directProperties)
+            setUseDirectData(true)
+          }
+        }
+      } catch (error) {
+        console.error('❌ Auto-load failed:', error)
+      }
+    }
+
+    loadDirectData()
+  }, []) // Run once on mount
 
   // Debug: Log properties data when it changes
   useEffect(() => {
