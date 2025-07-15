@@ -16,27 +16,8 @@ const Properties = () => {
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
 
-  // SIMPLE: Force data refresh when component mounts
-  useEffect(() => {
-    const simpleRefresh = async () => {
-      try {
-        console.log('🔄 Properties page: Starting data refresh...')
-
-        // Clear caches
-        localStorage.removeItem('leadEstate_dataCache')
-        sessionStorage.removeItem('leadEstate_dataCache')
-
-        // Force refresh using context
-        await refreshData(false)
-
-        console.log('✅ Properties page: Data refresh completed')
-      } catch (error) {
-        console.error('❌ Properties page: Data refresh failed:', error)
-      }
-    }
-
-    simpleRefresh()
-  }, [refreshData])
+  // Only refresh on manual trigger, not on component mount
+  // This prevents overwhelming the API with automatic requests
 
   // Debug: Log properties data when it changes
   useEffect(() => {

@@ -170,10 +170,11 @@ const DataProvider = ({ children }) => {
 
     setLoading(true)
 
+    // Add cache busting for force refresh (declare at top level)
+    const cacheBuster = forceRefresh ? `?_t=${Date.now()}&force=true` : ''
+    console.log('📡 API call with cache buster:', cacheBuster)
+
     try {
-      // Add cache busting for force refresh
-      const cacheBuster = forceRefresh ? `?_t=${Date.now()}&force=true` : ''
-      console.log('📡 API call with cache buster:', cacheBuster)
 
       // Try optimized single API call first
       const dashboardRes = await fetch(`${API_URL}/dashboard/all-data${cacheBuster}`, {
