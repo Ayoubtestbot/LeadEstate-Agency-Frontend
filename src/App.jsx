@@ -189,11 +189,20 @@ const DataProvider = ({ children }) => {
 
       if (dashboardRes.ok) {
         const dashboardData = await dashboardRes.json()
-        console.log('✅ All dashboard data received:', dashboardData)
+        console.log('✅ Dashboard API response:', dashboardData)
+        console.log('🔍 Dashboard response keys:', Object.keys(dashboardData))
+
+        // Debug properties specifically
+        const dashboardProperties = dashboardData.data?.properties || []
+        console.log('🏠 Dashboard properties count:', dashboardProperties.length)
+        if (dashboardProperties.length > 0) {
+          console.log('🔍 Dashboard first property fields:', Object.keys(dashboardProperties[0]))
+          console.log('🔍 Dashboard first property city:', dashboardProperties[0].city)
+        }
 
         // Set all data at once
         setLeads(dashboardData.data?.leads || [])
-        setProperties(dashboardData.data?.properties || [])
+        setProperties(dashboardProperties)
         setTeamMembers(dashboardData.data?.team || [])
 
         // PERFORMANCE: Cache the data for future use
@@ -240,8 +249,35 @@ const DataProvider = ({ children }) => {
         teamRes.ok ? teamRes.json().catch(() => ({ data: [] })) : { data: [] }
       ])
 
+      console.log('🔍 DEBUGGING API RESPONSES:')
+      console.log('📋 Properties API response:', propertiesData)
+      console.log('📋 Properties response keys:', Object.keys(propertiesData))
+
+      // Handle different response structures
+      let finalProperties = []
+      if (Array.isArray(propertiesData)) {
+        finalProperties = propertiesData
+        console.log('✅ Properties: Direct array format')
+      } else if (propertiesData.data && Array.isArray(propertiesData.data)) {
+        finalProperties = propertiesData.data
+        console.log('✅ Properties: Nested in data field')
+      } else if (propertiesData.properties && Array.isArray(propertiesData.properties)) {
+        finalProperties = propertiesData.properties
+        console.log('✅ Properties: Nested in properties field')
+      } else {
+        console.log('❌ Unknown properties response structure:', propertiesData)
+        finalProperties = []
+      }
+
+      console.log('🏠 Final properties count:', finalProperties.length)
+      if (finalProperties.length > 0) {
+        console.log('🔍 First property fields:', Object.keys(finalProperties[0]))
+        console.log('🔍 First property city:', finalProperties[0].city)
+        console.log('🔍 First property image_url:', finalProperties[0].image_url)
+      }
+
       setLeads(leadsData.data || [])
-      setProperties(propertiesData.data || [])
+      setProperties(finalProperties)
       setTeamMembers(teamData.data || [])
 
       // PERFORMANCE: Cache fallback data too
