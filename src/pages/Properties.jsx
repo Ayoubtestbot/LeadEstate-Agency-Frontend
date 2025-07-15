@@ -16,34 +16,47 @@ const Properties = () => {
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
 
-  // Force refresh data when component mounts to get latest property updates
+  // AGGRESSIVE: Force complete data refresh when component mounts
   useEffect(() => {
-    const forceRefresh = async () => {
+    const aggressiveRefresh = async () => {
       try {
-        console.log('🔄 Properties page: Force refreshing data to get latest updates...')
+        console.log('🔄 Properties page: AGGRESSIVE refresh starting...')
 
-        // Clear any cached data and force fresh fetch
-        localStorage.removeItem('leadEstate_dataCache')
-        sessionStorage.removeItem('leadEstate_dataCache')
+        // STEP 1: Clear ALL possible caches
+        localStorage.clear()
+        sessionStorage.clear()
 
-        await refreshData(false) // Force full refresh with loading
-        console.log('✅ Properties page: Data refreshed successfully')
-      } catch (error) {
-        console.error('❌ Properties page: Error refreshing data:', error)
+        // STEP 2: Force browser cache clear for API calls
+        const timestamp = Date.now()
+        const apiUrl = `https://leadestate-backend-9fih.onrender.com/api/properties?_t=${timestamp}`
 
-        // Fallback: Try direct API call
-        console.log('🔄 Trying direct API call as fallback...')
-        try {
-          const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties')
-          const data = await response.json()
-          console.log('📋 Direct API response:', data)
-        } catch (apiError) {
-          console.error('❌ Direct API call also failed:', apiError)
+        console.log('🔄 Direct API call with cache busting...')
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`)
         }
+
+        const freshData = await response.json()
+        console.log('📋 Fresh API response:', freshData)
+
+        // STEP 3: Also try the context refresh
+        await refreshData(false)
+
+        console.log('✅ Properties page: AGGRESSIVE refresh completed')
+      } catch (error) {
+        console.error('❌ Properties page: AGGRESSIVE refresh failed:', error)
       }
     }
 
-    forceRefresh()
+    aggressiveRefresh()
   }, [refreshData])
 
   // Debug: Log properties data when it changes
@@ -152,6 +165,13 @@ const Properties = () => {
 
             <div className="flex flex-col sm:flex-row gap-2">
               <button
+                onClick={handleRefreshData}
+                className="group relative inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-md hover:shadow-lg h-10 px-4 py-2 w-full sm:w-auto"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-700/20 to-red-700/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="relative z-10">🔄 Force Refresh</span>
+              </button>
+              <button
                 onClick={() => setShowAddProperty(true)}
                 className="group relative inline-flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500/20 disabled:pointer-events-none disabled:opacity-50 bg-gradient-to-r from-green-600 to-blue-600 text-white shadow-md hover:shadow-lg h-10 px-4 py-2 w-full sm:w-auto"
               >
@@ -172,25 +192,21 @@ const Properties = () => {
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-blue-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Enhanced Property Image */}
+              {/* Enhanced Property Image with Fallback */}
               <div className="relative h-56 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                {property.image_url ? (
-                  <img
-                    src={property.image_url}
-                    alt={property.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      console.log('❌ Image failed to load:', property.image_url)
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'flex';
-                    }}
-                    onLoad={() => {
-                      console.log('✅ Image loaded successfully:', property.image_url)
-                    }}
-                  />
-                ) : (
-                  console.log('⚠️ No image_url for property:', property.title, 'Available fields:', Object.keys(property))
-                )}
+                {/* Always show an image - use fallbacks if needed */}
+                <img
+                  src={property.image_url ||
+                       (property.images && property.images.length > 0 ? property.images[0] : null) ||
+                       `https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format`}
+                  alt={property.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => {
+                    console.log('❌ Image failed to load, using fallback')
+                    // Try a different fallback image
+                    e.target.src = 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800&h=600&fit=crop&auto=format'
+                  }}
+                />
                 <div
                   className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
                   style={{ display: property.image_url ? 'none' : 'flex' }}
