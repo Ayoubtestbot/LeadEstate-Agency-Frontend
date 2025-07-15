@@ -21,10 +21,25 @@ const Properties = () => {
     const forceRefresh = async () => {
       try {
         console.log('🔄 Properties page: Force refreshing data to get latest updates...')
-        await refreshData(true) // Skip loading spinner
+
+        // Clear any cached data and force fresh fetch
+        localStorage.removeItem('leadEstate_dataCache')
+        sessionStorage.removeItem('leadEstate_dataCache')
+
+        await refreshData(false) // Force full refresh with loading
         console.log('✅ Properties page: Data refreshed successfully')
       } catch (error) {
         console.error('❌ Properties page: Error refreshing data:', error)
+
+        // Fallback: Try direct API call
+        console.log('🔄 Trying direct API call as fallback...')
+        try {
+          const response = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties')
+          const data = await response.json()
+          console.log('📋 Direct API response:', data)
+        } catch (apiError) {
+          console.error('❌ Direct API call also failed:', apiError)
+        }
       }
     }
 
@@ -165,11 +180,17 @@ const Properties = () => {
                     alt={property.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
+                      console.log('❌ Image failed to load:', property.image_url)
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'flex';
                     }}
+                    onLoad={() => {
+                      console.log('✅ Image loaded successfully:', property.image_url)
+                    }}
                   />
-                ) : null}
+                ) : (
+                  console.log('⚠️ No image_url for property:', property.title, 'Available fields:', Object.keys(property))
+                )}
                 <div
                   className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200"
                   style={{ display: property.image_url ? 'none' : 'flex' }}
@@ -213,7 +234,13 @@ const Properties = () => {
                       <div className="p-1 rounded-lg bg-blue-100 mr-3">
                         <span className="text-blue-600">📍</span>
                       </div>
-                      <span className="font-medium">{property.city || property.location || 'Location not specified'}</span>
+                      <span className="font-medium">
+                        {(() => {
+                          const city = property.city || property.location || 'Location not specified'
+                          console.log(`🏠 ${property.title} - City: "${property.city}", Location: "${property.location}", Final: "${city}"`)
+                          return city
+                        })()}
+                      </span>
                     </div>
                     {property.address && (
                       <div className="flex items-center text-sm text-gray-600">
