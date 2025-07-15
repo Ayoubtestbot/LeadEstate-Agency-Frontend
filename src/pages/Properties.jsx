@@ -106,6 +106,14 @@ const Properties = () => {
     }
 
     try {
+      console.log('📄 PDF Download - Property Data:', property)
+      console.log('📄 PDF Download - Available fields:', Object.keys(property))
+      console.log('📄 PDF Download - City:', property.city)
+      console.log('📄 PDF Download - Address:', property.address)
+      console.log('📄 PDF Download - Location:', property.location)
+      console.log('📄 PDF Download - Image URL:', property.image_url)
+      console.log('📄 PDF Download - Images:', property.images)
+
       showToast('Generating PDF...', 'info')
       const success = await downloadPropertyPDF(property)
       if (success) {
