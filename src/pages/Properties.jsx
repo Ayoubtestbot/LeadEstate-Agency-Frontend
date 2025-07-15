@@ -104,14 +104,42 @@ const Properties = () => {
     try {
       console.log('🔄 Manual refresh triggered...')
 
-      // Clear caches first
-      localStorage.removeItem('leadEstate_dataCache')
-      sessionStorage.removeItem('leadEstate_dataCache')
+      // DIRECT API CALL - Bypass all caching and context issues
+      console.log('🚨 DIRECT API CALL - Bypassing context...')
 
-      // Force refresh with loading
+      const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?direct=true&t=' + Date.now())
+
+      if (directResponse.ok) {
+        const directData = await directResponse.json()
+        console.log('🔍 DIRECT API RESPONSE:', directData)
+        console.log('🔍 DIRECT API KEYS:', Object.keys(directData))
+
+        let directProperties = []
+        if (Array.isArray(directData)) {
+          directProperties = directData
+        } else if (directData.data) {
+          directProperties = directData.data
+        } else if (directData.properties) {
+          directProperties = directData.properties
+        }
+
+        console.log('🏠 DIRECT PROPERTIES COUNT:', directProperties.length)
+        if (directProperties.length > 0) {
+          console.log('🔍 DIRECT FIRST PROPERTY:', directProperties[0])
+          console.log('🔍 DIRECT FIRST PROPERTY FIELDS:', Object.keys(directProperties[0]))
+          console.log('🔍 DIRECT FIRST PROPERTY CITY:', directProperties[0].city)
+          console.log('🔍 DIRECT FIRST PROPERTY IMAGE_URL:', directProperties[0].image_url)
+        }
+
+        showToast('Direct API call successful! Check console for data structure.', 'success')
+      } else {
+        console.error('❌ Direct API call failed:', directResponse.status)
+        showToast('Direct API call failed. Status: ' + directResponse.status, 'error')
+      }
+
+      // Also try the normal refresh
       await refreshData(false)
 
-      showToast('Data refreshed successfully!', 'success')
       console.log('✅ Manual refresh completed')
     } catch (error) {
       console.error('❌ Error refreshing data:', error)
