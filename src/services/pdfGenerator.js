@@ -60,36 +60,73 @@ export class PropertyPDFGenerator {
       return {
         download: (filename) => {
           try {
+            console.log('🔄 Starting download process for:', filename)
+
             // Create blob and download link
             const blob = new Blob([htmlContent], { type: 'text/html' })
             const url = URL.createObjectURL(blob)
+            console.log('📄 Created blob URL:', url)
 
-            // Create download link
+            // Try multiple download methods for better compatibility
+
+            // Method 1: Standard download link
             const downloadLink = document.createElement('a')
             downloadLink.href = url
             downloadLink.download = filename + '.html'
             downloadLink.style.display = 'none'
+            downloadLink.target = '_blank'
 
-            // Prevent any navigation issues
-            downloadLink.onclick = (e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              return false
+            // Add to DOM
+            document.body.appendChild(downloadLink)
+            console.log('📎 Added download link to DOM')
+
+            // Try to trigger download
+            try {
+              downloadLink.click()
+              console.log('✅ Download link clicked')
+            } catch (clickError) {
+              console.error('❌ Click failed:', clickError)
+
+              // Method 2: Fallback - try programmatic click
+              const event = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+              })
+              downloadLink.dispatchEvent(event)
+              console.log('🔄 Tried programmatic click')
             }
 
-            // Add to DOM, trigger download, and clean up
-            document.body.appendChild(downloadLink)
-            downloadLink.click()
-
-            // Clean up immediately
+            // Method 3: Alternative approach - open in new window if download fails
             setTimeout(() => {
-              document.body.removeChild(downloadLink)
+              try {
+                // Check if download worked by seeing if the blob is still accessible
+                fetch(url).then(() => {
+                  console.log('⚠️ Download may have failed, opening in new window')
+                  window.open(url, '_blank')
+                }).catch(() => {
+                  console.log('✅ Download likely succeeded')
+                })
+              } catch (e) {
+                console.log('✅ Download completed')
+              }
+            }, 500)
+
+            // Clean up after a delay
+            setTimeout(() => {
+              if (document.body.contains(downloadLink)) {
+                document.body.removeChild(downloadLink)
+              }
               URL.revokeObjectURL(url)
-            }, 100)
+              console.log('🧹 Cleaned up download resources')
+            }, 2000)
 
             return true
           } catch (error) {
-            console.error('Download error:', error)
+            console.error('❌ Download error:', error)
+
+            // Last resort: show user instructions
+            alert(`Download failed. Please try again or contact support.\nError: ${error.message}`)
             return false
           }
         }
