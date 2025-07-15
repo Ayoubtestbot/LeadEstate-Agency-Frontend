@@ -56,7 +56,7 @@ const Properties = () => {
       showToast('Generating PDF...', 'info')
       const success = await downloadPropertyPDF(property)
       if (success) {
-        showToast(`PDF for "${property.title}" ready for download!`, 'success')
+        showToast(`PDF for "${property.title}" downloaded successfully!`, 'success')
       } else {
         showToast('Failed to generate PDF. Please try again.', 'error')
       }

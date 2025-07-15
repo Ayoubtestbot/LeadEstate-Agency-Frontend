@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react'
+import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react'
 
 const Toast = ({ message, type = 'success', isVisible, onClose, duration = 4000 }) => {
   useEffect(() => {
@@ -34,10 +34,17 @@ const Toast = ({ message, type = 'success', isVisible, onClose, duration = 4000 
       borderColor: 'border-yellow-200',
       iconColor: 'text-yellow-400',
       textColor: 'text-yellow-800'
+    },
+    info: {
+      icon: Info,
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200',
+      iconColor: 'text-blue-400',
+      textColor: 'text-blue-800'
     }
   }
 
-  const config = typeConfig[type]
+  const config = typeConfig[type] || typeConfig.info // Fallback to info if type not found
   const Icon = config.icon
 
   return (
