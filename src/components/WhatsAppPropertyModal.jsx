@@ -81,38 +81,116 @@ const WhatsAppPropertyModal = ({ isOpen, onClose, lead }) => {
         const phoneNumber = lead.phone.replace(/\D/g, '') // Remove non-digits
         const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`
 
-        // Show detailed instructions
+        // Show detailed instructions with proper event handling
         const instructionModal = document.createElement('div')
-        instructionModal.innerHTML = `
-          <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-              <h2 style="color: #2c3e50; margin-bottom: 20px;">📄 PDF Brochures Ready!</h2>
-              <p style="color: #34495e; margin-bottom: 20px; line-height: 1.6;">
-                <strong>${successCount} property brochure${successCount === 1 ? '' : 's'} opened in new window${successCount === 1 ? '' : 's'}!</strong>
-              </p>
-              <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
-                <h3 style="color: #2c3e50; margin-bottom: 15px;">📋 How to send via WhatsApp:</h3>
-                <ol style="color: #34495e; line-height: 1.8; margin: 0; padding-left: 20px;">
-                  <li><strong>Save PDFs:</strong> Click "📄 Save as PDF" button in each window</li>
-                  <li><strong>Choose location:</strong> Save to Downloads or Desktop</li>
-                  <li><strong>Open WhatsApp:</strong> Click "Open WhatsApp" below</li>
-                  <li><strong>Attach files:</strong> Use 📎 attachment button in WhatsApp</li>
-                  <li><strong>Select PDFs:</strong> Choose the saved PDF files</li>
-                  <li><strong>Send message:</strong> Your message is already prepared!</li>
-                </ol>
-              </div>
-              <div style="display: flex; gap: 15px; justify-content: center;">
-                <button onclick="window.open('${whatsappUrl}', '_blank'); this.parentElement.parentElement.parentElement.remove();" style="background: #25d366; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);">
-                  📱 Open WhatsApp
-                </button>
-                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #95a5a6; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 10px rgba(149, 165, 166, 0.3);">
-                  ✖ Close
-                </button>
-              </div>
-            </div>
-          </div>
+        instructionModal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.8);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         `
+
+        const modalContent = document.createElement('div')
+        modalContent.style.cssText = `
+          background: white;
+          padding: 30px;
+          border-radius: 15px;
+          max-width: 500px;
+          text-align: center;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        `
+
+        modalContent.innerHTML = `
+          <h2 style="color: #2c3e50; margin-bottom: 20px;">📄 PDF Brochures Ready!</h2>
+          <p style="color: #34495e; margin-bottom: 20px; line-height: 1.6;">
+            <strong>${successCount} property brochure${successCount === 1 ? '' : 's'} opened in new window${successCount === 1 ? '' : 's'}!</strong>
+          </p>
+          <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left;">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">📋 How to send via WhatsApp:</h3>
+            <ol style="color: #34495e; line-height: 1.8; margin: 0; padding-left: 20px;">
+              <li><strong>Save PDFs:</strong> Click "📄 Save as PDF" button in each window</li>
+              <li><strong>Choose location:</strong> Save to Downloads or Desktop</li>
+              <li><strong>Open WhatsApp:</strong> Click "Open WhatsApp" below</li>
+              <li><strong>Attach files:</strong> Use 📎 attachment button in WhatsApp</li>
+              <li><strong>Select PDFs:</strong> Choose the saved PDF files</li>
+              <li><strong>Send message:</strong> Your message is already prepared!</li>
+            </ol>
+          </div>
+          <div id="modal-buttons" style="display: flex; gap: 15px; justify-content: center;"></div>
+        `
+
+        // Create buttons with proper event listeners
+        const buttonContainer = modalContent.querySelector('#modal-buttons')
+
+        const whatsappButton = document.createElement('button')
+        whatsappButton.textContent = '📱 Open WhatsApp'
+        whatsappButton.style.cssText = `
+          background: #25d366;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
+          transition: all 0.2s;
+        `
+        whatsappButton.addEventListener('click', () => {
+          window.open(whatsappUrl, '_blank')
+          document.body.removeChild(instructionModal)
+        })
+        whatsappButton.addEventListener('mouseenter', () => {
+          whatsappButton.style.background = '#128c7e'
+          whatsappButton.style.transform = 'translateY(-2px)'
+        })
+        whatsappButton.addEventListener('mouseleave', () => {
+          whatsappButton.style.background = '#25d366'
+          whatsappButton.style.transform = 'translateY(0)'
+        })
+
+        const closeButton = document.createElement('button')
+        closeButton.textContent = '✖ Close'
+        closeButton.style.cssText = `
+          background: #95a5a6;
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          box-shadow: 0 2px 10px rgba(149, 165, 166, 0.3);
+          transition: all 0.2s;
+        `
+        closeButton.addEventListener('click', () => {
+          document.body.removeChild(instructionModal)
+        })
+        closeButton.addEventListener('mouseenter', () => {
+          closeButton.style.background = '#7f8c8d'
+          closeButton.style.transform = 'translateY(-2px)'
+        })
+        closeButton.addEventListener('mouseleave', () => {
+          closeButton.style.background = '#95a5a6'
+          closeButton.style.transform = 'translateY(0)'
+        })
+
+        buttonContainer.appendChild(whatsappButton)
+        buttonContainer.appendChild(closeButton)
+
+        instructionModal.appendChild(modalContent)
         document.body.appendChild(instructionModal)
+
+        // Close modal when clicking outside
+        instructionModal.addEventListener('click', (e) => {
+          if (e.target === instructionModal) {
+            document.body.removeChild(instructionModal)
+          }
+        })
         onClose()
       } else {
         alert('❌ Failed to generate PDF brochures. Please try again.')
