@@ -142,7 +142,18 @@ export class PropertyPDFGenerator {
   // Generate HTML content for PDF
   generateHTMLContent(property, agencyInfo) {
     const price = property.price ? `$${parseInt(property.price).toLocaleString()}` : 'Price on Request'
-    const location = property.address || property.city || property.location || 'Prime Location'
+
+    // DEBUG: Enhanced location detection
+    console.log('🔍 PDF Location Debug:')
+    console.log('  - property.city:', property.city)
+    console.log('  - property.address:', property.address)
+    console.log('  - property.location:', property.location)
+
+    const city = property.city || 'City not specified'
+    const address = property.address || 'Address not specified'
+    const location = `${city}${address && address !== city ? `, ${address}` : ''}`
+
+    console.log('  - Final location for PDF:', location)
 
     // Get property images
     const mainImage = property.image_url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format'
@@ -286,9 +297,13 @@ export class PropertyPDFGenerator {
       </head>
       <body>
         <div class="container">
-          <div class="header">
-            <h1>${agencyInfo.name || 'LeadEstate Agency'}</h1>
-            <p>Your Trusted Real Estate Partner</p>
+          <!-- Enhanced Professional Header -->
+          <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; text-align: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+            <h1 style="margin: 0 0 10px 0; font-size: 32px; font-weight: bold;">${agencyInfo.name || 'LeadEstate Agency'}</h1>
+            <p style="margin: 0; font-size: 18px; opacity: 0.9;">Your Trusted Real Estate Partner</p>
+            <div style="margin-top: 15px; font-size: 14px; opacity: 0.8;">
+              📞 ${agencyInfo.phone || '+212 600 000 000'} | 📧 ${agencyInfo.email || 'contact@leadestate.com'} | 🌐 ${agencyInfo.website || 'www.leadestate.com'}
+            </div>
           </div>
 
           <div class="content">
@@ -309,8 +324,12 @@ export class PropertyPDFGenerator {
                   <span class="detail-value">${property.type || 'N/A'}</span>
                 </div>
                 <div class="detail-item">
-                  <span class="detail-label">Location:</span>
-                  <span class="detail-value">${location}</span>
+                  <span class="detail-label">City:</span>
+                  <span class="detail-value">${city}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Address:</span>
+                  <span class="detail-value">${address}</span>
                 </div>
                 <div class="detail-item">
                   <span class="detail-label">Surface Area:</span>
@@ -356,27 +375,7 @@ export class PropertyPDFGenerator {
               </div>
             </div>
 
-            <div class="contact-section">
-              <div class="section-title">Contact Information</div>
-              <div class="contact-grid">
-                <div class="contact-item">
-                  <strong>📞 Phone:</strong><br>
-                  ${agencyInfo.phone || '+212 600 000 000'}
-                </div>
-                <div class="contact-item">
-                  <strong>📧 Email:</strong><br>
-                  ${agencyInfo.email || 'contact@leadestate.com'}
-                </div>
-                <div class="contact-item">
-                  <strong>🌐 Website:</strong><br>
-                  ${agencyInfo.website || 'www.leadestate.com'}
-                </div>
-                <div class="contact-item">
-                  <strong>📍 Address:</strong><br>
-                  ${agencyInfo.address || 'Casablanca, Morocco'}
-                </div>
-              </div>
-            </div>
+            <!-- Contact info is now in the header -->
           </div>
 
           <!-- Professional Footer -->
