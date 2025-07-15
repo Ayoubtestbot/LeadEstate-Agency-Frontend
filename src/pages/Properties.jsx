@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, Search, Filter, Home, Eye, Edit, Trash2, Download } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, Search, Filter, Home, Eye, Edit, Trash2, Download, RefreshCw } from 'lucide-react'
 import { useData } from '../App'
 import { useToast } from '../components/Toast'
 import AddPropertyModal from '../components/AddPropertyModal'
@@ -9,12 +9,37 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { downloadPropertyPDF } from '../services/pdfGenerator'
 
 const Properties = () => {
-  const { properties, addProperty, updateProperty, deleteProperty } = useData()
+  const { properties, addProperty, updateProperty, deleteProperty, refreshData } = useData()
   const { showToast } = useToast()
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [viewProperty, setViewProperty] = useState(null)
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
+
+  // Force refresh data when component mounts to get latest property updates
+  useEffect(() => {
+    const forceRefresh = async () => {
+      try {
+        console.log('🔄 Properties page: Force refreshing data to get latest updates...')
+        await refreshData(true) // Skip loading spinner
+        console.log('✅ Properties page: Data refreshed successfully')
+      } catch (error) {
+        console.error('❌ Properties page: Error refreshing data:', error)
+      }
+    }
+
+    forceRefresh()
+  }, [refreshData])
+
+  // Debug: Log properties data when it changes
+  useEffect(() => {
+    console.log('🏠 Properties data updated:', properties)
+    if (properties.length > 0) {
+      console.log('🔍 First property sample:', properties[0])
+      console.log('🔍 Image URL:', properties[0].image_url)
+      console.log('🔍 City:', properties[0].city)
+    }
+  }, [properties])
 
   const handleAddProperty = (propertyData) => {
     addProperty(propertyData)
@@ -63,6 +88,16 @@ const Properties = () => {
     } catch (error) {
       console.error('Error downloading PDF:', error)
       showToast('Failed to generate PDF. Please try again.', 'error')
+    }
+  }
+
+  const handleRefreshData = async () => {
+    try {
+      console.log('🔄 Manual refresh triggered...')
+      await refreshData(true) // Force refresh without loading spinner
+      console.log('✅ Manual refresh completed')
+    } catch (error) {
+      console.error('❌ Error refreshing data:', error)
     }
   }
 
@@ -178,7 +213,7 @@ const Properties = () => {
                       <div className="p-1 rounded-lg bg-blue-100 mr-3">
                         <span className="text-blue-600">📍</span>
                       </div>
-                      <span className="font-medium">{property.location || `${property.city}${property.state ? `, ${property.state}` : ''}`}</span>
+                      <span className="font-medium">{property.city || property.location || 'Location not specified'}</span>
                     </div>
                     {property.address && (
                       <div className="flex items-center text-sm text-gray-600">

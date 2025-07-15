@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Properties - LeadEstate</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .container { max-width: 1000px; margin: 0 auto; background: white; border-radius: 15px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        button { padding: 15px 30px; margin: 10px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; }
+        button:hover { background: #2980b9; transform: translateY(-2px); }
+        .log { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; height: 500px; overflow-y: auto; font-family: monospace; border: 2px solid #e9ecef; }
+        .success { color: #27ae60; font-weight: 600; }
+        .error { color: #e74c3c; font-weight: 600; }
+        .info { color: #3498db; }
+        h1 { color: #2c3e50; text-align: center; margin-bottom: 30px; }
+        .button-group { text-align: center; margin-bottom: 20px; }
+        .property-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .field { margin: 5px 0; }
+        .field-name { font-weight: bold; color: #495057; }
+        .field-value { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Properties Data Structure</h1>
+        <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px;">
+            This tool will show you the actual structure of your properties data to debug missing images and cities.
+        </p>
+        
+        <div class="button-group">
+            <button onclick="debugProperties()">🔍 Debug Properties</button>
+            <button onclick="fixProperties()">🔧 Fix Properties</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        async function debugProperties() {
+            log('🔍 Starting property data debug...', 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/properties`);
+                log(`📡 API Response Status: ${response.status}`, 'info');
+                
+                if (!response.ok) {
+                    log(`❌ API Error: ${response.status} - ${response.statusText}`, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                log(`📋 Raw API Response: ${JSON.stringify(data, null, 2)}`, 'info');
+                
+                // Analyze the structure
+                let properties = [];
+                if (Array.isArray(data)) {
+                    properties = data;
+                    log(`✅ Found ${properties.length} properties (direct array)`, 'success');
+                } else if (data.data && Array.isArray(data.data)) {
+                    properties = data.data;
+                    log(`✅ Found ${properties.length} properties (in data field)`, 'success');
+                } else {
+                    log(`⚠️ Unexpected response structure. Keys: ${Object.keys(data).join(', ')}`, 'info');
+                    return;
+                }
+                
+                if (properties.length === 0) {
+                    log('⚠️ No properties found in database!', 'info');
+                    return;
+                }
+                
+                // Analyze each property
+                properties.forEach((property, index) => {
+                    log(`\n🏠 Property ${index + 1}: ${property.title || property.name || 'Unnamed'}`, 'info');
+                    
+                    // Create property card HTML
+                    const propertyCard = document.createElement('div');
+                    propertyCard.className = 'property-card';
+                    propertyCard.innerHTML = `
+                        <h4>🏠 ${property.title || property.name || 'Unnamed Property'}</h4>
+                        ${Object.keys(property).map(key => `
+                            <div class="field">
+                                <span class="field-name">${key}:</span> 
+                                <span class="field-value">${JSON.stringify(property[key])}</span>
+                            </div>
+                        `).join('')}
+                    `;
+                    document.getElementById('log').appendChild(propertyCard);
+                    
+                    // Check for image fields
+                    const imageFields = ['image_url', 'image', 'images', 'main_image', 'photo'];
+                    const foundImageFields = imageFields.filter(field => property[field]);
+                    if (foundImageFields.length > 0) {
+                        log(`  📸 Image fields found: ${foundImageFields.join(', ')}`, 'success');
+                        foundImageFields.forEach(field => {
+                            log(`    ${field}: ${property[field]}`, 'info');
+                        });
+                    } else {
+                        log(`  ❌ No image fields found! Available fields: ${Object.keys(property).join(', ')}`, 'error');
+                    }
+                    
+                    // Check for location fields
+                    const locationFields = ['city', 'location', 'address', 'state', 'country'];
+                    const foundLocationFields = locationFields.filter(field => property[field]);
+                    if (foundLocationFields.length > 0) {
+                        log(`  📍 Location fields found: ${foundLocationFields.join(', ')}`, 'success');
+                        foundLocationFields.forEach(field => {
+                            log(`    ${field}: ${property[field]}`, 'info');
+                        });
+                    } else {
+                        log(`  ❌ No location fields found! Available fields: ${Object.keys(property).join(', ')}`, 'error');
+                    }
+                });
+                
+            } catch (error) {
+                log(`❌ Debug Failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function fixProperties() {
+            log('🔧 Starting property fixes...', 'info');
+            
+            try {
+                const response = await fetch(`${API_URL}/properties`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch properties');
+                }
+                
+                const responseData = await response.json();
+                let properties = [];
+                if (Array.isArray(responseData)) {
+                    properties = responseData;
+                } else if (responseData.data && Array.isArray(responseData.data)) {
+                    properties = responseData.data;
+                } else {
+                    log(`❌ Unexpected API response format`, 'error');
+                    return;
+                }
+                
+                if (properties.length === 0) {
+                    log('⚠️ No properties to fix!', 'info');
+                    return;
+                }
+                
+                let fixedCount = 0;
+                
+                for (const property of properties) {
+                    try {
+                        const fixes = {};
+                        let needsUpdate = false;
+                        
+                        // Fix missing image_url
+                        if (!property.image_url) {
+                            fixes.image_url = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format';
+                            needsUpdate = true;
+                            log(`  📸 Adding image_url to: ${property.title}`, 'info');
+                        }
+                        
+                        // Fix missing city
+                        if (!property.city) {
+                            fixes.city = 'Casablanca';
+                            needsUpdate = true;
+                            log(`  📍 Adding city to: ${property.title}`, 'info');
+                        }
+                        
+                        // Fix missing address
+                        if (!property.address) {
+                            fixes.address = 'Centre-ville, Casablanca';
+                            needsUpdate = true;
+                            log(`  🏠 Adding address to: ${property.title}`, 'info');
+                        }
+                        
+                        // Add bedrooms and bathrooms if missing
+                        if (!property.bedrooms) {
+                            fixes.bedrooms = 3;
+                            needsUpdate = true;
+                        }
+                        
+                        if (!property.bathrooms) {
+                            fixes.bathrooms = 2;
+                            needsUpdate = true;
+                        }
+                        
+                        if (needsUpdate) {
+                            const updateData = { ...property, ...fixes };
+                            
+                            const updateResponse = await fetch(`${API_URL}/properties/${property.id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(updateData)
+                            });
+                            
+                            if (updateResponse.ok) {
+                                log(`✅ Fixed: ${property.title}`, 'success');
+                                fixedCount++;
+                            } else {
+                                log(`❌ Failed to fix: ${property.title}`, 'error');
+                            }
+                        } else {
+                            log(`✅ No fixes needed for: ${property.title}`, 'success');
+                        }
+                        
+                        // Small delay
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                    } catch (error) {
+                        log(`❌ Error fixing ${property.title}: ${error.message}`, 'error');
+                    }
+                }
+                
+                log(`🎉 Fix complete! ${fixedCount} properties updated`, 'success');
+                log('🔄 Refresh your Properties page to see the changes!', 'info');
+                
+            } catch (error) {
+                log(`❌ Fix failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-start message
+        window.onload = function() {
+            log('🔍 Property Debug Tool Ready!', 'info');
+            log('Click "Debug Properties" to see the current data structure.', 'info');
+        };
+    </script>
+</body>
+</html>
