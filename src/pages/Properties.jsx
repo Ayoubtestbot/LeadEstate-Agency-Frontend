@@ -9,13 +9,20 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import { downloadPropertyPDF } from '../services/pdfGenerator'
 
 const Properties = () => {
-  const { properties, addProperty, updateProperty, deleteProperty, refreshData } = useData()
+  const { properties: contextProperties, addProperty, updateProperty, deleteProperty, refreshData } = useData()
   const { showToast } = useToast()
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [viewProperty, setViewProperty] = useState(null)
   const [editProperty, setEditProperty] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+
+  // EMERGENCY FIX: Override properties with direct API data
+  const [directProperties, setDirectProperties] = useState([])
+  const [useDirectData, setUseDirectData] = useState(false)
+
+  // Use direct properties if available, otherwise fall back to context
+  const properties = useDirectData && directProperties.length > 0 ? directProperties : contextProperties
 
   // DEBUG: Log properties data structure
   useEffect(() => {
@@ -131,7 +138,12 @@ const Properties = () => {
           console.log('🔍 DIRECT FIRST PROPERTY IMAGE_URL:', directProperties[0].image_url)
         }
 
-        showToast('Direct API call successful! Check console for data structure.', 'success')
+        // EMERGENCY FIX: Use the direct data to override context
+        console.log('🚨 EMERGENCY: Overriding context properties with direct API data!')
+        setDirectProperties(directProperties)
+        setUseDirectData(true)
+
+        showToast(`🎉 SUCCESS! Using direct API data. Found ${directProperties.length} properties with cities!`, 'success')
       } else {
         console.error('❌ Direct API call failed:', directResponse.status)
         showToast('Direct API call failed. Status: ' + directResponse.status, 'error')
