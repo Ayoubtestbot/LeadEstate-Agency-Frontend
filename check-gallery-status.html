@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Gallery Status</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+        .property-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .property-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .property-details {
+            font-size: 12px;
+            color: #666;
+        }
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .image-preview img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Gallery Status Checker</h1>
+            <p>Check which properties have gallery images and their current status</p>
+        </div>
+
+        <div class="log-area" id="logArea"></div>
+
+        <div class="controls">
+            <button class="btn" onclick="checkGalleryStatus()">🔍 Check Gallery Status</button>
+            <button class="btn" onclick="showDetailedView()">📋 Detailed View</button>
+            <button class="btn" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logArea.appendChild(logEntry);
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logArea').innerHTML = '';
+        }
+
+        async function checkGalleryStatus() {
+            try {
+                log('🔍 Checking gallery status for all properties...', 'info');
+                
+                const response = await fetch(`${API_URL}/properties?t=${Date.now()}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch properties: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                log(`📋 Raw API response keys: ${Object.keys(data).join(', ')}`, 'info');
+                
+                let properties = [];
+                if (Array.isArray(data)) {
+                    properties = data;
+                } else if (data.data && Array.isArray(data.data)) {
+                    properties = data.data;
+                } else if (data.properties && Array.isArray(data.properties)) {
+                    properties = data.properties;
+                } else {
+                    log(`❌ Unexpected response structure: ${JSON.stringify(data).substring(0, 200)}...`, 'error');
+                    return;
+                }
+                
+                log(`📊 Found ${properties.length} total properties`, 'info');
+                
+                let withGallery = 0;
+                let withMainImage = 0;
+                let withoutImages = 0;
+                
+                properties.forEach((property, index) => {
+                    const hasGallery = property.images && Array.isArray(property.images) && property.images.length > 0;
+                    const hasMainImage = property.image_url && property.image_url.trim() !== '';
+                    
+                    if (hasGallery) {
+                        withGallery++;
+                        log(`✅ "${property.title}" - Gallery: ${property.images.length} images`, 'success');
+                        log(`   Main image: ${property.image_url ? 'YES' : 'NO'}`, hasMainImage ? 'success' : 'warning');
+                        log(`   Gallery preview: ${property.images.slice(0, 2).join(', ')}...`, 'info');
+                    } else if (hasMainImage) {
+                        withMainImage++;
+                        log(`🖼️ "${property.title}" - Main image only: ${property.image_url}`, 'warning');
+                    } else {
+                        withoutImages++;
+                        log(`❌ "${property.title}" - No images`, 'error');
+                    }
+                    
+                    // Show all fields for first property
+                    if (index === 0) {
+                        log(`🔍 First property fields: ${Object.keys(property).join(', ')}`, 'info');
+                    }
+                });
+                
+                log('', 'info');
+                log('📊 SUMMARY:', 'info');
+                log(`✅ Properties with gallery: ${withGallery}`, 'success');
+                log(`🖼️ Properties with main image only: ${withMainImage}`, 'warning');
+                log(`❌ Properties without images: ${withoutImages}`, 'error');
+                log(`📋 Total properties: ${properties.length}`, 'info');
+                
+                if (withGallery > 0) {
+                    log('💡 You can now test property details and PDF generation!', 'success');
+                } else {
+                    log('⚠️ No properties found with gallery images. Try running the gallery tool again.', 'warning');
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking gallery status: ${error.message}`, 'error');
+            }
+        }
+
+        async function showDetailedView() {
+            try {
+                log('📋 Loading detailed property view...', 'info');
+                
+                const response = await fetch(`${API_URL}/properties?t=${Date.now()}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch properties: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const properties = data.data || data.properties || data;
+                
+                clearLogs();
+                
+                const logArea = document.getElementById('logArea');
+                
+                properties.slice(0, 10).forEach(property => {
+                    const propertyCard = document.createElement('div');
+                    propertyCard.className = 'property-card';
+                    
+                    const hasGallery = property.images && Array.isArray(property.images) && property.images.length > 0;
+                    const hasMainImage = property.image_url && property.image_url.trim() !== '';
+                    
+                    propertyCard.innerHTML = `
+                        <div class="property-title">${property.title || 'Untitled Property'}</div>
+                        <div class="property-details">
+                            <strong>Type:</strong> ${property.type || 'N/A'} | 
+                            <strong>City:</strong> ${property.city || 'N/A'} | 
+                            <strong>Price:</strong> $${property.price || 'N/A'}
+                        </div>
+                        <div class="property-details">
+                            <strong>Main Image:</strong> ${hasMainImage ? '✅ YES' : '❌ NO'} | 
+                            <strong>Gallery:</strong> ${hasGallery ? `✅ ${property.images.length} images` : '❌ NO'}
+                        </div>
+                        ${hasMainImage ? `<div class="property-details"><strong>Main Image URL:</strong> ${property.image_url}</div>` : ''}
+                        ${hasGallery ? `
+                            <div class="image-preview">
+                                ${property.images.slice(0, 4).map(img => `<img src="${img}" alt="Property image" onerror="this.style.border='2px solid red'">`).join('')}
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    logArea.appendChild(propertyCard);
+                });
+                
+            } catch (error) {
+                log(`❌ Error showing detailed view: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            log('🔍 Gallery Status Checker Ready!', 'success');
+            log('Click "Check Gallery Status" to see which properties have images', 'info');
+        });
+    </script>
+</body>
+</html>
