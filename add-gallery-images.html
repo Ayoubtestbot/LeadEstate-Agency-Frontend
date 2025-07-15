@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Gallery Images to Properties</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .log-area {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Add Gallery Images to Properties</h1>
+            <p>This tool will add beautiful gallery images to existing properties for testing</p>
+        </div>
+
+        <div class="log-area" id="logArea"></div>
+
+        <div class="controls">
+            <button class="btn" onclick="addGalleryImages()">🖼️ Add Gallery Images</button>
+            <button class="btn" onclick="testPropertyWithGallery()">🔍 Test Property Details</button>
+            <button class="btn" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logArea.appendChild(logEntry);
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logArea').innerHTML = '';
+        }
+
+        // High-quality property images for different property types
+        const propertyImages = {
+            villa: [
+                'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format', // Main villa
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format', // Living room
+                'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format', // Kitchen
+                'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format', // Bedroom
+                'https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=800&h=600&fit=crop&auto=format', // Bathroom
+                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&auto=format'  // Garden
+            ],
+            apartment: [
+                'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800&h=600&fit=crop&auto=format', // Modern apartment
+                'https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&h=600&fit=crop&auto=format', // Living area
+                'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format', // Kitchen
+                'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&h=600&fit=crop&auto=format', // Bedroom
+                'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=800&h=600&fit=crop&auto=format', // Balcony
+                'https://images.unsplash.com/photo-1571055107559-3e67626fa8be?w=800&h=600&fit=crop&auto=format'  // Bathroom
+            ],
+            house: [
+                'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800&h=600&fit=crop&auto=format', // House exterior
+                'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop&auto=format', // Living room
+                'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&h=600&fit=crop&auto=format', // Kitchen
+                'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format', // Bedroom
+                'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&h=600&fit=crop&auto=format', // Dining room
+                'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&h=600&fit=crop&auto=format'  // Backyard
+            ]
+        };
+
+        async function addGalleryImages() {
+            try {
+                log('🚀 Starting to add gallery images to properties...', 'info');
+                
+                // Get all properties
+                const response = await fetch(`${API_URL}/properties`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch properties: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const properties = data.data || data.properties || data;
+                
+                log(`📋 Found ${properties.length} properties`, 'info');
+                
+                let updatedCount = 0;
+                
+                for (let i = 0; i < Math.min(properties.length, 5); i++) {
+                    const property = properties[i];
+                    
+                    // Skip if already has images
+                    if (property.images && property.images.length > 0) {
+                        log(`⏭️ Skipping ${property.title} - already has gallery images`, 'warning');
+                        continue;
+                    }
+                    
+                    // Get appropriate images based on property type
+                    const propertyType = property.type || 'villa';
+                    const imageSet = propertyImages[propertyType] || propertyImages.villa;
+                    
+                    // Select 4-6 random images
+                    const selectedImages = imageSet.slice(0, 4 + Math.floor(Math.random() * 3));
+                    
+                    // Update property with gallery images
+                    const updateData = {
+                        ...property,
+                        images: selectedImages,
+                        image_url: selectedImages[0] // Set main image
+                    };
+                    
+                    log(`🖼️ Adding ${selectedImages.length} images to "${property.title}"...`, 'info');
+                    
+                    const updateResponse = await fetch(`${API_URL}/properties/${property.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+                    
+                    if (updateResponse.ok) {
+                        updatedCount++;
+                        log(`✅ Updated "${property.title}" with gallery images`, 'success');
+                    } else {
+                        log(`❌ Failed to update "${property.title}": ${updateResponse.status}`, 'error');
+                    }
+                    
+                    // Small delay to avoid overwhelming the API
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                log(`🎉 Successfully added gallery images to ${updatedCount} properties!`, 'success');
+                log('💡 Now you can test property details and PDF generation', 'info');
+                
+            } catch (error) {
+                log(`❌ Error adding gallery images: ${error.message}`, 'error');
+            }
+        }
+
+        async function testPropertyWithGallery() {
+            try {
+                log('🔍 Looking for properties with gallery images...', 'info');
+                
+                const response = await fetch(`${API_URL}/properties`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch properties: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const properties = data.data || data.properties || data;
+                
+                const propertiesWithGallery = properties.filter(p => p.images && p.images.length > 0);
+                
+                if (propertiesWithGallery.length === 0) {
+                    log('❌ No properties found with gallery images. Run "Add Gallery Images" first.', 'warning');
+                    return;
+                }
+                
+                log(`✅ Found ${propertiesWithGallery.length} properties with gallery images:`, 'success');
+                
+                propertiesWithGallery.forEach((property, index) => {
+                    log(`${index + 1}. "${property.title}" - ${property.images.length} images`, 'info');
+                    log(`   Main image: ${property.image_url}`, 'info');
+                    log(`   Gallery: ${property.images.slice(0, 2).join(', ')}...`, 'info');
+                });
+                
+                log('💡 Go to Properties page to view details and test PDF download!', 'success');
+                
+            } catch (error) {
+                log(`❌ Error testing properties: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            log('🎨 Gallery Image Manager Ready!', 'success');
+            log('Click "Add Gallery Images" to enhance your properties with beautiful image galleries', 'info');
+        });
+    </script>
+</body>
+</html>
