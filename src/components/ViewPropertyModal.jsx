@@ -1,8 +1,33 @@
-import { Home, DollarSign, MapPin, Calendar, Tag, Bed, Bath, Maximize } from 'lucide-react'
+import { Home, DollarSign, MapPin, Calendar, Tag, Bed, Bath, Maximize, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState } from 'react'
 import Modal from './Modal'
 
 const ViewPropertyModal = ({ isOpen, onClose, property }) => {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+
   if (!property) return null
+
+  // Get all images (main image + gallery)
+  const allImages = []
+  if (property.image_url) {
+    allImages.push(property.image_url)
+  }
+  if (property.images && Array.isArray(property.images)) {
+    // Add gallery images that are different from main image
+    property.images.forEach(img => {
+      if (img !== property.image_url) {
+        allImages.push(img)
+      }
+    })
+  }
+
+  const nextImage = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % allImages.length)
+  }
+
+  const prevImage = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)
+  }
 
   const getTypeColor = (type) => {
     switch (type) {
@@ -26,17 +51,76 @@ const ViewPropertyModal = ({ isOpen, onClose, property }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Property Details" size="lg">
       <div className="space-y-6">
-        {/* Property Image */}
-        {property.image_url && (
-          <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-            <img
-              src={property.image_url}
-              alt={property.title}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
+        {/* Property Gallery */}
+        {allImages.length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Property Gallery</h3>
+
+            {/* Main Image Display */}
+            <div className="relative mb-4">
+              <div className="w-full h-80 bg-gray-200 rounded-lg overflow-hidden">
+                <img
+                  src={allImages[selectedImageIndex]}
+                  alt={`${property.title} - Image ${selectedImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format'
+                  }}
+                />
+              </div>
+
+              {/* Navigation Arrows */}
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-all"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+
+                  {/* Image Counter */}
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+                    {selectedImageIndex + 1} / {allImages.length}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Gallery */}
+            {allImages.length > 1 && (
+              <div className="grid grid-cols-6 gap-2">
+                {allImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative h-16 bg-gray-200 rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImageIndex === index
+                        ? 'border-blue-500 ring-2 ring-blue-200'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <img
+                      src={image}
+                      alt={`Thumbnail ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=200&h=200&fit=crop&auto=format'
+                      }}
+                    />
+                    {selectedImageIndex === index && (
+                      <div className="absolute inset-0 bg-blue-500 bg-opacity-20"></div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
