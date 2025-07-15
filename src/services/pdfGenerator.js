@@ -155,13 +155,32 @@ export class PropertyPDFGenerator {
 
     console.log('  - Final location for PDF:', location)
 
-    // Get property images
+    // Get property images - Enhanced gallery support
     const mainImage = property.image_url || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format'
-    const galleryImages = property.images && Array.isArray(property.images) ? property.images.slice(0, 3) : [
+
+    // Prepare all images for gallery (main + additional gallery images)
+    const allImages = []
+    if (property.image_url) {
+      allImages.push(property.image_url)
+    }
+    if (property.images && Array.isArray(property.images)) {
+      // Add gallery images that are different from main image
+      property.images.forEach(img => {
+        if (img !== property.image_url) {
+          allImages.push(img)
+        }
+      })
+    }
+
+    // If no real images, use fallback gallery
+    const galleryImages = allImages.length > 0 ? allImages.slice(0, 8) : [
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&h=600&fit=crop&auto=format',
       'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop&auto=format',
       'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&auto=format',
       'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format'
     ]
+
+    console.log('🖼️ PDF Gallery Images:', galleryImages.length, 'images prepared')
 
     return `
       <!DOCTYPE html>
@@ -365,14 +384,57 @@ export class PropertyPDFGenerator {
               </div>
             ` : ''}
 
-            <!-- Property Gallery -->
+            <!-- Enhanced Property Gallery -->
             <div class="details-section">
-              <div class="section-title">Property Gallery</div>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                ${galleryImages.map(img => `
-                  <img src="${img}" alt="Property view" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);" />
-                `).join('')}
-              </div>
+              <div class="section-title">Property Gallery (${galleryImages.length} Images)</div>
+
+              ${galleryImages.length > 1 ? `
+                <!-- Featured Images Grid -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 20px;">
+                  <!-- Main Featured Image -->
+                  <div style="position: relative;">
+                    <img src="${galleryImages[0]}" alt="Main property view" style="width: 100%; height: 300px; object-fit: cover; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);" />
+                    <div style="position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 20px; font-size: 14px; font-weight: bold;">
+                      Main View
+                    </div>
+                  </div>
+
+                  <!-- Side Images -->
+                  <div style="display: grid; grid-template-rows: 1fr 1fr; gap: 15px;">
+                    ${galleryImages.slice(1, 3).map((img, index) => `
+                      <div style="position: relative;">
+                        <img src="${img}" alt="Property view ${index + 2}" style="width: 100%; height: 142px; object-fit: cover; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2);" />
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+
+                <!-- Additional Images Grid -->
+                ${galleryImages.length > 3 ? `
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+                    ${galleryImages.slice(3, 7).map((img, index) => `
+                      <div style="position: relative;">
+                        <img src="${img}" alt="Property view ${index + 4}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.2);" />
+                        <div style="position: absolute; bottom: 5px; right: 5px; background: rgba(0,0,0,0.6); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px;">
+                          ${index + 4}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : ''}
+
+                <!-- Gallery Summary -->
+                <div style="text-align: center; padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; margin-top: 15px;">
+                  <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                    <strong>📸 Complete Gallery:</strong> ${galleryImages.length} professional images showcasing all aspects of this beautiful property
+                  </p>
+                </div>
+              ` : `
+                <!-- Single Image Display -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                  <img src="${galleryImages[0]}" alt="Property view" style="width: 100%; max-width: 600px; height: 400px; object-fit: cover; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);" />
+                </div>
+              `}
             </div>
 
             <!-- Contact info is now in the header -->
