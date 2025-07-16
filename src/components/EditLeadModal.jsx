@@ -25,22 +25,11 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
       console.log('🔍 EditLeadModal - Full lead data:', lead); // Debug log
       console.log('🔍 Available fields:', Object.keys(lead)); // Show all available fields
 
-      // Handle name - try multiple possible field combinations
-      let fullName = '';
-      if (lead.first_name || lead.last_name) {
-        fullName = `${lead.first_name || ''} ${lead.last_name || ''}`.trim();
-      } else if (lead.name) {
-        fullName = lead.name;
-      }
-
-      // Handle phone - try multiple possible field names
-      const phoneValue = lead.phone || lead.phone_number || '';
-
-      // Handle city - try multiple possible field names
-      const cityValue = lead.city || lead.location || lead.address || '';
-
-      // Handle assigned agent
-      const assignedValue = lead.assigned_to || lead.assignedTo || lead.agent || '';
+      // Use the actual data structure from the logs
+      const fullName = lead.name || '';
+      const phoneValue = lead.phone || '';
+      const cityValue = lead.city || ''; // Keep empty if no city field
+      const assignedValue = lead.assignedTo || '';
 
       console.log('🔍 Mapped values:', {
         name: fullName,
@@ -58,7 +47,7 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
         email: lead.email || '',
         status: lead.status || 'new',
         source: lead.source || 'website',
-        propertyType: lead.property_type || lead.propertyType || 'house',
+        propertyType: lead.propertyType || 'house',
         budget: lead.budget || '',
         notes: lead.notes || '',
         assignedTo: assignedValue
@@ -69,24 +58,18 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    // Split name into first_name and last_name
-    const nameParts = formData.name.trim().split(' ')
-    const firstName = nameParts[0] || ''
-    const lastName = nameParts.slice(1).join(' ') || ''
-
-    // Prepare data with correct field names for backend
+    // Prepare data to match the existing lead structure
     const submitData = {
-      first_name: firstName,
-      last_name: lastName,
+      name: formData.name,
       phone: formData.phone,
       city: formData.city,
       email: formData.email,
       status: formData.status,
       source: formData.source,
-      property_type: formData.propertyType,
+      propertyType: formData.propertyType,
       budget: formData.budget,
       notes: formData.notes,
-      assigned_to: formData.assignedTo
+      assignedTo: formData.assignedTo
     }
 
     console.log('📤 EditLeadModal - Submitting data:', submitData); // Debug log
