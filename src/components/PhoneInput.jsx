@@ -215,34 +215,43 @@ const PhoneInput = ({
     }
   }, [user, value, selectedCountry.code])
 
-  // Handle external value changes (like when editing a lead)
+  // Handle external value changes (like when editing a lead) - prevent infinite loops
   useEffect(() => {
     if (value && value.startsWith('+')) {
-      console.log('📱 PhoneInput - External value changed:', value)
+      const currentFullNumber = selectedCountry.code + phoneNumber
 
-      // Find matching country code
-      const matchingCountry = COUNTRY_CODES.find(country =>
-        value.startsWith(country.code)
-      )
+      // Only update if the external value is different from current internal value
+      if (value !== currentFullNumber) {
+        console.log('📱 PhoneInput - External value changed:', value, 'Current:', currentFullNumber)
 
-      if (matchingCountry) {
-        console.log('📱 PhoneInput - Found matching country:', matchingCountry.country)
-        setSelectedCountry(matchingCountry)
-        setPhoneNumber(value.substring(matchingCountry.code.length))
-      } else {
-        console.log('📱 PhoneInput - No matching country found, using value as-is')
-        setPhoneNumber(value.replace(/^\+\d+/, ''))
+        // Find matching country code
+        const matchingCountry = COUNTRY_CODES.find(country =>
+          value.startsWith(country.code)
+        )
+
+        if (matchingCountry) {
+          console.log('📱 PhoneInput - Found matching country:', matchingCountry.country)
+          setSelectedCountry(matchingCountry)
+          setPhoneNumber(value.substring(matchingCountry.code.length))
+        } else {
+          console.log('📱 PhoneInput - No matching country found, using value as-is')
+          setPhoneNumber(value.replace(/^\+\d+/, ''))
+        }
       }
-    } else if (value === '') {
+    } else if (value === '' && phoneNumber !== '') {
       // Clear the phone number if value is empty
+      console.log('📱 PhoneInput - Clearing phone number')
       setPhoneNumber('')
     }
-  }, [value])
+  }, [value, selectedCountry.code, phoneNumber])
 
-  // Update parent component when values change
+  // Update parent component when values change - prevent infinite loops
   useEffect(() => {
     const fullNumber = selectedCountry.code + phoneNumber
-    if (onChange) {
+
+    // Only call onChange if the value actually changed and it's different from the external value
+    if (onChange && fullNumber !== value) {
+      console.log('📱 PhoneInput - Calling onChange:', fullNumber)
       onChange({
         target: {
           name,
@@ -250,7 +259,7 @@ const PhoneInput = ({
         }
       })
     }
-  }, [selectedCountry, phoneNumber, onChange, name])
+  }, [selectedCountry, phoneNumber, onChange, name, value])
 
   const handleCountrySelect = (country) => {
     setSelectedCountry(country)
