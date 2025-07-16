@@ -22,24 +22,47 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
   // Update form data when lead changes
   useEffect(() => {
     if (lead) {
+      console.log('🔍 EditLeadModal - Lead data:', lead); // Debug log
       setFormData({
-        name: lead.name || '',
+        name: `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '',
         phone: lead.phone || '',
         city: lead.city || '',
         email: lead.email || '',
         status: lead.status || 'new',
         source: lead.source || 'website',
-        propertyType: lead.propertyType || 'house',
+        propertyType: lead.property_type || lead.propertyType || 'house',
         budget: lead.budget || '',
         notes: lead.notes || '',
-        assignedTo: lead.assignedTo || ''
+        assignedTo: lead.assigned_to || lead.assignedTo || ''
       })
     }
   }, [lead])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    onSubmit(formData)
+
+    // Split name into first_name and last_name
+    const nameParts = formData.name.trim().split(' ')
+    const firstName = nameParts[0] || ''
+    const lastName = nameParts.slice(1).join(' ') || ''
+
+    // Prepare data with correct field names for backend
+    const submitData = {
+      first_name: firstName,
+      last_name: lastName,
+      phone: formData.phone,
+      city: formData.city,
+      email: formData.email,
+      status: formData.status,
+      source: formData.source,
+      property_type: formData.propertyType,
+      budget: formData.budget,
+      notes: formData.notes,
+      assigned_to: formData.assignedTo
+    }
+
+    console.log('📤 EditLeadModal - Submitting data:', submitData); // Debug log
+    onSubmit(submitData)
     onClose()
   }
 
