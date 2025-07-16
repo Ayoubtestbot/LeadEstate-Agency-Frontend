@@ -62,6 +62,8 @@ const Leads = () => {
   }
 
   const handleEditLead = (lead) => {
+    console.log('🔍 Leads.jsx - Edit lead clicked:', lead); // Debug log
+    console.log('🔍 Lead fields available:', Object.keys(lead)); // Show available fields
     setEditLead(lead)
   }
 

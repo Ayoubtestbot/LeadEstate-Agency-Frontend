@@ -22,18 +22,46 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
   // Update form data when lead changes
   useEffect(() => {
     if (lead) {
-      console.log('🔍 EditLeadModal - Lead data:', lead); // Debug log
+      console.log('🔍 EditLeadModal - Full lead data:', lead); // Debug log
+      console.log('🔍 Available fields:', Object.keys(lead)); // Show all available fields
+
+      // Handle name - try multiple possible field combinations
+      let fullName = '';
+      if (lead.first_name || lead.last_name) {
+        fullName = `${lead.first_name || ''} ${lead.last_name || ''}`.trim();
+      } else if (lead.name) {
+        fullName = lead.name;
+      }
+
+      // Handle phone - try multiple possible field names
+      const phoneValue = lead.phone || lead.phone_number || '';
+
+      // Handle city - try multiple possible field names
+      const cityValue = lead.city || lead.location || lead.address || '';
+
+      // Handle assigned agent
+      const assignedValue = lead.assigned_to || lead.assignedTo || lead.agent || '';
+
+      console.log('🔍 Mapped values:', {
+        name: fullName,
+        phone: phoneValue,
+        city: cityValue,
+        email: lead.email,
+        status: lead.status,
+        assigned: assignedValue
+      });
+
       setFormData({
-        name: `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '',
-        phone: lead.phone || '',
-        city: lead.city || '',
+        name: fullName,
+        phone: phoneValue,
+        city: cityValue,
         email: lead.email || '',
         status: lead.status || 'new',
         source: lead.source || 'website',
         propertyType: lead.property_type || lead.propertyType || 'house',
         budget: lead.budget || '',
         notes: lead.notes || '',
-        assignedTo: lead.assigned_to || lead.assignedTo || ''
+        assignedTo: assignedValue
       })
     }
   }, [lead])
