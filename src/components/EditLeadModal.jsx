@@ -40,6 +40,9 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
         assigned: assignedValue
       });
 
+      console.log('🔍 Team members available:', teamMembers?.length || 0);
+      console.log('🔍 First team member:', teamMembers?.[0]);
+
       setFormData({
         name: fullName,
         phone: phoneValue,

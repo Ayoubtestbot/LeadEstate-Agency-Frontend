@@ -215,6 +215,30 @@ const PhoneInput = ({
     }
   }, [user, value, selectedCountry.code])
 
+  // Handle external value changes (like when editing a lead)
+  useEffect(() => {
+    if (value && value.startsWith('+')) {
+      console.log('📱 PhoneInput - External value changed:', value)
+
+      // Find matching country code
+      const matchingCountry = COUNTRY_CODES.find(country =>
+        value.startsWith(country.code)
+      )
+
+      if (matchingCountry) {
+        console.log('📱 PhoneInput - Found matching country:', matchingCountry.country)
+        setSelectedCountry(matchingCountry)
+        setPhoneNumber(value.substring(matchingCountry.code.length))
+      } else {
+        console.log('📱 PhoneInput - No matching country found, using value as-is')
+        setPhoneNumber(value.replace(/^\+\d+/, ''))
+      }
+    } else if (value === '') {
+      // Clear the phone number if value is empty
+      setPhoneNumber('')
+    }
+  }, [value])
+
   // Update parent component when values change
   useEffect(() => {
     const fullNumber = selectedCountry.code + phoneNumber
