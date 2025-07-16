@@ -128,11 +128,13 @@ const DataProvider = ({ children }) => {
   })
   const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes cache
 
-  // Get language context for WhatsApp messages
-  const { language } = useLanguage ? useLanguage() : { language: 'en' }
+  // Get language context for WhatsApp messages (always call hook)
+  const languageContext = useLanguage()
+  const language = languageContext?.language || 'en'
 
-  // Fetch data from API on component mount
+  // Fetch data from API on component mount (with debug counter)
   useEffect(() => {
+    console.log('🔍 useEffect triggered - fetchAllData called')
     fetchAllData()
   }, [])
 

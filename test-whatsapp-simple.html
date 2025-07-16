@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick WhatsApp Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            background: #25d366;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #128c7e;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Quick WhatsApp Endpoint Test</h1>
+        <p>Test if the WhatsApp welcome endpoint is working after deployment</p>
+        
+        <button class="btn" onclick="testEndpoint()">🔍 Test WhatsApp Endpoint</button>
+        <button class="btn" onclick="checkHealth()">❤️ Check Backend Health</button>
+        <button class="btn" onclick="clearLog()">🗑️ Clear Log</button>
+        
+        <div id="log" class="log">Ready to test...\n</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://leadestate-backend-9fih.onrender.com/api';
+        const TEST_LEAD_ID = '8defac2a-42c2-4d62-b080-ee52717eee5e';
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = 'Log cleared...\n';
+        }
+        
+        async function checkHealth() {
+            try {
+                log('🔍 Checking backend health...', 'info');
+                
+                const response = await fetch(`${API_URL.replace('/api', '')}/health`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('✅ Backend is healthy!', 'success');
+                    log(`📊 Status: ${data.status}`, 'info');
+                    if (data.database) {
+                        log(`💾 Database: ${data.database.status}`, 'success');
+                    }
+                } else {
+                    log('❌ Backend health check failed', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Health check error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testEndpoint() {
+            try {
+                log('📱 Testing WhatsApp welcome endpoint...', 'info');
+                log(`🎯 URL: ${API_URL}/whatsapp/welcome/${TEST_LEAD_ID}`, 'info');
+                
+                const response = await fetch(`${API_URL}/whatsapp/welcome/${TEST_LEAD_ID}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                log(`📊 Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('🎉 SUCCESS! WhatsApp endpoint is working!', 'success');
+                    log(`📄 Message: ${data.message}`, 'success');
+                    if (data.data && data.data.whatsappUrl) {
+                        log('🔗 WhatsApp URL generated successfully', 'success');
+                    }
+                } else {
+                    log(`❌ FAILED: ${data.message || data.error || 'Unknown error'}`, 'error');
+                    if (response.status === 404) {
+                        log('💡 Endpoint still not found - deployment may still be in progress', 'info');
+                        log('⏳ Wait 1-2 minutes and try again', 'info');
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Network error: ${error.message}`, 'error');
+                log('💡 This could mean the server is still deploying', 'info');
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            log('🚀 WhatsApp Endpoint Tester Ready!', 'success');
+            log('💡 Click "Test WhatsApp Endpoint" to check if the fix worked', 'info');
+            
+            // Auto-check health
+            setTimeout(checkHealth, 1000);
+        });
+    </script>
+</body>
+</html>
