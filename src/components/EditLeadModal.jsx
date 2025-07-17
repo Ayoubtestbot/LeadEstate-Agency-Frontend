@@ -31,6 +31,9 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
       const cityValue = lead.city || ''; // Keep empty if no city field
       const assignedValue = lead.assignedTo || '';
 
+      console.log('🔍 RAW LEAD DATA:', lead);
+      console.log('🔍 PHONE VALUE EXTRACTED:', phoneValue);
+      console.log('🔍 CITY VALUE EXTRACTED:', cityValue);
       console.log('🔍 Mapped values:', {
         name: fullName,
         phone: phoneValue,

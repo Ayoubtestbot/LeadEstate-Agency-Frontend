@@ -177,6 +177,8 @@ const PhoneInput = ({
   const { user } = useAuth()
   const isInitializing = useRef(true)
 
+  console.log('📱 PhoneInput - Received value prop:', value);
+
   const [selectedCountry, setSelectedCountry] = useState(() => {
     // If value already has a country code, extract it
     if (value && value.startsWith('+')) {
