@@ -10,6 +10,7 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
     name: '',
     phone: '',
     city: '',
+    address: '',
     email: '',
     status: 'new',
     source: 'website',
@@ -28,20 +29,17 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
       // Use the actual data structure from the logs
       const fullName = lead.name || '';
       const phoneValue = lead.phone || '';
-
-      // Try multiple possible field names for city
-      const cityValue = lead.city || lead.location || lead.address || lead.area || lead.region || '';
+      const cityValue = lead.city || '';
+      const addressValue = lead.address || '';
       const assignedValue = lead.assignedTo || '';
 
       console.log('🔍 RAW LEAD DATA:', lead);
       console.log('🔍 PHONE VALUE EXTRACTED:', phoneValue);
       console.log('🔍 CITY VALUE EXTRACTED:', cityValue);
-      console.log('🔍 Checking city fields:', {
+      console.log('🔍 ADDRESS VALUE EXTRACTED:', addressValue);
+      console.log('🔍 Checking location fields:', {
         city: lead.city,
-        location: lead.location,
-        address: lead.address,
-        area: lead.area,
-        region: lead.region
+        address: lead.address
       });
       console.log('🔍 Mapped values:', {
         name: fullName,
@@ -59,6 +57,7 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
         name: fullName,
         phone: phoneValue,
         city: cityValue,
+        address: addressValue,
         email: lead.email || '',
         status: lead.status || 'new',
         source: lead.source || 'website',
@@ -78,6 +77,7 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
       name: formData.name,
       phone: formData.phone,
       city: formData.city,
+      address: formData.address,
       email: formData.email,
       status: formData.status,
       source: formData.source,
@@ -152,6 +152,24 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
               required
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter city"
+            />
+          </div>
+        </div>
+
+        {/* Address */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Address
+          </label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <textarea
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              rows={2}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter full address (optional)"
             />
           </div>
         </div>
