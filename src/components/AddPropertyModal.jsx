@@ -1,7 +1,19 @@
 import { useState } from 'react'
-import { X, Home, DollarSign, MapPin, Upload, Image } from 'lucide-react'
+import { X, Home, DollarSign, MapPin, Upload, Image, Building } from 'lucide-react'
+import PremiumDropdown from './PremiumDropdown'
 
 const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
+  // Premium dropdown options
+  const propertyTypeOptions = [
+    { value: 'apartment', label: 'Apartment', icon: Building },
+    { value: 'house', label: 'House', icon: Home },
+    { value: 'studio', label: 'Studio', icon: Building },
+    { value: 'loft', label: 'Loft', icon: Building },
+    { value: 'duplex', label: 'Duplex', icon: Home },
+    { value: 'penthouse', label: 'Penthouse', icon: Building },
+    { value: 'villa', label: 'Villa', icon: Home }
+  ]
+
   const [formData, setFormData] = useState({
     title: '',
     type: 'apartment',
@@ -209,21 +221,13 @@ const AddPropertyModal = ({ isOpen, onClose, onSubmit }) => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Property Type *
                 </label>
-                <select
-                  name="type"
+                <PremiumDropdown
+                  options={propertyTypeOptions}
                   value={formData.type}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="apartment">Apartment</option>
-                  <option value="house">House</option>
-                  <option value="studio">Studio</option>
-                  <option value="loft">Loft</option>
-                  <option value="duplex">Duplex</option>
-                  <option value="penthouse">Penthouse</option>
-                  <option value="villa">Villa</option>
-                </select>
+                  onChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+                  placeholder="Select Property Type"
+                  icon={Building}
+                />
               </div>
 
               <div>

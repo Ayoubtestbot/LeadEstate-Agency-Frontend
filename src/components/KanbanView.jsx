@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User, Search, Filter } from 'lucide-react'
+import { Phone, Mail, MapPin, Home, Eye, Edit, UserCheck, Trash2, MessageCircle, User, Search, Filter, Users } from 'lucide-react'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
 import ProtectedComponent from './ProtectedComponent'
+import PremiumDropdown from './PremiumDropdown'
 
 const KanbanView = ({
   leads,
@@ -21,6 +22,17 @@ const KanbanView = ({
   const [columnLimits, setColumnLimits] = useState({})
   const [showAllColumns, setShowAllColumns] = useState(false)
   const { hasPermission } = usePermissions()
+
+  // Premium dropdown options for agent filter
+  const agentOptions = [
+    { value: 'all', label: 'All Agents', icon: Users },
+    { value: 'unassigned', label: 'Unassigned', icon: User },
+    ...teamMembers.map(member => ({
+      value: member.name,
+      label: member.name,
+      icon: User
+    }))
+  ]
 
   // Performance settings
   const INITIAL_COLUMN_LIMIT = 20 // Show 20 leads per column initially
@@ -280,29 +292,17 @@ const KanbanView = ({
             />
           </div>
 
-          {/* Agent Filter */}
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <select
+          {/* Agent Filter - Premium Dropdown */}
+          <div className="min-w-[180px]">
+            <PremiumDropdown
+              options={agentOptions}
               value={agentFilter}
-              onChange={(e) => setAgentFilter(e.target.value)}
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[160px]"
+              onChange={setAgentFilter}
+              placeholder="Select Agent"
+              icon={Filter}
+              showSearch={true}
               disabled={uniqueAgents.length === 0 && !hasUnassignedLeads}
-            >
-              <option value="all">
-                {uniqueAgents.length === 0 && !hasUnassignedLeads ? 'No agents or unassigned leads' : 'All Agents'}
-              </option>
-              {hasUnassignedLeads && (
-                <option value="unassigned">
-                  Unassigned ({unassignedCount})
-                </option>
-              )}
-              {uniqueAgents.map(agent => (
-                <option key={agent.id} value={agent.name}>
-                  {agent.name} ({leads.filter(lead => lead.assignedTo === agent.name).length})
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </div>
 

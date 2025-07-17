@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Home, DollarSign, MapPin, Bed, Bath } from 'lucide-react'
+import { Home, DollarSign, MapPin, Bed, Bath, Building } from 'lucide-react'
 import Modal from './Modal'
+import PremiumDropdown from './PremiumDropdown'
 
 const EditPropertyModal = ({ isOpen, onClose, property, onSubmit }) => {
+  // Premium dropdown options
+  const propertyTypeOptions = [
+    { value: 'house', label: 'House', icon: Home },
+    { value: 'apartment', label: 'Apartment', icon: Building },
+    { value: 'condo', label: 'Condo', icon: Building },
+    { value: 'townhouse', label: 'Townhouse', icon: Home },
+    { value: 'land', label: 'Land', icon: MapPin },
+    { value: 'commercial', label: 'Commercial', icon: Building }
+  ]
+
   const [formData, setFormData] = useState({
     title: '',
     type: 'house',
@@ -76,20 +87,13 @@ const EditPropertyModal = ({ isOpen, onClose, property, onSubmit }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Property Type *
             </label>
-            <select
-              name="type"
+            <PremiumDropdown
+              options={propertyTypeOptions}
               value={formData.type}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="house">House</option>
-              <option value="apartment">Apartment</option>
-              <option value="condo">Condo</option>
-              <option value="townhouse">Townhouse</option>
-              <option value="land">Land</option>
-              <option value="commercial">Commercial</option>
-            </select>
+              onChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+              placeholder="Select Property Type"
+              icon={Building}
+            />
           </div>
 
           <div>
