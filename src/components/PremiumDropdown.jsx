@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { ChevronDownIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { ChevronDown, Check } from 'lucide-react'
 
 const PremiumDropdown = ({ 
   options = [], 
@@ -72,11 +72,11 @@ const PremiumDropdown = ({
               {selectedOption ? selectedOption.label : placeholder}
             </span>
           </div>
-          <ChevronDownIcon 
+          <ChevronDown
             className={`
               h-5 w-5 text-gray-400 transition-transform duration-200
               ${isOpen ? 'rotate-180' : ''}
-            `} 
+            `}
           />
         </div>
       </button>
@@ -143,7 +143,7 @@ const PremiumDropdown = ({
                     </span>
                   </div>
                   {value === option.value && (
-                    <CheckIcon className="h-4 w-4 text-blue-600" />
+                    <Check className="h-4 w-4 text-blue-600" />
                   )}
                 </button>
               ))
