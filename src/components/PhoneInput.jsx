@@ -180,26 +180,34 @@ const PhoneInput = ({
   console.log('📱 PhoneInput - Received value prop:', value);
 
   const [selectedCountry, setSelectedCountry] = useState(() => {
+    console.log('📱 PhoneInput - Initializing with value:', value)
+
     // If value already has a country code, extract it
     if (value && value.startsWith('+')) {
-      const matchingCountry = COUNTRY_CODES.find(country =>
+      // Sort by code length (longest first) to match +212 before +21
+      const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length)
+      const matchingCountry = sortedCodes.find(country =>
         value.startsWith(country.code)
       )
-      console.log('📱 PhoneInput - Initial country from value:', matchingCountry?.country || 'not found')
+      console.log('📱 PhoneInput - Initial country from value:', matchingCountry?.country || 'not found', matchingCountry?.code)
       return matchingCountry || COUNTRY_CODES.find(c => c.code === getDefaultCountryCode(user))
     }
     return COUNTRY_CODES.find(c => c.code === getDefaultCountryCode(user))
   })
 
   const [phoneNumber, setPhoneNumber] = useState(() => {
+    console.log('📱 PhoneInput - Initializing phone number with value:', value)
+
     // Extract phone number without country code
     if (value && value.startsWith('+')) {
-      const matchingCountry = COUNTRY_CODES.find(country =>
+      // Sort by code length (longest first) to match +212 before +21
+      const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length)
+      const matchingCountry = sortedCodes.find(country =>
         value.startsWith(country.code)
       )
       if (matchingCountry) {
         const extractedNumber = value.substring(matchingCountry.code.length)
-        console.log('📱 PhoneInput - Initial phone number:', extractedNumber)
+        console.log('📱 PhoneInput - Initial phone number extracted:', extractedNumber, 'from', value, 'using country', matchingCountry.code)
         return extractedNumber
       }
     }
@@ -207,6 +215,34 @@ const PhoneInput = ({
   })
 
   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  // Handle value prop changes (when modal opens with existing data)
+  useEffect(() => {
+    if (value && value.startsWith('+')) {
+      const currentFullNumber = selectedCountry.code + phoneNumber
+
+      // Only update if the external value is different from current internal value
+      if (value !== currentFullNumber) {
+        console.log('📱 PhoneInput - Value prop changed, updating internal state:', value)
+
+        // Sort by code length (longest first) to match +212 before +21
+        const sortedCodes = [...COUNTRY_CODES].sort((a, b) => b.code.length - a.code.length)
+        const matchingCountry = sortedCodes.find(country =>
+          value.startsWith(country.code)
+        )
+
+        if (matchingCountry) {
+          const extractedNumber = value.substring(matchingCountry.code.length)
+          console.log('📱 PhoneInput - Updating to country:', matchingCountry.country, 'phone:', extractedNumber)
+          setSelectedCountry(matchingCountry)
+          setPhoneNumber(extractedNumber)
+        }
+      }
+    } else if (value === '' && phoneNumber !== '') {
+      console.log('📱 PhoneInput - Clearing phone number')
+      setPhoneNumber('')
+    }
+  }, [value]) // Only depend on value, not internal state to avoid loops
 
   // Only call onChange when user actually interacts (not during initialization or prop changes)
   const handleCountryChange = (country) => {
