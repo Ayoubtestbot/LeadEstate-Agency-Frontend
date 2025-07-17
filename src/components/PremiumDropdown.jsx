@@ -57,12 +57,27 @@ const PremiumDropdown = ({
   }, [isOpen])
 
   const handleSelect = (option) => {
+    console.log('🔄 PremiumDropdown handleSelect:', {
+      selectedValue: option.value,
+      selectedLabel: option.label,
+      currentValue: value
+    })
     onChange(option.value)
     setIsOpen(false)
     setSearchTerm('')
   }
 
   const selectedOption = options.find(opt => opt.value === value)
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 PremiumDropdown state:', {
+      value,
+      selectedOption: selectedOption?.label,
+      optionsCount: options.length,
+      firstOption: options[0]?.label
+    })
+  }, [value, selectedOption, options])
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef} style={{ zIndex: isOpen ? 9999 : 'auto' }}>

@@ -298,7 +298,14 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
           <PremiumDropdown
             options={agentOptions}
             value={formData.assignedTo}
-            onChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value }))}
+            onChange={(value) => {
+              console.log('🔄 EditLeadModal agent onChange:', {
+                newValue: value,
+                currentAssignedTo: formData.assignedTo,
+                formData: formData
+              })
+              setFormData(prev => ({ ...prev, assignedTo: value }))
+            }}
             placeholder="Select Agent"
             icon={Users}
             showSearch={true}
