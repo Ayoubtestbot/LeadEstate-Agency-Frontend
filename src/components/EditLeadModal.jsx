@@ -28,12 +28,21 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
       // Use the actual data structure from the logs
       const fullName = lead.name || '';
       const phoneValue = lead.phone || '';
-      const cityValue = lead.city || ''; // Keep empty if no city field
+
+      // Try multiple possible field names for city
+      const cityValue = lead.city || lead.location || lead.address || lead.area || lead.region || '';
       const assignedValue = lead.assignedTo || '';
 
       console.log('🔍 RAW LEAD DATA:', lead);
       console.log('🔍 PHONE VALUE EXTRACTED:', phoneValue);
       console.log('🔍 CITY VALUE EXTRACTED:', cityValue);
+      console.log('🔍 Checking city fields:', {
+        city: lead.city,
+        location: lead.location,
+        address: lead.address,
+        area: lead.area,
+        region: lead.region
+      });
       console.log('🔍 Mapped values:', {
         name: fullName,
         phone: phoneValue,
