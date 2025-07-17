@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { ChevronDown, Check } from 'lucide-react'
 
 const PremiumDropdown = ({ 
@@ -32,6 +33,28 @@ const PremiumDropdown = ({
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // Calculate dropdown position to avoid clipping
+  const [dropdownPosition, setDropdownPosition] = useState('bottom')
+  const [dropdownRect, setDropdownRect] = useState(null)
+
+  useEffect(() => {
+    if (isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect()
+      setDropdownRect(rect)
+
+      const viewportHeight = window.innerHeight
+      const spaceBelow = viewportHeight - rect.bottom
+      const spaceAbove = rect.top
+
+      // If not enough space below and more space above, show dropdown above
+      if (spaceBelow < 200 && spaceAbove > spaceBelow) {
+        setDropdownPosition('top')
+      } else {
+        setDropdownPosition('bottom')
+      }
+    }
+  }, [isOpen])
 
   const handleSelect = (option) => {
     onChange(option.value)
@@ -80,24 +103,27 @@ const PremiumDropdown = ({
         </div>
       </button>
 
-      {/* Premium Dropdown Menu - Fixed Positioning */}
-      {isOpen && (
-        <div className="
-          absolute z-[9999] w-full mt-1
-          bg-white
-          border border-gray-300
-          rounded-md
-          shadow-lg
-          max-h-60 overflow-hidden
-          animate-in slide-in-from-top-2 duration-200
-        "
-        style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          right: 0,
-          zIndex: 9999
-        }}
+      {/* Premium Dropdown Menu - Portal for Modal Compatibility */}
+      {isOpen && dropdownRect && createPortal(
+        <div
+          className={`
+            fixed z-[9999]
+            bg-white
+            border border-gray-300
+            rounded-md
+            shadow-lg
+            max-h-48 overflow-hidden
+            animate-in duration-200
+            ${dropdownPosition === 'top' ? 'slide-in-from-bottom-2' : 'slide-in-from-top-2'}
+          `}
+          style={{
+            position: 'fixed',
+            top: dropdownPosition === 'top' ? dropdownRect.top - 200 : dropdownRect.bottom + 4,
+            left: dropdownRect.left,
+            width: dropdownRect.width,
+            zIndex: 9999,
+            maxHeight: '192px'
+          }}
         >
           {/* Search Input */}
           {showSearch && (
@@ -121,7 +147,7 @@ const PremiumDropdown = ({
           )}
 
           {/* Options List */}
-          <div className="max-h-48 overflow-y-auto">
+          <div className="overflow-y-auto" style={{ maxHeight: dropdownPosition === 'top' ? '150px' : '150px' }}>
             {filteredOptions.length === 0 ? (
               <div className="px-3 py-2 text-gray-500 text-sm text-center">
                 No options found
@@ -132,7 +158,7 @@ const PremiumDropdown = ({
                   key={option.value}
                   onClick={() => handleSelect(option)}
                   className={`
-                    w-full px-3 py-2 text-left
+                    w-full px-3 py-2 text-left text-sm
                     flex items-center justify-between
                     hover:bg-blue-50
                     transition-colors duration-150
@@ -156,7 +182,8 @@ const PremiumDropdown = ({
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
