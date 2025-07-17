@@ -208,50 +208,41 @@ const PhoneInput = ({
 
   const [dropdownOpen, setDropdownOpen] = useState(false)
 
-  // Mark initialization as complete after first render
-  useEffect(() => {
-    isInitializing.current = false
-  }, [])
-
-  // Update country when user context changes (for smart detection)
-  useEffect(() => {
-    if (user && !value) {
-      // Only auto-detect if no value is set (new input)
-      const detectedCode = getDefaultCountryCode(user)
-      const detectedCountry = COUNTRY_CODES.find(c => c.code === detectedCode)
-      if (detectedCountry && detectedCountry.code !== selectedCountry.code) {
-        console.log('🔄 Updating country based on user context:', detectedCountry.country)
-        setSelectedCountry(detectedCountry)
-      }
-    }
-  }, [user, value, selectedCountry.code])
-
-  // Update parent component when values change (skip during initialization)
-  useEffect(() => {
-    if (!isInitializing.current) {
-      const fullNumber = selectedCountry.code + phoneNumber
-      console.log('📱 PhoneInput - User changed value to:', fullNumber)
-      if (onChange) {
-        onChange({
-          target: {
-            name,
-            value: fullNumber
-          }
-        })
-      }
-    }
-  }, [selectedCountry, phoneNumber, onChange, name])
-
-  const handleCountrySelect = (country) => {
+  // Only call onChange when user actually interacts (not during initialization or prop changes)
+  const handleCountryChange = (country) => {
     setSelectedCountry(country)
     setDropdownOpen(false)
+
+    // Call onChange when user changes country
+    const fullNumber = country.code + phoneNumber
+    if (onChange) {
+      onChange({
+        target: {
+          name,
+          value: fullNumber
+        }
+      })
+    }
   }
 
-  const handlePhoneChange = (e) => {
+  const handlePhoneNumberChange = (e) => {
     // Only allow digits, spaces, hyphens, and parentheses
     const cleaned = e.target.value.replace(/[^\d\s\-\(\)]/g, '')
     setPhoneNumber(cleaned)
+
+    // Call onChange when user changes phone number
+    const fullNumber = selectedCountry.code + cleaned
+    if (onChange) {
+      onChange({
+        target: {
+          name,
+          value: fullNumber
+        }
+      })
+    }
   }
+
+
 
   // Get dynamic placeholder based on selected country
   const getDynamicPlaceholder = () => {
@@ -301,7 +292,7 @@ const PhoneInput = ({
                 <button
                   key={`${country.code}-${country.name}-${index}`}
                   type="button"
-                  onClick={() => handleCountrySelect(country)}
+                  onClick={() => handleCountryChange(country)}
                   className="w-full flex items-center px-4 py-3 text-left hover:bg-blue-50 focus:bg-blue-50 focus:outline-none border-b border-gray-100 last:border-b-0"
                 >
                   <FlagIcon
@@ -327,7 +318,7 @@ const PhoneInput = ({
           <input
             type="tel"
             value={phoneNumber}
-            onChange={handlePhoneChange}
+            onChange={handlePhoneNumberChange}
             placeholder={getDynamicPlaceholder()}
             required={required}
             className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-10 placeholder-gray-400"
