@@ -24,15 +24,21 @@ const PremiumDropdown = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      // Check if click is outside both the dropdown button and the portal menu
+      const isOutsideButton = dropdownRef.current && !dropdownRef.current.contains(event.target)
+      const isOutsidePortal = !event.target.closest('[data-dropdown-portal]')
+
+      if (isOutsideButton && isOutsidePortal) {
         setIsOpen(false)
         setSearchTerm('')
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
 
   // Calculate dropdown position to avoid clipping
   const [dropdownPosition, setDropdownPosition] = useState('bottom')
@@ -121,6 +127,7 @@ const PremiumDropdown = ({
       {/* Premium Dropdown Menu - Portal for Modal Compatibility */}
       {isOpen && dropdownRect && createPortal(
         <div
+          data-dropdown-portal="true"
           className={`
             fixed z-[9999]
             bg-white
@@ -171,7 +178,15 @@ const PremiumDropdown = ({
               filteredOptions.map((option) => (
                 <button
                   key={option.value}
-                  onClick={() => handleSelect(option)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleSelect(option)
+                  }}
+                  onMouseDown={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                  }}
                   className={`
                     w-full px-3 py-2 text-left text-sm
                     flex items-center justify-between
