@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Phone, ChevronDown } from 'lucide-react'
 import { useAuth } from '../App'
 import FlagIcon from './FlagIcon'
@@ -175,6 +175,7 @@ const PhoneInput = ({
 }) => {
   // Get user context for smart country detection
   const { user } = useAuth()
+  const isInitializing = useRef(true)
 
   const [selectedCountry, setSelectedCountry] = useState(() => {
     // If value already has a country code, extract it
@@ -182,25 +183,33 @@ const PhoneInput = ({
       const matchingCountry = COUNTRY_CODES.find(country =>
         value.startsWith(country.code)
       )
+      console.log('📱 PhoneInput - Initial country from value:', matchingCountry?.country || 'not found')
       return matchingCountry || COUNTRY_CODES.find(c => c.code === getDefaultCountryCode(user))
     }
     return COUNTRY_CODES.find(c => c.code === getDefaultCountryCode(user))
   })
-  
+
   const [phoneNumber, setPhoneNumber] = useState(() => {
     // Extract phone number without country code
     if (value && value.startsWith('+')) {
-      const matchingCountry = COUNTRY_CODES.find(country => 
+      const matchingCountry = COUNTRY_CODES.find(country =>
         value.startsWith(country.code)
       )
       if (matchingCountry) {
-        return value.substring(matchingCountry.code.length)
+        const extractedNumber = value.substring(matchingCountry.code.length)
+        console.log('📱 PhoneInput - Initial phone number:', extractedNumber)
+        return extractedNumber
       }
     }
     return value.replace(/^\+\d+/, '') // Remove any existing country code
   })
-  
+
   const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  // Mark initialization as complete after first render
+  useEffect(() => {
+    isInitializing.current = false
+  }, [])
 
   // Update country when user context changes (for smart detection)
   useEffect(() => {
@@ -215,51 +224,21 @@ const PhoneInput = ({
     }
   }, [user, value, selectedCountry.code])
 
-  // Handle external value changes (like when editing a lead) - prevent infinite loops
+  // Update parent component when values change (skip during initialization)
   useEffect(() => {
-    if (value && value.startsWith('+')) {
-      const currentFullNumber = selectedCountry.code + phoneNumber
-
-      // Only update if the external value is different from current internal value
-      if (value !== currentFullNumber) {
-        console.log('📱 PhoneInput - External value changed:', value, 'Current:', currentFullNumber)
-
-        // Find matching country code
-        const matchingCountry = COUNTRY_CODES.find(country =>
-          value.startsWith(country.code)
-        )
-
-        if (matchingCountry) {
-          console.log('📱 PhoneInput - Found matching country:', matchingCountry.country)
-          setSelectedCountry(matchingCountry)
-          setPhoneNumber(value.substring(matchingCountry.code.length))
-        } else {
-          console.log('📱 PhoneInput - No matching country found, using value as-is')
-          setPhoneNumber(value.replace(/^\+\d+/, ''))
-        }
+    if (!isInitializing.current) {
+      const fullNumber = selectedCountry.code + phoneNumber
+      console.log('📱 PhoneInput - User changed value to:', fullNumber)
+      if (onChange) {
+        onChange({
+          target: {
+            name,
+            value: fullNumber
+          }
+        })
       }
-    } else if (value === '' && phoneNumber !== '') {
-      // Clear the phone number if value is empty
-      console.log('📱 PhoneInput - Clearing phone number')
-      setPhoneNumber('')
     }
-  }, [value, selectedCountry.code, phoneNumber])
-
-  // Update parent component when values change - prevent infinite loops
-  useEffect(() => {
-    const fullNumber = selectedCountry.code + phoneNumber
-
-    // Only call onChange if the value actually changed and it's different from the external value
-    if (onChange && fullNumber !== value) {
-      console.log('📱 PhoneInput - Calling onChange:', fullNumber)
-      onChange({
-        target: {
-          name,
-          value: fullNumber
-        }
-      })
-    }
-  }, [selectedCountry, phoneNumber, onChange, name, value])
+  }, [selectedCountry, phoneNumber, onChange, name])
 
   const handleCountrySelect = (country) => {
     setSelectedCountry(country)
