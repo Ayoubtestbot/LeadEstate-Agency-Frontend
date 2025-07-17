@@ -1,11 +1,51 @@
 import { useState, useEffect } from 'react'
-import { User, Mail, MapPin } from 'lucide-react'
+import { User, Mail, MapPin, Globe, Home, Users, Building, Filter } from 'lucide-react'
 import { useData } from '../App'
 import Modal from './Modal'
 import PhoneInput from './PhoneInput'
+import PremiumDropdown from './PremiumDropdown'
 
 const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
   const { teamMembers } = useData()
+
+  // Premium dropdown options
+  const statusOptions = [
+    { value: 'new', label: 'New', icon: Filter },
+    { value: 'contacted', label: 'Contacted', icon: Mail },
+    { value: 'qualified', label: 'Qualified', icon: User },
+    { value: 'proposal', label: 'Proposal', icon: Mail },
+    { value: 'negotiation', label: 'Negotiation', icon: Users },
+    { value: 'closed-won', label: 'Closed Won', icon: User },
+    { value: 'closed-lost', label: 'Closed Lost', icon: Filter }
+  ]
+
+  const sourceOptions = [
+    { value: 'website', label: 'Website', icon: Globe },
+    { value: 'facebook', label: 'Facebook', icon: Globe },
+    { value: 'google', label: 'Google', icon: Globe },
+    { value: 'referral', label: 'Referral', icon: Users },
+    { value: 'walk-in', label: 'Walk-in', icon: User },
+    { value: 'other', label: 'Other', icon: Globe }
+  ]
+
+  const propertyTypeOptions = [
+    { value: 'house', label: 'House', icon: Home },
+    { value: 'apartment', label: 'Apartment', icon: Building },
+    { value: 'condo', label: 'Condo', icon: Building },
+    { value: 'townhouse', label: 'Townhouse', icon: Home },
+    { value: 'land', label: 'Land', icon: MapPin },
+    { value: 'commercial', label: 'Commercial', icon: Building }
+  ]
+
+  const agentOptions = [
+    { value: '', label: 'Unassigned', icon: User },
+    ...teamMembers.map(member => ({
+      value: member.name,
+      label: `${member.name} (${member.role})`,
+      icon: User
+    }))
+  ]
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -198,39 +238,26 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Status
             </label>
-            <select
-              name="status"
+            <PremiumDropdown
+              options={statusOptions}
               value={formData.status}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="qualified">Qualified</option>
-              <option value="proposal">Proposal</option>
-              <option value="negotiation">Negotiation</option>
-              <option value="closed-won">Closed Won</option>
-              <option value="closed-lost">Closed Lost</option>
-            </select>
+              onChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
+              placeholder="Select Status"
+              icon={Filter}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Source
             </label>
-            <select
-              name="source"
+            <PremiumDropdown
+              options={sourceOptions}
               value={formData.source}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="website">Website</option>
-              <option value="facebook">Facebook</option>
-              <option value="google">Google</option>
-              <option value="referral">Referral</option>
-              <option value="walk-in">Walk-in</option>
-              <option value="other">Other</option>
-            </select>
+              onChange={(value) => setFormData(prev => ({ ...prev, source: value }))}
+              placeholder="Select Source"
+              icon={Globe}
+            />
           </div>
         </div>
 
@@ -239,19 +266,13 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Property Type
           </label>
-          <select
-            name="propertyType"
+          <PremiumDropdown
+            options={propertyTypeOptions}
             value={formData.propertyType}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="house">House</option>
-            <option value="apartment">Apartment</option>
-            <option value="condo">Condo</option>
-            <option value="townhouse">Townhouse</option>
-            <option value="land">Land</option>
-            <option value="commercial">Commercial</option>
-          </select>
+            onChange={(value) => setFormData(prev => ({ ...prev, propertyType: value }))}
+            placeholder="Select Property Type"
+            icon={Home}
+          />
         </div>
 
         {/* Budget */}
@@ -274,19 +295,14 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Assign to Agent
           </label>
-          <select
-            name="assignedTo"
+          <PremiumDropdown
+            options={agentOptions}
             value={formData.assignedTo}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Unassigned</option>
-            {teamMembers.map(member => (
-              <option key={member.id} value={member.name}>
-                {member.name} ({member.role})
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setFormData(prev => ({ ...prev, assignedTo: value }))}
+            placeholder="Select Agent"
+            icon={Users}
+            showSearch={true}
+          />
         </div>
 
         {/* Notes */}

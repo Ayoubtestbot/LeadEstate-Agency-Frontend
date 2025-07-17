@@ -13,7 +13,9 @@ import {
   List,
   Users,
   Upload,
-  MessageCircle
+  MessageCircle,
+  Filter,
+  UserIcon
 } from 'lucide-react'
 import { useData, useAuth } from '../App'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
@@ -29,6 +31,7 @@ import ImportLeadsModal from '../components/ImportLeadsModal'
 import GoogleSheetsConfig from '../components/GoogleSheetsConfig'
 import KanbanView from '../components/KanbanView'
 import ConfirmDialog from '../components/ConfirmDialog'
+import PremiumDropdown from '../components/PremiumDropdown'
 
 const Leads = () => {
   const { leads, properties, teamMembers, addLead, updateLead, deleteLead, linkPropertyToLead, unlinkPropertyFromLead } = useData()
@@ -38,6 +41,28 @@ const Leads = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [agentFilter, setAgentFilter] = useState('all') // New agent filter
+
+  // Premium dropdown options
+  const statusOptions = [
+    { value: 'all', label: 'All Status', icon: Filter },
+    { value: 'new', label: 'New', icon: Plus },
+    { value: 'contacted', label: 'Contacted', icon: Phone },
+    { value: 'qualified', label: 'Qualified', icon: UserCheck },
+    { value: 'proposal', label: 'Proposal', icon: Mail },
+    { value: 'negotiation', label: 'Negotiation', icon: MessageCircle },
+    { value: 'closed-won', label: 'Closed Won', icon: UserCheck },
+    { value: 'closed-lost', label: 'Closed Lost', icon: Trash2 }
+  ]
+
+  const agentOptions = [
+    { value: 'all', label: 'All Agents', icon: Users },
+    { value: '', label: 'Unassigned', icon: UserIcon },
+    ...teamMembers.map(member => ({
+      value: member.name,
+      label: member.name,
+      icon: UserIcon
+    }))
+  ]
   const [selectedLeads, setSelectedLeads] = useState([]) // For bulk actions
   const [viewMode, setViewMode] = useState('table') // 'table' or 'kanban'
   // Pagination state
@@ -489,42 +514,31 @@ const Leads = () => {
                 </div>
               </div>
 
-              {/* Enhanced Filters */}
+              {/* Premium Filters */}
               <div className="flex flex-col sm:flex-row gap-4">
-                {/* Enhanced Status Filter */}
-                <div className="sm:w-56">
-                  <select
+                {/* Premium Status Filter */}
+                <div className="sm:w-64">
+                  <PremiumDropdown
+                    options={statusOptions}
                     value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="flex h-12 w-full rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 hover:shadow-xl cursor-pointer"
-                  >
-                    <option value="all">🔍 All Status</option>
-                    <option value="new">🆕 New</option>
-                    <option value="contacted">📞 Contacted</option>
-                    <option value="qualified">✅ Qualified</option>
-                    <option value="proposal">📋 Proposal</option>
-                    <option value="negotiation">🤝 Negotiation</option>
-                    <option value="closed-won">🎉 Closed Won</option>
-                    <option value="closed-lost">❌ Closed Lost</option>
-                  </select>
+                    onChange={setStatusFilter}
+                    placeholder="Select Status"
+                    icon={Filter}
+                    showSearch={false}
+                  />
                 </div>
 
-                {/* Enhanced Agent Filter - Manager and Super Agent only */}
+                {/* Premium Agent Filter - Manager and Super Agent only */}
                 {hasPermission(PERMISSIONS.VIEW_ALL_LEADS) && (
-                  <div className="sm:w-56">
-                    <select
+                  <div className="sm:w-64">
+                    <PremiumDropdown
+                      options={agentOptions}
                       value={agentFilter}
-                      onChange={(e) => setAgentFilter(e.target.value)}
-                      className="flex h-12 w-full rounded-2xl border border-gray-200/50 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-medium shadow-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-purple-500/20 focus:border-purple-500/50 hover:shadow-xl cursor-pointer"
-                    >
-                      <option value="all">👥 All Agents</option>
-                      <option value="">🔄 Unassigned</option>
-                      {teamMembers.map(member => (
-                        <option key={member.id} value={member.name}>
-                          👤 {member.name}
-                        </option>
-                      ))}
-                    </select>
+                      onChange={setAgentFilter}
+                      placeholder="Select Agent"
+                      icon={Users}
+                      showSearch={true}
+                    />
                   </div>
                 )}
               </div>
