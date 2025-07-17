@@ -328,11 +328,63 @@ const DataProvider = ({ children }) => {
     }
   }
 
-  // OPTIMIZED: Refresh data function using the optimized fetchAllData
+  // REAL-TIME: Smart refresh function - updates data instantly without loading delays
   const refreshData = async (skipLoading = true) => {
-    console.log('🔄 Refreshing all data (force refresh)...')
+    console.log('⚡ Smart refresh: Updating data in background...')
+    const startTime = Date.now()
 
-    // Use the optimized fetchAllData with force refresh
+    try {
+      // INSTANT UPDATE: Use optimized dashboard endpoint without loading states
+      const dashboardResponse = await fetch(`${API_URL}/dashboard?_refresh=${Date.now()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (dashboardResponse.ok) {
+        const dashboardData = await dashboardResponse.json()
+        const refreshTime = Date.now() - startTime
+
+        console.log(`⚡ Smart refresh completed in ${refreshTime}ms (backend: ${dashboardData.performance?.queryTime}ms)`)
+
+        // Handle properties data structure
+        let dashboardProperties = []
+        if (dashboardData.data?.properties) {
+          dashboardProperties = Array.isArray(dashboardData.data.properties)
+            ? dashboardData.data.properties
+            : []
+        }
+
+        // INSTANT UPDATE: Set all data at once without loading states
+        setLeads(dashboardData.data?.leads || [])
+        setProperties(dashboardProperties)
+        setTeamMembers(dashboardData.data?.team || [])
+
+        // Update cache with fresh data
+        setDataCache({
+          data: dashboardData.data,
+          timestamp: Date.now(),
+          isValid: true
+        })
+
+        console.log('⚡ Smart refresh successful:', {
+          leads: dashboardData.data?.leads?.length || 0,
+          properties: dashboardData.data?.properties?.length || 0,
+          team: dashboardData.data?.team?.length || 0,
+          refreshTime: `${refreshTime}ms`,
+          method: '⚡ SMART REFRESH'
+        })
+        return
+      }
+
+      console.warn('❌ Smart refresh failed, using fallback...')
+    } catch (error) {
+      console.error('Error in smart refresh:', error)
+    }
+
+    // Fallback: If smart refresh fails, use regular refresh
+    console.log('🔄 Fallback: Using regular refresh method...')
     if (!skipLoading) {
       await fetchAllData(true) // Force refresh, will show loading
     } else {
@@ -342,7 +394,41 @@ const DataProvider = ({ children }) => {
       setLoading(currentLoading) // Restore previous loading state
     }
 
-    console.log('✅ Data refreshed successfully using optimized method')
+    console.log('✅ Data refreshed successfully')
+  }
+
+  // INSTANT: Super-fast refresh for real-time updates (no loading, no delays)
+  const instantRefresh = async () => {
+    console.log('🚀 Instant refresh: Real-time data update...')
+    const startTime = Date.now()
+
+    try {
+      const response = await fetch(`${API_URL}/dashboard?_instant=${Date.now()}`)
+
+      if (response.ok) {
+        const data = await response.json()
+        const updateTime = Date.now() - startTime
+
+        // INSTANT UPDATE: No loading states, just update data
+        setLeads(data.data?.leads || [])
+        setProperties(data.data?.properties || [])
+        setTeamMembers(data.data?.team || [])
+
+        // Update cache
+        setDataCache({
+          data: data.data,
+          timestamp: Date.now(),
+          isValid: true
+        })
+
+        console.log(`🚀 Instant refresh completed in ${updateTime}ms - REAL-TIME UPDATE`)
+        return true
+      }
+    } catch (error) {
+      console.error('Instant refresh failed:', error)
+    }
+
+    return false
   }
 
   const addLead = async (leadData) => {
@@ -708,7 +794,8 @@ const DataProvider = ({ children }) => {
     deleteProperty,
     linkPropertyToLead,
     unlinkPropertyFromLead,
-    refreshData
+    refreshData,
+    instantRefresh
   }
 
   return (
