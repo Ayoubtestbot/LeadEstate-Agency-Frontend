@@ -236,12 +236,12 @@ const DataProvider = ({ children }) => {
       console.error('Error with high-performance dashboard endpoint:', error)
     }
 
-    // Fallback: Use parallel individual calls with limits
+    // Fallback: Use parallel individual calls (NO LIMITS)
     try {
-      console.log('🔄 Using fallback individual API calls...')
+      console.log('🔄 Using fallback individual API calls (ALL DATA)...')
 
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
+        fetch(`${API_URL}/leads${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching leads:', err)
           return { ok: false }
         }),
@@ -249,7 +249,7 @@ const DataProvider = ({ children }) => {
           console.error('❌ Error fetching properties:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/team?limit=50${cacheBuster ? '&' + cacheBuster.substring(1) : ''}`).catch((err) => {
+        fetch(`${API_URL}/team${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching team:', err)
           return { ok: false }
         })
@@ -310,10 +310,12 @@ const DataProvider = ({ children }) => {
         isValid: true
       })
 
-      console.log('✅ Fallback data loaded and cached:', {
+      console.log('✅ FALLBACK data loaded and cached (ALL DATA):', {
         leads: leadsData.data?.length || 0,
         properties: propertiesData.data?.length || 0,
-        team: teamData.data?.length || 0
+        team: teamData.data?.length || 0,
+        method: '🔄 FALLBACK (Individual API calls)',
+        note: 'Dashboard endpoint failed, using individual calls'
       })
     } catch (error) {
       console.error('Error in fallback data loading:', error)
