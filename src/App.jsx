@@ -178,8 +178,11 @@ const DataProvider = ({ children }) => {
 
     try {
 
-      // Try optimized single API call first
-      const dashboardRes = await fetch(`${API_URL}/dashboard/all-data${cacheBuster}`, {
+      // PERFORMANCE: Use optimized dashboard endpoint (single API call with parallel queries)
+      console.log('🚀 Using high-performance dashboard endpoint...')
+      const startTime = Date.now()
+
+      const dashboardRes = await fetch(`${API_URL}/dashboard${cacheBuster}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -191,7 +194,10 @@ const DataProvider = ({ children }) => {
 
       if (dashboardRes.ok) {
         const dashboardData = await dashboardRes.json()
-        console.log('✅ Dashboard API response:', dashboardData)
+        const loadTime = Date.now() - startTime
+
+        console.log(`✅ Dashboard data loaded in ${loadTime}ms (backend: ${dashboardData.performance?.queryTime}ms)`)
+        console.log('📊 Dashboard API response:', dashboardData)
         console.log('🔍 Dashboard response keys:', Object.keys(dashboardData))
 
         // Debug properties specifically
@@ -214,17 +220,20 @@ const DataProvider = ({ children }) => {
           isValid: true
         })
 
-        console.log('📊 Optimized data loaded and cached:', {
+        console.log('📊 High-performance data loaded and cached:', {
           leads: dashboardData.data?.leads?.length || 0,
           properties: dashboardData.data?.properties?.length || 0,
-          team: dashboardData.data?.team?.length || 0
+          team: dashboardData.data?.team?.length || 0,
+          totalLoadTime: `${loadTime}ms`,
+          backendTime: `${dashboardData.performance?.queryTime}ms`,
+          performance: '🚀 OPTIMIZED'
         })
         return // Success, exit early
       }
 
-      console.warn('❌ Optimized endpoint failed, using fallback...')
+      console.warn('❌ High-performance dashboard endpoint failed, using fallback...')
     } catch (error) {
-      console.error('Error with optimized endpoint:', error)
+      console.error('Error with high-performance dashboard endpoint:', error)
     }
 
     // Fallback: Use parallel individual calls with limits
