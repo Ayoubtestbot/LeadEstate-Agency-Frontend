@@ -163,7 +163,7 @@ const Analytics = () => {
     return { agentPerformance, sourceROI, geographicalData }
   }
 
-  // Fetch comprehensive role-based KPIs based on user role
+  // Fetch comprehensive role-based KPIs based on user role with better error handling
   const fetchRoleKPIs = async () => {
     try {
       console.log(`📊 Fetching comprehensive KPIs for ${userRole} role`)
@@ -183,27 +183,60 @@ const Analytics = () => {
         kpisToFetch = ['agent']
       }
 
-      const kpiPromises = kpisToFetch.map(async (role) => {
-        const url = `${API_URL}/kpis/${role}/${selectedPeriod}${selectedAgent !== 'all' ? `?agent=${selectedAgent}` : ''}`
-        const response = await fetch(url)
-        const result = await response.json()
-        return { role, data: result.success ? result.data : null }
-      })
-
-      const kpiResults = await Promise.all(kpiPromises)
       const combinedKPIs = {}
 
-      kpiResults.forEach(({ role, data }) => {
-        if (data) {
-          combinedKPIs[role] = data
+      // Fetch KPIs sequentially to avoid overwhelming the database
+      for (const role of kpisToFetch) {
+        try {
+          const url = `${API_URL}/kpis/${role}/${selectedPeriod}${selectedAgent !== 'all' ? `?agent=${selectedAgent}` : ''}`
+
+          console.log(`🔄 Fetching ${role} KPIs from:`, url)
+
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout
+
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            signal: controller.signal
+          })
+
+          clearTimeout(timeoutId)
+
+          if (!response.ok) {
+            console.warn(`⚠️ Failed to fetch ${role} KPIs: ${response.status} ${response.statusText}`)
+            continue
+          }
+
+          const result = await response.json()
+
+          if (result.success && result.data) {
+            combinedKPIs[role] = result.data
+            console.log(`✅ ${role} KPIs loaded successfully`)
+          } else {
+            console.warn(`⚠️ ${role} KPIs returned no data:`, result.message)
+          }
+
+          // Small delay between requests to prevent overwhelming the database
+          await new Promise(resolve => setTimeout(resolve, 100))
+
+        } catch (roleError) {
+          console.error(`❌ Error fetching ${role} KPIs:`, roleError.message)
+          // Continue with other roles even if one fails
+          continue
         }
-      })
+      }
 
       setRoleKPIs(combinedKPIs)
-      console.log('✅ Comprehensive KPIs loaded:', combinedKPIs)
+      console.log('✅ Comprehensive KPIs loaded:', Object.keys(combinedKPIs))
 
     } catch (error) {
       console.error('❌ Error fetching comprehensive KPIs:', error)
+      // Set empty object to prevent infinite loading
+      setRoleKPIs({})
     }
   }
 
@@ -717,7 +750,7 @@ const Analytics = () => {
         {activeTab === 'agents' && (
           <div className="space-y-6">
             {/* Comprehensive Role-based KPI Section */}
-            {roleKPIs && Object.keys(roleKPIs).length > 0 && (
+            {roleKPIs && Object.keys(roleKPIs).length > 0 ? (
               <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
@@ -971,6 +1004,14 @@ const Analytics = () => {
                 </div>
 
 
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">📊</div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading KPIs...</h3>
+                  <p className="text-gray-600">Fetching role-specific performance metrics</p>
+                </div>
               </div>
             )}
 
