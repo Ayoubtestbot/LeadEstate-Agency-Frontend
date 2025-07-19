@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../App'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid, 
@@ -215,9 +215,9 @@ const Analytics = () => {
 
           if (result.success && result.data) {
             combinedKPIs[role] = result.data
-            console.log(`✅ ${role} KPIs loaded successfully`)
+            console.log(`✅ ${role} KPIs loaded successfully:`, result.data)
           } else {
-            console.warn(`⚠️ ${role} KPIs returned no data:`, result.message)
+            console.warn(`⚠️ ${role} KPIs returned no data:`, result)
           }
 
           // Small delay between requests to prevent overwhelming the database
@@ -780,6 +780,14 @@ const Analytics = () => {
                 </div>
 
                 <div className="space-y-8">
+                  {/* Debug: Show what data we have */}
+                  {process.env.NODE_ENV === 'development' && (
+                    <div className="mb-4 p-4 bg-gray-100 rounded-lg">
+                      <h4 className="font-bold">Debug - KPI Data:</h4>
+                      <pre className="text-xs">{JSON.stringify(roleKPIs, null, 2)}</pre>
+                    </div>
+                  )}
+
                   {/* Manager KPIs - Always show if user is manager or if manager data exists */}
                   {roleKPIs.manager && roleKPIs.manager.kpis && (
                     <div className="border-b border-gray-200 pb-6">
