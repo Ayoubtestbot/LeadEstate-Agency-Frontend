@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid, 
@@ -39,7 +40,9 @@ const Analytics = () => {
   })
 
   const [roleKPIs, setRoleKPIs] = useState(null)
-  const [userRole, setUserRole] = useState('manager') // This should come from auth context
+  const [allRoleKPIs, setAllRoleKPIs] = useState({}) // Store KPIs for all roles
+  const { user } = useAuth()
+  const userRole = user?.role || 'manager'
   const [loading, setLoading] = useState(true)
   const [selectedPeriod, setSelectedPeriod] = useState('monthly')
   const [selectedAgent, setSelectedAgent] = useState('all')
@@ -160,23 +163,47 @@ const Analytics = () => {
     return { agentPerformance, sourceROI, geographicalData }
   }
 
-  // Fetch role-based KPIs
+  // Fetch comprehensive role-based KPIs based on user role
   const fetchRoleKPIs = async () => {
     try {
-      console.log(`📊 Fetching ${userRole} KPIs for ${selectedPeriod} period`)
+      console.log(`📊 Fetching comprehensive KPIs for ${userRole} role`)
 
-      const url = `${API_URL}/kpis/${userRole}/${selectedPeriod}${selectedAgent !== 'all' ? `?agent=${selectedAgent}` : ''}`
-      const response = await fetch(url)
-      const result = await response.json()
+      let kpisToFetch = []
 
-      if (result.success) {
-        setRoleKPIs(result.data)
-        console.log('✅ Role KPIs loaded:', result.data)
-      } else {
-        console.error('❌ Failed to fetch role KPIs:', result.message)
+      // Manager can see ALL KPIs (manager + super-agent + agent)
+      if (userRole === 'manager') {
+        kpisToFetch = ['manager', 'super-agent', 'agent']
       }
+      // Super Agent can see super-agent + agent KPIs
+      else if (userRole === 'super-agent') {
+        kpisToFetch = ['super-agent', 'agent']
+      }
+      // Agent can only see agent KPIs
+      else if (userRole === 'agent') {
+        kpisToFetch = ['agent']
+      }
+
+      const kpiPromises = kpisToFetch.map(async (role) => {
+        const url = `${API_URL}/kpis/${role}/${selectedPeriod}${selectedAgent !== 'all' ? `?agent=${selectedAgent}` : ''}`
+        const response = await fetch(url)
+        const result = await response.json()
+        return { role, data: result.success ? result.data : null }
+      })
+
+      const kpiResults = await Promise.all(kpiPromises)
+      const combinedKPIs = {}
+
+      kpiResults.forEach(({ role, data }) => {
+        if (data) {
+          combinedKPIs[role] = data
+        }
+      })
+
+      setRoleKPIs(combinedKPIs)
+      console.log('✅ Comprehensive KPIs loaded:', combinedKPIs)
+
     } catch (error) {
-      console.error('❌ Error fetching role KPIs:', error)
+      console.error('❌ Error fetching comprehensive KPIs:', error)
     }
   }
 
@@ -689,17 +716,21 @@ const Analytics = () => {
 
         {activeTab === 'agents' && (
           <div className="space-y-6">
-            {/* Role-based KPI Section */}
-            {roleKPIs && (
+            {/* Comprehensive Role-based KPI Section */}
+            {roleKPIs && Object.keys(roleKPIs).length > 0 && (
               <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">
-                      {userRole === 'manager' && '👨‍💼 Manager KPIs'}
-                      {userRole === 'super-agent' && '🧑‍💼 Super Agent KPIs'}
-                      {userRole === 'agent' && '👤 Agent KPIs'}
+                      {userRole === 'manager' && '👨‍💼 Manager Dashboard - All KPIs'}
+                      {userRole === 'super-agent' && '🧑‍💼 Super Agent Dashboard - Team KPIs'}
+                      {userRole === 'agent' && '👤 Agent Dashboard - Personal KPIs'}
                     </h2>
-                    <p className="text-gray-600">Role-specific performance metrics for {selectedPeriod} period</p>
+                    <p className="text-gray-600">
+                      {userRole === 'manager' && 'Complete overview of all agents, super agents, and management metrics'}
+                      {userRole === 'super-agent' && 'Team performance and individual agent metrics'}
+                      {userRole === 'agent' && 'Personal performance metrics'}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <select
@@ -715,166 +746,231 @@ const Analytics = () => {
                   </div>
                 </div>
 
-                {/* Manager KPIs */}
-                {userRole === 'manager' && roleKPIs.kpis && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
-                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                            <Users className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.totalLeadsReceived}</p>
-                            <p className="text-xs text-gray-600">Total Leads Received</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
-                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                            <Target className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.globalConversionRate}%</p>
-                            <p className="text-xs text-gray-600">Global Conversion Rate</p>
+                <div className="space-y-8">
+                  {/* Manager KPIs - Always show if user is manager or if manager data exists */}
+                  {roleKPIs.manager && roleKPIs.manager.kpis && (
+                    <div className="border-b border-gray-200 pb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        👨‍💼 <span>Management Overview</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                              <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.manager.kpis.totalLeadsReceived}</p>
+                              <p className="text-xs text-gray-600">Total Leads Received</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
-                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                            <Clock className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.avgFirstContactTimeHours.toFixed(1)}h</p>
-                            <p className="text-xs text-gray-600">Avg First Contact Time</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200/50">
-                        <div className="flex items-center justify-between">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
-                            <DollarSign className="w-6 h-6 text-white" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-gray-900">${(roleKPIs.kpis.estimatedValue/1000).toFixed(0)}K</p>
-                            <p className="text-xs text-gray-600">Estimated Value</p>
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                              <Target className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.manager.kpis.globalConversionRate}%</p>
+                              <p className="text-xs text-gray-600">Global Conversion Rate</p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {/* Super Agent KPIs */}
-                {userRole === 'super-agent' && roleKPIs.kpis && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                          <Users className="w-6 h-6 text-white" />
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                              <Clock className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.manager.kpis.avgFirstContactTimeHours.toFixed(1)}h</p>
+                              <p className="text-xs text-gray-600">Avg First Contact Time</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.totalLeadsAssigned}</p>
-                          <p className="text-xs text-gray-600">Total Leads Assigned</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                          <RefreshCw className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.reassignmentRate}%</p>
-                          <p className="text-xs text-gray-600">Reassignment Rate</p>
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                              <DollarSign className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">${(roleKPIs.manager.kpis.estimatedValue/1000).toFixed(0)}K</p>
+                              <p className="text-xs text-gray-600">Estimated Value</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )}
 
-                    <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border border-red-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                          <AlertTriangle className="w-6 h-6 text-white" />
+                  {/* Super Agent KPIs - Show if user is manager/super-agent or if super-agent data exists */}
+                  {roleKPIs['super-agent'] && roleKPIs['super-agent'].kpis && (
+                    <div className="border-b border-gray-200 pb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        🧑‍💼 <span>Team Management</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                              <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs['super-agent'].kpis.totalLeadsAssigned}</p>
+                              <p className="text-xs text-gray-600">Total Leads Assigned</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.staleLeads}</p>
-                          <p className="text-xs text-gray-600">Stale Leads (3+ days)</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                          <Clock className="w-6 h-6 text-white" />
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                              <RefreshCw className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs['super-agent'].kpis.reassignmentRate}%</p>
+                              <p className="text-xs text-gray-600">Reassignment Rate</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.pendingLeads}</p>
-                          <p className="text-xs text-gray-600">Pending Too Long</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {/* Agent KPIs */}
-                {userRole === 'agent' && roleKPIs.kpis && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                          <Users className="w-6 h-6 text-white" />
+                        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border border-red-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                              <AlertTriangle className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs['super-agent'].kpis.staleLeads}</p>
+                              <p className="text-xs text-gray-600">Stale Leads (3+ days)</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.leadsHandled}</p>
-                          <p className="text-xs text-gray-600">Leads Handled</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                          <Phone className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.callsMade}</p>
-                          <p className="text-xs text-gray-600">Calls Made</p>
+                        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                              <Clock className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs['super-agent'].kpis.pendingLeads}</p>
+                              <p className="text-xs text-gray-600">Pending Too Long</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )}
 
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                          <Activity className="w-6 h-6 text-white" />
+                  {/* Agent KPIs - Always show if agent data exists */}
+                  {roleKPIs.agent && roleKPIs.agent.kpis && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        👤 <span>Agent Performance</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                              <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.leadsHandled}</p>
+                              <p className="text-xs text-gray-600">Leads Handled</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.followUpsSent}</p>
-                          <p className="text-xs text-gray-600">Follow-ups Sent</p>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200/50">
-                      <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                          <Target className="w-6 h-6 text-white" />
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                              <Phone className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.callsMade}</p>
+                              <p className="text-xs text-gray-600">Calls Made</p>
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.leadsConverted}</p>
-                          <p className="text-xs text-gray-600">Leads Converted</p>
+
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                              <Activity className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.followUpsSent}</p>
+                              <p className="text-xs text-gray-600">Follow-ups Sent</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                              <Target className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.leadsConverted}</p>
+                              <p className="text-xs text-gray-600">Leads Converted</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                              <Clock className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.avgResponseTimeHours.toFixed(1)}h</p>
+                              <p className="text-xs text-gray-600">Avg Response Time</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl p-6 border border-emerald-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                              <CheckCircle className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.timelyFollowUps}</p>
+                              <p className="text-xs text-gray-600">Timely Follow-ups</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                              <AlertTriangle className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.ignoredLeads}</p>
+                              <p className="text-xs text-gray-600">Ignored Leads</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200/50">
+                          <div className="flex items-center justify-between">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                              <Award className="w-6 h-6 text-white" />
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-gray-900">{roleKPIs.agent.kpis.conversionRate}%</p>
+                              <p className="text-xs text-gray-600">Conversion Rate</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+
+
               </div>
             )}
 

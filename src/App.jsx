@@ -36,7 +36,7 @@ import Layout from './components/Layout'
 
 // Import contexts
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
-import { PermissionsProvider } from './contexts/PermissionsContext'
+import { PermissionsProvider, usePermissions, PERMISSIONS } from './contexts/PermissionsContext'
 import { ToastProvider } from './components/Toast'
 
 // API Configuration - Force correct backend URL
@@ -955,9 +955,10 @@ const Header = ({ setSidebarOpen }) => {
 // Rename Settings to avoid conflict with SettingsIcon
 const SettingsPage = Settings
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
+// Protected Route Component with Permission Checking
+const ProtectedRoute = ({ children, permission, permissions, requireAll = false }) => {
   const { user, loading } = useAuth()
+  const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions()
 
   if (loading) {
     return (
@@ -967,7 +968,37 @@ const ProtectedRoute = ({ children }) => {
     )
   }
 
-  return user ? children : <Navigate to="/login" replace />
+  // Check authentication first
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Check permissions if specified
+  if (permission || permissions) {
+    let hasAccess = false
+
+    if (permission) {
+      hasAccess = hasPermission(permission)
+    } else if (permissions) {
+      hasAccess = requireAll ? hasAllPermissions(permissions) : hasAnyPermission(permissions)
+    }
+
+    if (!hasAccess) {
+      // Redirect to dashboard with error message
+      return (
+        <Navigate
+          to="/dashboard"
+          replace
+          state={{
+            error: 'Access denied. You do not have permission to view this page.',
+            from: window.location.pathname
+          }}
+        />
+      )
+    }
+  }
+
+  return children
 }
 
 
@@ -1040,22 +1071,16 @@ function AppWithAuth() {
                 </ProtectedRoute>
               } />
               <Route path="/team" element={
-                <ProtectedRoute>
+                <ProtectedRoute permission={PERMISSIONS.VIEW_TEAM}>
                   <Layout>
                     <Team />
                   </Layout>
                 </ProtectedRoute>
               } />
               <Route path="/analytics" element={
-                <ProtectedRoute>
+                <ProtectedRoute permission={PERMISSIONS.VIEW_ANALYTICS}>
                   <Layout>
                     <Analytics />
-                  </Layout>
-                </ProtectedRoute>
-              } />
-              <Route path="/kpis" element={
-                <ProtectedRoute>
-                  <Layout>
                   </Layout>
                 </ProtectedRoute>
               } />
@@ -1067,14 +1092,14 @@ function AppWithAuth() {
                 </ProtectedRoute>
               } />
               <Route path="/automation" element={
-                <ProtectedRoute>
+                <ProtectedRoute permission={PERMISSIONS.MANAGE_AUTOMATION}>
                   <Layout>
                     <Automation />
                   </Layout>
                 </ProtectedRoute>
               } />
               <Route path="/follow-up" element={
-                <ProtectedRoute>
+                <ProtectedRoute permission={PERMISSIONS.MANAGE_FOLLOW_UP}>
                   <Layout>
                     <FollowUp />
                   </Layout>
