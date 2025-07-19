@@ -198,8 +198,7 @@ const Analytics = () => {
           const response = await fetch(url, {
             method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache'
+              'Content-Type': 'application/json'
             },
             signal: controller.signal
           })
