@@ -351,12 +351,12 @@ const Analytics = () => {
 
   const exportToExcel = () => {
     const csvData = analyticsData.agentPerformance.map(agent => ({
-      Agent: agent.name,
-      LeadsGenerated: agent.leadsGenerated,
-      QualifiedLeads: agent.qualifiedLeads,
-      ClosedDeals: agent.closedDeals,
-      ConversionRate: agent.conversionRate + '%',
-      Revenue: '$' + (agent.revenue/1000).toFixed(0) + 'K'
+      Agent: agent.agent || agent.name || 'Unknown',
+      TotalLeads: agent.total_leads || agent.leadsGenerated || 0,
+      QualifiedLeads: agent.qualified_leads || agent.qualifiedLeads || 0,
+      ClosedDeals: agent.closed_deals || agent.closedDeals || 0,
+      ConversionRate: (agent.conversion_rate || agent.conversionRate || 0) + '%',
+      Revenue: '$' + ((agent.estimated_revenue || agent.revenue || 0)/1000).toFixed(0) + 'K'
     }))
     console.log('📊 Excel Export Data:', csvData)
     alert(`Excel Export Ready!\n\n${csvData.length} agent records prepared.\nData logged to console for development.`)
@@ -666,17 +666,22 @@ const Analytics = () => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                {analyticsData.agentPerformance.map((agent, index) => (
-                  <div key={agent.name} className="relative group">
+                {analyticsData.agentPerformance.map((agent, index) => {
+                  // Handle both backend format (agent field) and frontend format (name field)
+                  const agentName = agent.agent || agent.name || 'Unknown Agent'
+                  const agentInitials = agentName.split(' ').map(n => n[0]).join('').toUpperCase()
+
+                  return (
+                  <div key={agentName} className="relative group">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-300" />
                     <div className="relative bg-white/95 backdrop-blur-sm rounded-xl border border-white/30 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
-                            {agent.name.split(' ').map(n => n[0]).join('')}
+                            {agentInitials}
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-900">{agent.name}</h3>
+                            <h3 className="font-semibold text-gray-900">{agentName}</h3>
                             <p className="text-sm text-gray-600">Real Estate Agent</p>
                           </div>
                         </div>
@@ -721,7 +726,8 @@ const Analytics = () => {
                       </div>
                     </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
 
