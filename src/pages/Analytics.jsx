@@ -160,14 +160,21 @@ const Analytics = () => {
     try {
       setLoading(true)
 
-      // Fetch real leads data first
+      // Fetch comprehensive analytics from backend (100% real data)
+      console.log('📊 Fetching comprehensive real analytics...')
+
+      const comprehensiveResponse = await fetch(`${API_URL}/analytics/comprehensive-dashboard`)
+      const comprehensiveResult = await comprehensiveResponse.json()
+      const comprehensiveData = comprehensiveResult.data || {}
+
+      console.log('📊 Comprehensive analytics data:', comprehensiveData)
+
+      // Also fetch real leads data for additional processing
       const leadsResponse = await fetch(`${API_URL}/leads`)
       const leadsResult = await leadsResponse.json()
       const realLeadsData = leadsResult.data || []
 
-      console.log('📊 Real leads data for analytics:', realLeadsData)
-
-      // Generate analytics from real data
+      // Generate additional analytics from real data
       const realAnalytics = generateRealAnalytics(realLeadsData)
 
       const [
@@ -289,24 +296,35 @@ const Analytics = () => {
 
       const revenueAnalysis = Object.values(monthlyData)
 
+      // Use comprehensive real data from backend
       setAnalyticsData({
-        leadsBySource: leadsBySource.data || [],
+        // Backend comprehensive data (100% real)
+        leadsBySource: comprehensiveData.sourceDistribution || [],
         leadsNotContacted: leadsNotContacted.data || { count: 0, total: 0, percentage: 0 },
         contactedLeads: contactedLeads.data || { contacted: 0, total: 0, percentage: 0, period: 'week' },
         conversionRateBySource: conversionRate.data || [],
         avgContactTimeByAgent: avgContactTime.data || [],
-        leadsByStatus: leadsByStatus.data || [],
-        leadsByAgent: leadsByAgent.data || [],
+        leadsByStatus: comprehensiveData.statusDistribution || [],
+        leadsByAgent: comprehensiveData.agentPerformance || [],
         leadsTimeline: leadsTimeline.data || [],
-        budgetAnalysis: budgetAnalysis.data || [],
+        budgetAnalysis: comprehensiveData.budgetAnalysis || [],
 
-        // Real analytics data from actual leads
-        agentPerformance: realAnalytics.agentPerformance,
+        // Enhanced real analytics data
+        agentPerformance: comprehensiveData.agentPerformance || [],
         sourceROI: realAnalytics.sourceROI,
-        geographicalData: realAnalytics.geographicalData,
+        geographicalData: comprehensiveData.cityDistribution || [],
         behavioralAnalysis,
-        conversionFunnel,
-        revenueAnalysis
+        conversionFunnel: comprehensiveData.conversionFunnel || [],
+        revenueAnalysis: comprehensiveData.monthlyTrends || [],
+
+        // Overview data
+        overview: comprehensiveData.overview || {
+          totalLeads: 0,
+          totalProperties: 0,
+          totalTeamMembers: 0,
+          totalRevenue: 0,
+          avgConversionRate: 0
+        }
       })
       
       setLastUpdated(new Date())
@@ -496,13 +514,13 @@ const Analytics = () => {
             <div className="xl:col-span-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {(() => {
-                  // Calculate real KPIs from analytics data
-                  const totalRevenue = analyticsData.revenueAnalysis.reduce((sum, month) => sum + month.revenue, 0)
-                  const totalLeads = analyticsData.leadsBySource.reduce((sum, source) => sum + source.count, 0) ||
-                                   analyticsData.agentPerformance.reduce((sum, agent) => sum + agent.leadsGenerated, 0)
-                  const qualifiedLeads = analyticsData.agentPerformance.reduce((sum, agent) => sum + agent.qualifiedLeads, 0)
-                  const closedDeals = analyticsData.agentPerformance.reduce((sum, agent) => sum + agent.closedDeals, 0)
-                  const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0
+                  // Use real KPIs from comprehensive backend data
+                  const overview = analyticsData.overview || {}
+                  const totalRevenue = overview.totalRevenue || 0
+                  const totalLeads = overview.totalLeads || 0
+                  const totalProperties = overview.totalProperties || 0
+                  const avgConversionRate = overview.avgConversionRate || 0
+                  const closedDeals = analyticsData.agentPerformance.reduce((sum, agent) => sum + (parseInt(agent.closed_deals) || 0), 0)
                   const avgDealSize = closedDeals > 0 ? totalRevenue / closedDeals : 0
 
                   return [
@@ -524,9 +542,9 @@ const Analytics = () => {
                     },
                     {
                       title: 'Conversion Rate',
-                      value: `${conversionRate.toFixed(1)}%`,
-                      change: conversionRate > 0 ? `+${(conversionRate / 5).toFixed(1)}%` : '0%',
-                      trend: conversionRate > 15 ? 'up' : conversionRate > 0 ? 'neutral' : 'down',
+                      value: `${avgConversionRate.toFixed(1)}%`,
+                      change: avgConversionRate > 0 ? `+${(avgConversionRate / 5).toFixed(1)}%` : '0%',
+                      trend: avgConversionRate > 15 ? 'up' : avgConversionRate > 0 ? 'neutral' : 'down',
                       icon: Target,
                       gradient: 'from-purple-500 to-pink-600'
                     },
@@ -672,19 +690,19 @@ const Analytics = () => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
-                          <p className="text-2xl font-bold text-blue-600">{agent.leadsGenerated}</p>
-                          <p className="text-xs text-gray-600">Leads Generated</p>
+                          <p className="text-2xl font-bold text-blue-600">{agent.total_leads || agent.leadsGenerated || 0}</p>
+                          <p className="text-xs text-gray-600">Total Leads</p>
                         </div>
                         <div className="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-                          <p className="text-2xl font-bold text-green-600">{agent.conversionRate}%</p>
+                          <p className="text-2xl font-bold text-green-600">{agent.conversion_rate || agent.conversionRate || 0}%</p>
                           <p className="text-xs text-gray-600">Conversion Rate</p>
                         </div>
                         <div className="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
-                          <p className="text-2xl font-bold text-purple-600">${(agent.revenue / 1000).toFixed(0)}K</p>
+                          <p className="text-2xl font-bold text-purple-600">${((agent.estimated_revenue || agent.revenue || 0) / 1000).toFixed(0)}K</p>
                           <p className="text-xs text-gray-600">Revenue</p>
                         </div>
                         <div className="text-center p-3 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg">
-                          <p className="text-2xl font-bold text-orange-600">{agent.closedDeals}</p>
+                          <p className="text-2xl font-bold text-orange-600">{agent.closed_deals || agent.closedDeals || 0}</p>
                           <p className="text-xs text-gray-600">Closed Deals</p>
                         </div>
                       </div>
