@@ -22,7 +22,6 @@ import Leads from './pages/Leads'
 import Properties from './pages/Properties'
 import Team from './pages/Team'
 import Analytics from './pages/Analytics'
-import KPIDashboard from './pages/KPIDashboard'
 import Settings from './pages/Settings'
 import Automation from './pages/Automation'
 import FollowUp from './pages/FollowUp'
@@ -1057,7 +1056,6 @@ function AppWithAuth() {
               <Route path="/kpis" element={
                 <ProtectedRoute>
                   <Layout>
-                    <KPIDashboard />
                   </Layout>
                 </ProtectedRoute>
               } />
