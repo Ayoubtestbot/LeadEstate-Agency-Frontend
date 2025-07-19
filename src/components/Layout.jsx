@@ -82,12 +82,6 @@ const Layout = ({ children }) => {
       permission: PERMISSIONS.VIEW_ANALYTICS
     },
     {
-      name: 'KPI Dashboard',
-      href: '/kpis',
-      icon: Target,
-      permission: PERMISSIONS.VIEW_ANALYTICS
-    },
-    {
       name: safeT('nav.automation', 'Automation'),
       href: '/automation',
       icon: Zap,

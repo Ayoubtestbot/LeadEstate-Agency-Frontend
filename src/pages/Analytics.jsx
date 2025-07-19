@@ -4,10 +4,11 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadarChart, PolarGrid, 
   PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, Scatter, ScatterChart 
 } from 'recharts'
-import { 
+import {
   TrendingUp, Users, Target, Phone, Calendar, RefreshCw, BarChart3, Eye, Filter,
   Download, FileText, FileSpreadsheet, Presentation, MapPin, Globe, Award,
-  Zap, DollarSign, Clock, Star, ArrowUp, ArrowDown, Activity, Briefcase
+  Zap, DollarSign, Clock, Star, ArrowUp, ArrowDown, Activity, Briefcase,
+  AlertTriangle, CheckCircle
 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend-9fih.onrender.com/api'
@@ -27,7 +28,7 @@ const Analytics = () => {
     leadsByAgent: [],
     leadsTimeline: [],
     budgetAnalysis: [],
-    
+
     // New premium analytics
     agentPerformance: [],
     sourceROI: [],
@@ -36,8 +37,11 @@ const Analytics = () => {
     conversionFunnel: [],
     revenueAnalysis: []
   })
+
+  const [roleKPIs, setRoleKPIs] = useState(null)
+  const [userRole, setUserRole] = useState('manager') // This should come from auth context
   const [loading, setLoading] = useState(true)
-  const [selectedPeriod, setSelectedPeriod] = useState('week')
+  const [selectedPeriod, setSelectedPeriod] = useState('monthly')
   const [selectedAgent, setSelectedAgent] = useState('all')
   const [selectedMetric, setSelectedMetric] = useState('conversion')
   const [lastUpdated, setLastUpdated] = useState(new Date())
@@ -156,6 +160,26 @@ const Analytics = () => {
     return { agentPerformance, sourceROI, geographicalData }
   }
 
+  // Fetch role-based KPIs
+  const fetchRoleKPIs = async () => {
+    try {
+      console.log(`📊 Fetching ${userRole} KPIs for ${selectedPeriod} period`)
+
+      const url = `${API_URL}/kpis/${userRole}/${selectedPeriod}${selectedAgent !== 'all' ? `?agent=${selectedAgent}` : ''}`
+      const response = await fetch(url)
+      const result = await response.json()
+
+      if (result.success) {
+        setRoleKPIs(result.data)
+        console.log('✅ Role KPIs loaded:', result.data)
+      } else {
+        console.error('❌ Failed to fetch role KPIs:', result.message)
+      }
+    } catch (error) {
+      console.error('❌ Error fetching role KPIs:', error)
+    }
+  }
+
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true)
@@ -176,6 +200,9 @@ const Analytics = () => {
 
       // Generate additional analytics from real data
       const realAnalytics = generateRealAnalytics(realLeadsData)
+
+      // Fetch role-based KPIs
+      await fetchRoleKPIs()
 
       const [
         leadsBySourceRes,
@@ -377,7 +404,13 @@ const Analytics = () => {
 
   useEffect(() => {
     fetchAnalyticsData()
-  }, [selectedPeriod])
+  }, [])
+
+  useEffect(() => {
+    if (selectedPeriod) {
+      fetchRoleKPIs()
+    }
+  }, [selectedPeriod, selectedAgent, userRole])
 
   const handleRefresh = () => {
     fetchAnalyticsData()
@@ -656,6 +689,195 @@ const Analytics = () => {
 
         {activeTab === 'agents' && (
           <div className="space-y-6">
+            {/* Role-based KPI Section */}
+            {roleKPIs && (
+              <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      {userRole === 'manager' && '👨‍💼 Manager KPIs'}
+                      {userRole === 'super-agent' && '🧑‍💼 Super Agent KPIs'}
+                      {userRole === 'agent' && '👤 Agent KPIs'}
+                    </h2>
+                    <p className="text-gray-600">Role-specific performance metrics for {selectedPeriod} period</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <select
+                      value={selectedPeriod}
+                      onChange={(e) => setSelectedPeriod(e.target.value)}
+                      className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Manager KPIs */}
+                {userRole === 'manager' && roleKPIs.kpis && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                            <Users className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.totalLeadsReceived}</p>
+                            <p className="text-xs text-gray-600">Total Leads Received</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                            <Target className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.globalConversionRate}%</p>
+                            <p className="text-xs text-gray-600">Global Conversion Rate</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.avgFirstContactTimeHours.toFixed(1)}h</p>
+                            <p className="text-xs text-gray-600">Avg First Contact Time</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200/50">
+                        <div className="flex items-center justify-between">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-600 flex items-center justify-center">
+                            <DollarSign className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-gray-900">${(roleKPIs.kpis.estimatedValue/1000).toFixed(0)}K</p>
+                            <p className="text-xs text-gray-600">Estimated Value</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Super Agent KPIs */}
+                {userRole === 'super-agent' && roleKPIs.kpis && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                          <Users className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.totalLeadsAssigned}</p>
+                          <p className="text-xs text-gray-600">Total Leads Assigned</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                          <RefreshCw className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.reassignmentRate}%</p>
+                          <p className="text-xs text-gray-600">Reassignment Rate</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border border-red-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                          <AlertTriangle className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.staleLeads}</p>
+                          <p className="text-xs text-gray-600">Stale Leads (3+ days)</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-xl p-6 border border-orange-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                          <Clock className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.pendingLeads}</p>
+                          <p className="text-xs text-gray-600">Pending Too Long</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Agent KPIs */}
+                {userRole === 'agent' && roleKPIs.kpis && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                          <Users className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.leadsHandled}</p>
+                          <p className="text-xs text-gray-600">Leads Handled</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                          <Phone className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.callsMade}</p>
+                          <p className="text-xs text-gray-600">Calls Made</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                          <Activity className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.followUpsSent}</p>
+                          <p className="text-xs text-gray-600">Follow-ups Sent</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200/50">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                          <Target className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">{roleKPIs.kpis.leadsConverted}</p>
+                          <p className="text-xs text-gray-600">Leads Converted</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Agent Performance Grid */}
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
               <div className="flex items-center justify-between mb-6">
