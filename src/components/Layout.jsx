@@ -14,6 +14,7 @@ import {
   LogOut,
   Building2,
   BarChart3,
+  Target,
   Zap,
   Clock,
   UserCheck,
@@ -78,6 +79,12 @@ const Layout = ({ children }) => {
       name: safeT('nav.analytics', 'Analytics'),
       href: '/analytics',
       icon: BarChart3,
+      permission: PERMISSIONS.VIEW_ANALYTICS
+    },
+    {
+      name: 'KPI Dashboard',
+      href: '/kpis',
+      icon: Target,
       permission: PERMISSIONS.VIEW_ANALYTICS
     },
     {
