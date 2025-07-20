@@ -9,7 +9,7 @@ import {
   TrendingUp, Users, Target, Phone, Calendar, RefreshCw, BarChart3, Eye, Filter,
   Download, FileText, FileSpreadsheet, Presentation, MapPin, Globe, Award,
   Zap, DollarSign, Clock, Star, ArrowUp, ArrowDown, Activity, Briefcase,
-  AlertTriangle, CheckCircle
+  AlertTriangle, CheckCircle, UserCheck
 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://leadestate-backend-9fih.onrender.com/api'
@@ -243,69 +243,20 @@ const Analytics = () => {
     try {
       setLoading(true)
 
-      // Fetch comprehensive analytics from backend (100% real data)
-      console.log('📊 Fetching comprehensive real analytics...')
+      // Only fetch essential data for better performance
+      console.log('📊 Fetching essential analytics data...')
 
+      // Fetch only comprehensive dashboard data (contains most needed info)
       const comprehensiveResponse = await fetch(`${API_URL}/analytics/comprehensive-dashboard`)
       const comprehensiveResult = await comprehensiveResponse.json()
       const comprehensiveData = comprehensiveResult.data || {}
 
-      console.log('📊 Comprehensive analytics data:', comprehensiveData)
+      console.log('📊 Analytics data loaded:', Object.keys(comprehensiveData))
 
-      // Also fetch real leads data for additional processing
-      const leadsResponse = await fetch(`${API_URL}/leads`)
-      const leadsResult = await leadsResponse.json()
-      const realLeadsData = leadsResult.data || []
+      // Skip additional API calls for better performance
+      // Use only the comprehensive data which already contains most analytics
 
-      // Generate additional analytics from real data
-      const realAnalytics = generateRealAnalytics(realLeadsData)
-
-      // Fetch role-based KPIs
-      await fetchRoleKPIs()
-
-      const [
-        leadsBySourceRes,
-        leadsNotContactedRes,
-        contactedLeadsRes,
-        conversionRateRes,
-        avgContactTimeRes,
-        leadsByStatusRes,
-        leadsByAgentRes,
-        leadsTimelineRes,
-        budgetAnalysisRes
-      ] = await Promise.all([
-        fetch(`${API_URL}/analytics/leads-by-source`),
-        fetch(`${API_URL}/analytics/leads-not-contacted`),
-        fetch(`${API_URL}/analytics/contacted-leads?period=${selectedPeriod}`),
-        fetch(`${API_URL}/analytics/conversion-rate-by-source`),
-        fetch(`${API_URL}/analytics/avg-contact-time-by-agent`),
-        fetch(`${API_URL}/analytics/leads-by-status`),
-        fetch(`${API_URL}/analytics/leads-by-agent`),
-        fetch(`${API_URL}/analytics/leads-timeline?period=${selectedPeriod}`),
-        fetch(`${API_URL}/analytics/budget-analysis`)
-      ])
-
-      const [
-        leadsBySource,
-        leadsNotContacted,
-        contactedLeads,
-        conversionRate,
-        avgContactTime,
-        leadsByStatus,
-        leadsByAgent,
-        leadsTimeline,
-        budgetAnalysis
-      ] = await Promise.all([
-        leadsBySourceRes.json(),
-        leadsNotContactedRes.json(),
-        contactedLeadsRes.json(),
-        conversionRateRes.json(),
-        avgContactTimeRes.json(),
-        leadsByStatusRes.json(),
-        leadsByAgentRes.json(),
-        leadsTimelineRes.json(),
-        budgetAnalysisRes.json()
-      ])
+      // Use comprehensive data directly (no additional API calls for better performance)
 
       // Generate behavioral analysis from real data
       const totalLeads = realLeadsData.length
@@ -384,22 +335,22 @@ const Analytics = () => {
 
       // Use comprehensive real data from backend
       setAnalyticsData({
-        // Backend comprehensive data (100% real)
+        // Use only comprehensive data for better performance
         leadsBySource: comprehensiveData.sourceDistribution || [],
-        leadsNotContacted: leadsNotContacted.data || { count: 0, total: 0, percentage: 0 },
-        contactedLeads: contactedLeads.data || { contacted: 0, total: 0, percentage: 0, period: 'week' },
-        conversionRateBySource: conversionRate.data || [],
-        avgContactTimeByAgent: avgContactTime.data || [],
+        leadsNotContacted: comprehensiveData.leadsNotContacted || { count: 0, total: 0, percentage: 0 },
+        contactedLeads: comprehensiveData.contactedLeads || { contacted: 0, total: 0, percentage: 0, period: 'week' },
+        conversionRateBySource: comprehensiveData.conversionRateBySource || [],
+        avgContactTimeByAgent: comprehensiveData.avgContactTimeByAgent || [],
         leadsByStatus: comprehensiveData.statusDistribution || [],
         leadsByAgent: comprehensiveData.agentPerformance || [],
-        leadsTimeline: leadsTimeline.data || [],
+        leadsTimeline: comprehensiveData.leadsTimeline || [],
         budgetAnalysis: comprehensiveData.budgetAnalysis || [],
 
         // Enhanced real analytics data
         agentPerformance: comprehensiveData.agentPerformance || [],
-        sourceROI: realAnalytics.sourceROI,
+        sourceROI: comprehensiveData.sourceROI || [],
         geographicalData: comprehensiveData.cityDistribution || [],
-        behavioralAnalysis,
+        behavioralAnalysis: behavioralAnalysis || [],
         conversionFunnel: comprehensiveData.conversionFunnel || [],
         revenueAnalysis: comprehensiveData.monthlyTrends || [],
 
