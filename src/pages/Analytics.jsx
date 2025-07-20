@@ -271,9 +271,15 @@ const Analytics = () => {
       const contactedCount = statusData.filter(s => s.status !== 'new' && s.status !== 'pending').reduce((sum, s) => sum + parseInt(s.count || 0), 0)
       const notContactedCount = statusData.filter(s => s.status === 'new' || s.status === 'pending').reduce((sum, s) => sum + parseInt(s.count || 0), 0)
 
+      console.log('📊 Calculated totals:', { totalLeads, contactedCount, notContactedCount })
+
       setAnalyticsData({
-        // Use comprehensive data with correct field mapping
-        leadsBySource: comprehensiveData.sourceDistribution || [],
+        // Use comprehensive data with correct field mapping - convert string counts to numbers
+        leadsBySource: (comprehensiveData.sourceDistribution || []).map(source => ({
+          ...source,
+          count: parseInt(source.count || 0),
+          percentage: parseFloat(source.percentage || 0)
+        })),
         leadsNotContacted: {
           count: notContactedCount,
           total: totalLeads,
@@ -293,7 +299,11 @@ const Analytics = () => {
           agent: agent.agent,
           avg_hours: Math.random() * 8 + 1 // Placeholder until we have real response time data
         })) || [],
-        leadsByStatus: comprehensiveData.statusDistribution || [],
+        leadsByStatus: (comprehensiveData.statusDistribution || []).map(status => ({
+          ...status,
+          count: parseInt(status.count || 0),
+          percentage: parseFloat(status.percentage || 0)
+        })),
         leadsByAgent: comprehensiveData.agentPerformance || [],
         leadsTimeline: comprehensiveData.monthlyTrends || [],
         budgetAnalysis: comprehensiveData.budgetAnalysis || [],
