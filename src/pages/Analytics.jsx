@@ -258,80 +258,9 @@ const Analytics = () => {
 
       // Use comprehensive data directly (no additional API calls for better performance)
 
-      // Generate behavioral analysis from real data
-      const totalLeads = realLeadsData.length
-      const qualifiedLeads = realLeadsData.filter(lead => lead.status === 'qualified').length
-      const closedLeads = realLeadsData.filter(lead => lead.status === 'closed').length
-      const phoneLeads = realLeadsData.filter(lead => lead.phone && lead.phone.length > 0).length
-      const emailLeads = realLeadsData.filter(lead => lead.email && lead.email.length > 0).length
+      // Use behavioral analysis from comprehensive data
 
-      const behavioralAnalysis = [
-        {
-          behavior: 'Form Submissions',
-          count: totalLeads,
-          conversion: totalLeads > 0 ? Math.round((qualifiedLeads / totalLeads) * 100) : 0
-        },
-        {
-          behavior: 'Phone Contacts',
-          count: phoneLeads,
-          conversion: phoneLeads > 0 ? Math.round((qualifiedLeads / phoneLeads) * 100) : 0
-        },
-        {
-          behavior: 'Email Contacts',
-          count: emailLeads,
-          conversion: emailLeads > 0 ? Math.round((qualifiedLeads / emailLeads) * 100) : 0
-        },
-        {
-          behavior: 'Qualified Leads',
-          count: qualifiedLeads,
-          conversion: qualifiedLeads > 0 ? Math.round((closedLeads / qualifiedLeads) * 100) : 0
-        },
-        {
-          behavior: 'Closed Deals',
-          count: closedLeads,
-          conversion: 100
-        }
-      ]
-
-      // Real conversion funnel from actual data
-      const conversionFunnel = [
-        { stage: 'Total Leads', count: totalLeads, percentage: 100 },
-        { stage: 'Contacted', count: phoneLeads + emailLeads, percentage: totalLeads > 0 ? Math.round(((phoneLeads + emailLeads) / totalLeads) * 100) : 0 },
-        { stage: 'Qualified', count: qualifiedLeads, percentage: totalLeads > 0 ? Math.round((qualifiedLeads / totalLeads) * 100) : 0 },
-        { stage: 'Closed', count: closedLeads, percentage: totalLeads > 0 ? Math.round((closedLeads / totalLeads) * 100) : 0 }
-      ]
-
-      // Generate revenue analysis from real data by month
-      const monthlyData = {}
-      const currentDate = new Date()
-
-      // Initialize last 6 months with realistic targets based on lead volume
-      const avgBudgetPerLead = realLeadsData.length > 0 ?
-        realLeadsData.reduce((sum, lead) => sum + (parseInt(lead.budget?.replace(/[^0-9]/g, '') || '0') || 0), 0) / realLeadsData.length :
-        300000 // Default average budget
-
-      for (let i = 5; i >= 0; i--) {
-        const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
-        const monthKey = date.toLocaleDateString('en-US', { month: 'short' })
-        const baseTarget = Math.max(50000, avgBudgetPerLead * 0.03 * Math.max(1, realLeadsData.length / 6)) // 3% commission on estimated monthly leads
-        monthlyData[monthKey] = { month: monthKey, revenue: 0, deals: 0, target: baseTarget + (i * baseTarget * 0.1) }
-      }
-
-      // Calculate real revenue from closed deals using actual data
-      realLeadsData.forEach(lead => {
-        if (lead.status === 'closed' && lead.budget && lead.created_at) {
-          const leadDate = new Date(lead.created_at)
-          const monthKey = leadDate.toLocaleDateString('en-US', { month: 'short' })
-          if (monthlyData[monthKey]) {
-            const budget = parseInt(lead.budget.replace(/[^0-9]/g, '')) || 0
-            const commission = budget * 0.03 // 3% commission
-            monthlyData[monthKey].revenue += commission
-            monthlyData[monthKey].deals += 1
-          }
-        }
-      })
-
-      const revenueAnalysis = Object.values(monthlyData)
+      // All data now comes from comprehensive backend endpoint
 
       // Use comprehensive real data from backend
       setAnalyticsData({
@@ -350,7 +279,7 @@ const Analytics = () => {
         agentPerformance: comprehensiveData.agentPerformance || [],
         sourceROI: comprehensiveData.sourceROI || [],
         geographicalData: comprehensiveData.cityDistribution || [],
-        behavioralAnalysis: behavioralAnalysis || [],
+        behavioralAnalysis: comprehensiveData.behavioralAnalysis || [],
         conversionFunnel: comprehensiveData.conversionFunnel || [],
         revenueAnalysis: comprehensiveData.monthlyTrends || [],
 
