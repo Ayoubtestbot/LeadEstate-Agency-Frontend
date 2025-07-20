@@ -252,6 +252,8 @@ const Analytics = () => {
       const comprehensiveData = comprehensiveResult.data || {}
 
       console.log('📊 Analytics data loaded:', Object.keys(comprehensiveData))
+      console.log('📊 Source Distribution:', comprehensiveData.sourceDistribution)
+      console.log('📊 Status Distribution:', comprehensiveData.statusDistribution)
 
       // Skip additional API calls for better performance
       // Use only the comprehensive data which already contains most analytics
@@ -642,32 +644,44 @@ const Analytics = () => {
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Sources Distribution</h3>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={analyticsData.leadsBySource}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="count"
-                      label={({ source, percent }) => `${source}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {analyticsData.leadsBySource.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        border: 'none',
-                        borderRadius: '12px',
-                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                {analyticsData.leadsBySource && analyticsData.leadsBySource.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={analyticsData.leadsBySource}
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="count"
+                        label={({ source, percent }) => `${source}: ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {analyticsData.leadsBySource.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          backdropFilter: 'blur(10px)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="text-gray-400 mb-2">📊</div>
+                      <p className="text-gray-600">No lead source data available</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Debug: {analyticsData.leadsBySource ? `Array length: ${analyticsData.leadsBySource.length}` : 'Data is null/undefined'}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
