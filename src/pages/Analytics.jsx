@@ -606,46 +606,47 @@ const Analytics = () => {
             <div className="xl:col-span-3">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {(() => {
-                  // Use real KPIs from comprehensive backend data
-                  const overview = analyticsData.overview || {}
-                  const totalRevenue = overview.totalRevenue || 0
-                  const totalLeads = overview.totalLeads || 0
-                  const totalProperties = overview.totalProperties || 0
-                  const avgConversionRate = overview.avgConversionRate || 0
-                  const closedDeals = analyticsData.agentPerformance.reduce((sum, agent) => sum + (parseInt(agent.closed_deals) || 0), 0)
-                  const avgDealSize = closedDeals > 0 ? totalRevenue / closedDeals : 0
+                  // Calculate real KPIs from actual data sources
+                  const totalLeads = analyticsData.leadsBySource.reduce((sum, source) => sum + source.count, 0)
+                  const contactedLeads = analyticsData.contactedLeads.contacted || 0
+                  const notContactedLeads = analyticsData.leadsNotContacted.count || 0
+                  const conversionRate = totalLeads > 0 ? ((contactedLeads / totalLeads) * 100) : 0
+                  const activeAgents = analyticsData.agentPerformance.filter(agent => parseInt(agent.total_leads || 0) > 0).length
+                  const avgResponseTime = analyticsData.avgContactTimeByAgent.length > 0
+                    ? analyticsData.avgContactTimeByAgent.reduce((sum, agent) => sum + (parseFloat(agent.avg_hours) || 0), 0) / analyticsData.avgContactTimeByAgent.length
+                    : 0
 
                   return [
                     {
-                      title: 'Total Revenue',
-                      value: totalRevenue > 0 ? `$${(totalRevenue / 1000).toFixed(0)}K` : '$0',
-                      change: totalRevenue > 0 ? `+${((totalRevenue / 100000) * 10).toFixed(1)}%` : '0%',
-                      trend: totalRevenue > 0 ? 'up' : 'neutral',
-                      icon: DollarSign,
-                      gradient: 'from-green-500 to-emerald-600'
-                    },
-                    {
-                      title: 'Active Leads',
+                      title: 'Total Leads',
                       value: totalLeads.toLocaleString(),
-                      change: totalLeads > 0 ? `+${Math.min(50, totalLeads * 2)}%` : '0%',
-                      trend: totalLeads > 0 ? 'up' : 'neutral',
+                      change: totalLeads > 100 ? `${totalLeads} leads` : totalLeads > 0 ? 'Growing' : 'No data',
+                      trend: totalLeads > 100 ? 'up' : totalLeads > 0 ? 'neutral' : 'down',
                       icon: Users,
                       gradient: 'from-blue-500 to-indigo-600'
                     },
                     {
-                      title: 'Conversion Rate',
-                      value: `${avgConversionRate.toFixed(1)}%`,
-                      change: avgConversionRate > 0 ? `+${(avgConversionRate / 5).toFixed(1)}%` : '0%',
-                      trend: avgConversionRate > 15 ? 'up' : avgConversionRate > 0 ? 'neutral' : 'down',
+                      title: 'Contacted Leads',
+                      value: contactedLeads.toLocaleString(),
+                      change: `${((contactedLeads / totalLeads) * 100).toFixed(1)}%`,
+                      trend: (contactedLeads / totalLeads) > 0.7 ? 'up' : (contactedLeads / totalLeads) > 0.3 ? 'neutral' : 'down',
+                      icon: Phone,
+                      gradient: 'from-green-500 to-emerald-600'
+                    },
+                    {
+                      title: 'Contact Rate',
+                      value: `${conversionRate.toFixed(1)}%`,
+                      change: conversionRate > 70 ? 'Excellent' : conversionRate > 50 ? 'Good' : 'Needs Work',
+                      trend: conversionRate > 70 ? 'up' : conversionRate > 50 ? 'neutral' : 'down',
                       icon: Target,
                       gradient: 'from-purple-500 to-pink-600'
                     },
                     {
-                      title: 'Avg Deal Size',
-                      value: avgDealSize > 0 ? `$${(avgDealSize / 1000).toFixed(0)}K` : '$0',
-                      change: avgDealSize > 0 ? `+${((avgDealSize / 50000) * 5).toFixed(1)}%` : '0%',
-                      trend: avgDealSize > 100000 ? 'up' : avgDealSize > 0 ? 'neutral' : 'down',
-                      icon: Briefcase,
+                      title: 'Active Agents',
+                      value: activeAgents.toString(),
+                      change: `${avgResponseTime.toFixed(1)}h avg response`,
+                      trend: avgResponseTime < 2 ? 'up' : avgResponseTime < 8 ? 'neutral' : 'down',
+                      icon: UserCheck,
                       gradient: 'from-orange-500 to-red-600'
                     }
                   ]
@@ -713,7 +714,7 @@ const Analytics = () => {
 
             {/* Lead Sources Pie Chart */}
             <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Sources</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Sources Distribution</h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -741,6 +742,103 @@ const Analytics = () => {
                     />
                   </PieChart>
                 </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Lead Status Overview */}
+            <div className="xl:col-span-2 bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Lead Status Overview</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analyticsData.leadsByStatus}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="status" />
+                    <YAxis />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                    <Bar dataKey="count" fill="#8884d8" radius={[4, 4, 0, 0]}>
+                      {analyticsData.leadsByStatus.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Agent Performance Summary */}
+            <div className="bg-white/90 backdrop-blur-xl rounded-2xl border border-white/20 shadow-xl p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Top Performing Agents</h3>
+              <div className="space-y-4">
+                {analyticsData.agentPerformance.slice(0, 5).map((agent, index) => {
+                  const agentName = agent.agent || agent.name || 'Unknown Agent'
+                  const totalLeads = parseInt(agent.total_leads) || 0
+                  const closedDeals = parseInt(agent.closed_deals) || 0
+                  const conversionRate = totalLeads > 0 ? ((closedDeals / totalLeads) * 100) : 0
+
+                  return (
+                    <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                          {agentName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{agentName}</p>
+                          <p className="text-sm text-gray-600">{totalLeads} leads handled</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-green-600">{conversionRate.toFixed(1)}%</p>
+                        <p className="text-sm text-gray-600">{closedDeals} closed</p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Quick Stats Cards */}
+            <div className="xl:col-span-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-200/50">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Clock className="w-5 h-5 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-900">Avg Response Time</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-900">
+                    {analyticsData.avgContactTimeByAgent.length > 0
+                      ? `${(analyticsData.avgContactTimeByAgent.reduce((sum, agent) => sum + (parseFloat(agent.avg_hours) || 0), 0) / analyticsData.avgContactTimeByAgent.length).toFixed(1)}h`
+                      : 'N/A'
+                    }
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-200/50">
+                  <div className="flex items-center gap-3 mb-2">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="text-sm font-medium text-green-900">Contact Success</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-900">
+                    {analyticsData.contactedLeads.percentage}%
+                  </p>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-200/50">
+                  <div className="flex items-center gap-3 mb-2">
+                    <AlertTriangle className="w-5 h-5 text-orange-600" />
+                    <span className="text-sm font-medium text-orange-900">Needs Attention</span>
+                  </div>
+                  <p className="text-2xl font-bold text-orange-900">
+                    {analyticsData.leadsNotContacted.count}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -779,13 +877,7 @@ const Analytics = () => {
                 </div>
 
                 <div className="space-y-8">
-                  {/* Debug: Show what data we have */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <div className="mb-4 p-4 bg-gray-100 rounded-lg">
-                      <h4 className="font-bold">Debug - KPI Data:</h4>
-                      <pre className="text-xs">{JSON.stringify(roleKPIs, null, 2)}</pre>
-                    </div>
-                  )}
+
 
                   {/* Manager KPIs - Always show if user is manager or if manager data exists */}
                   {roleKPIs.manager && roleKPIs.manager.kpis && (
