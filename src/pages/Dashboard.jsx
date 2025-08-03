@@ -28,6 +28,10 @@ const Dashboard = () => {
   // Check for permission error from navigation
   const [permissionError, setPermissionError] = useState(location.state?.error || null)
 
+  // Direct properties loading (fallback for dashboard)
+  const [directProperties, setDirectProperties] = useState([])
+  const [useDirectProperties, setUseDirectProperties] = useState(false)
+
   // French translations fallback
   const translations = {
     'common.welcomeBack': 'Bon retour',
@@ -122,18 +126,63 @@ const Dashboard = () => {
     setRecentActivity(sortedActivities)
   }, [leads, properties, language])
 
+  // Direct properties loading (fallback when context properties are empty)
+  useEffect(() => {
+    const loadDirectProperties = async () => {
+      // Only load direct properties if context properties are empty
+      if (properties?.length === 0) {
+        try {
+          console.log('🚀 Dashboard: Loading direct properties API (context is empty)...')
+
+          const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?dashboard=true&t=' + Date.now())
+
+          if (directResponse.ok) {
+            const directData = await directResponse.json()
+
+            let directPropertiesData = []
+            if (Array.isArray(directData)) {
+              directPropertiesData = directData
+            } else if (directData.data) {
+              directPropertiesData = directData.data
+            } else if (directData.properties) {
+              directPropertiesData = directData.properties
+            }
+
+            if (directPropertiesData.length > 0) {
+              console.log('✅ Dashboard: Loaded direct properties:', directPropertiesData.length)
+              setDirectProperties(directPropertiesData)
+              setUseDirectProperties(true)
+            }
+          }
+        } catch (error) {
+          console.error('❌ Dashboard: Direct properties load failed:', error)
+        }
+      } else {
+        // Context has properties, use them
+        setUseDirectProperties(false)
+      }
+    }
+
+    loadDirectProperties()
+  }, [properties])
+
   // Calculate stats directly from local data for instant updates
   useEffect(() => {
     console.log('📊 Dashboard: Data changed, calculating stats from local data...')
     console.log('📊 Current leads:', leads?.length || 0)
     console.log('📊 Current properties:', properties?.length || 0)
+    console.log('📊 Direct properties:', directProperties?.length || 0)
+    console.log('📊 Using direct properties:', useDirectProperties)
 
     setUpdating(true)
+
+    // Use direct properties if context properties are empty
+    const effectiveProperties = useDirectProperties ? directProperties : properties
 
     // Calculate stats directly from the current data
     const calculatedStats = {
       totalLeads: leads?.length || 0,
-      availableProperties: properties?.length || 0,
+      availableProperties: effectiveProperties?.length || 0,
       conversionRate: leads?.length > 0 ?
         ((leads.filter(l => l.status === 'closed-won').length / leads.length) * 100).toFixed(1) : 0,
       closedWonLeads: leads?.filter(l => l.status === 'closed-won').length || 0
@@ -142,7 +191,7 @@ const Dashboard = () => {
     setStats(calculatedStats)
     setUpdating(false)
     console.log('✅ Dashboard stats updated instantly:', calculatedStats)
-  }, [leads, properties])
+  }, [leads, properties, directProperties, useDirectProperties])
 
   // Removed fetchDashboardStats - now calculating directly from local data for instant updates
 
