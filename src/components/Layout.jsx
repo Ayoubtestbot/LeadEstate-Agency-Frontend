@@ -18,6 +18,7 @@ import {
   Zap,
   Clock,
   UserCheck,
+  Activity,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react'
@@ -80,6 +81,12 @@ const Layout = ({ children }) => {
       href: '/analytics',
       icon: BarChart3,
       permission: PERMISSIONS.VIEW_ANALYTICS
+    },
+    {
+      name: safeT('nav.agentAnalytics', 'My Analytics'),
+      href: '/agent-analytics',
+      icon: Activity,
+      permissions: [PERMISSIONS.VIEW_ASSIGNED_LEADS] // Available to agents
     },
     {
       name: safeT('nav.automation', 'Automation'),

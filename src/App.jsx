@@ -22,6 +22,7 @@ import Leads from './pages/Leads'
 import Properties from './pages/Properties'
 import Team from './pages/Team'
 import Analytics from './pages/Analytics'
+import AgentAnalytics from './pages/AgentAnalytics'
 import Settings from './pages/Settings'
 import Automation from './pages/Automation'
 import FollowUp from './pages/FollowUp'
@@ -1081,6 +1082,13 @@ function AppWithAuth() {
                 <ProtectedRoute permission={PERMISSIONS.VIEW_ANALYTICS}>
                   <Layout>
                     <Analytics />
+                  </Layout>
+                </ProtectedRoute>
+              } />
+              <Route path="/agent-analytics" element={
+                <ProtectedRoute>
+                  <Layout>
+                    <AgentAnalytics />
                   </Layout>
                 </ProtectedRoute>
               } />
