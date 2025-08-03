@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { User, Mail, MapPin, Globe, Home, Users, Building, Filter } from 'lucide-react'
+import { User, Mail, MapPin, Globe, Home, Users, Building, Filter, RotateCcw } from 'lucide-react'
 import { useData } from '../App'
 import Modal from './Modal'
 import PhoneInput from './PhoneInput'
@@ -12,6 +12,7 @@ const EditLeadModal = ({ isOpen, onClose, lead, onSubmit }) => {
   const statusOptions = [
     { value: 'new', label: 'New', icon: Filter },
     { value: 'contacted', label: 'Contacted', icon: Mail },
+    { value: 'relance', label: 'Relance', icon: RotateCcw },
     { value: 'qualified', label: 'Qualified', icon: User },
     { value: 'proposal', label: 'Proposal', icon: Mail },
     { value: 'negotiation', label: 'Negotiation', icon: Users },

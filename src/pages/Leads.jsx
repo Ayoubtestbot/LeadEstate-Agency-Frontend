@@ -15,7 +15,8 @@ import {
   Upload,
   MessageCircle,
   Filter,
-  UserIcon
+  UserIcon,
+  RotateCcw
 } from 'lucide-react'
 import { useData, useAuth } from '../App'
 import { usePermissions, PERMISSIONS } from '../contexts/PermissionsContext'
@@ -47,6 +48,7 @@ const Leads = () => {
     { value: 'all', label: 'All Status', icon: Filter },
     { value: 'new', label: 'New', icon: Plus },
     { value: 'contacted', label: 'Contacted', icon: Phone },
+    { value: 'relance', label: 'Relance', icon: RotateCcw },
     { value: 'qualified', label: 'Qualified', icon: UserCheck },
     { value: 'proposal', label: 'Proposal', icon: Mail },
     { value: 'negotiation', label: 'Negotiation', icon: MessageCircle },
@@ -304,6 +306,8 @@ const Leads = () => {
         return 'bg-blue-100 text-blue-800'
       case 'contacted':
         return 'bg-yellow-100 text-yellow-800'
+      case 'relance':
+        return 'bg-amber-100 text-amber-800'
       case 'qualified':
         return 'bg-green-100 text-green-800'
       case 'proposal':

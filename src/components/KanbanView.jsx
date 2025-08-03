@@ -42,6 +42,7 @@ const KanbanView = ({
   const columns = [
     { id: 'new', title: 'New Leads', color: 'bg-blue-50 border-blue-200', headerColor: 'bg-blue-100' },
     { id: 'contacted', title: 'Contacted', color: 'bg-yellow-50 border-yellow-200', headerColor: 'bg-yellow-100' },
+    { id: 'relance', title: 'Relance', color: 'bg-amber-50 border-amber-200', headerColor: 'bg-amber-100' },
     { id: 'qualified', title: 'Qualified', color: 'bg-green-50 border-green-200', headerColor: 'bg-green-100' },
     { id: 'proposal', title: 'Proposal', color: 'bg-purple-50 border-purple-200', headerColor: 'bg-purple-100' },
     { id: 'negotiation', title: 'Negotiation', color: 'bg-orange-50 border-orange-200', headerColor: 'bg-orange-100' },
@@ -235,6 +236,8 @@ const KanbanView = ({
         return 'bg-blue-100 text-blue-800'
       case 'contacted':
         return 'bg-yellow-100 text-yellow-800'
+      case 'relance':
+        return 'bg-amber-100 text-amber-800'
       case 'qualified':
         return 'bg-green-100 text-green-800'
       case 'proposal':
