@@ -7,6 +7,7 @@ import ViewPropertyModal from '../components/ViewPropertyModal'
 import EditPropertyModal from '../components/EditPropertyModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { downloadPropertyPDF } from '../services/pdfGenerator'
+import api from '../services/api'
 
 const Properties = () => {
   const { properties: contextProperties, addProperty, updateProperty, deleteProperty, refreshData } = useData()
@@ -42,10 +43,10 @@ const Properties = () => {
       try {
         console.log('🚀 Auto-loading direct API data on page load...')
 
-        const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?autoload=true&t=' + Date.now())
+        const directResponse = await api.get('/properties?autoload=true&t=' + Date.now())
 
-        if (directResponse.ok) {
-          const directData = await directResponse.json()
+        if (directResponse && directResponse.data) {
+          const directData = directResponse.data
 
           let directProperties = []
           if (Array.isArray(directData)) {
@@ -148,10 +149,10 @@ const Properties = () => {
       // DIRECT API CALL - Bypass all caching and context issues
       console.log('🚨 DIRECT API CALL - Bypassing context...')
 
-      const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?direct=true&t=' + Date.now())
+      const directResponse = await api.get('/properties?direct=true&t=' + Date.now())
 
-      if (directResponse.ok) {
-        const directData = await directResponse.json()
+      if (directResponse && directResponse.data) {
+        const directData = directResponse.data
         console.log('🔍 DIRECT API RESPONSE:', directData)
         console.log('🔍 DIRECT API KEYS:', Object.keys(directData))
 

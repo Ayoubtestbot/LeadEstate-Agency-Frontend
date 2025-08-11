@@ -40,6 +40,9 @@ import { LanguageProvider, useLanguage } from './contexts/LanguageContext'
 import { PermissionsProvider, usePermissions, PERMISSIONS } from './contexts/PermissionsContext'
 import { ToastProvider } from './components/Toast'
 
+// Import API service
+import api from './services/api'
+
 // API Configuration - Force correct backend URL
 const API_URL = 'https://leadestate-backend-9fih.onrender.com/api'
 
@@ -183,18 +186,13 @@ const DataProvider = ({ children }) => {
       console.log('🚀 Using high-performance dashboard endpoint...')
       const startTime = Date.now()
 
-      const dashboardRes = await fetch(`${API_URL}/dashboard${cacheBuster}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }).catch((err) => {
+      const dashboardRes = await api.get(`/dashboard${cacheBuster}`).catch((err) => {
         console.error('❌ Error fetching dashboard data:', err)
         return { ok: false }
       })
 
-      if (dashboardRes.ok) {
-        const dashboardData = await dashboardRes.json()
+      if (dashboardRes && dashboardRes.data) {
+        const dashboardData = dashboardRes.data
         const loadTime = Date.now() - startTime
 
         console.log(`✅ Dashboard data loaded in ${loadTime}ms (backend: ${dashboardData.performance?.queryTime}ms)`)
@@ -242,28 +240,26 @@ const DataProvider = ({ children }) => {
       console.log('🔄 Using fallback individual API calls (ALL DATA)...')
 
       const [leadsRes, propertiesRes, teamRes] = await Promise.all([
-        fetch(`${API_URL}/leads${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
+        api.get(`/leads${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching leads:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/properties${cacheBuster}`).catch((err) => {
+        api.get(`/properties${cacheBuster}`).catch((err) => {
           console.error('❌ Error fetching properties:', err)
           return { ok: false }
         }),
-        fetch(`${API_URL}/team${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
+        api.get(`/team${cacheBuster ? '?' + cacheBuster.substring(1) : ''}`).catch((err) => {
           console.error('❌ Error fetching team:', err)
           return { ok: false }
         })
       ])
 
-      console.log('📡 Properties API response status:', propertiesRes.status, propertiesRes.ok)
+      console.log('📡 Properties API response status:', propertiesRes?.status)
 
-      // Process all responses in parallel
-      const [leadsData, propertiesData, teamData] = await Promise.all([
-        leadsRes.ok ? leadsRes.json().catch(() => ({ data: [] })) : { data: [] },
-        propertiesRes.ok ? propertiesRes.json().catch(() => ({ data: [] })) : { data: [] },
-        teamRes.ok ? teamRes.json().catch(() => ({ data: [] })) : { data: [] }
-      ])
+      // Process axios responses (axios returns data directly)
+      const leadsData = leadsRes?.data || { data: [] }
+      const propertiesData = propertiesRes?.data || { data: [] }
+      const teamData = teamRes?.data || { data: [] }
 
       console.log('🔍 DEBUGGING API RESPONSES:')
       console.log('📋 Properties API response:', propertiesData)
@@ -336,15 +332,10 @@ const DataProvider = ({ children }) => {
 
     try {
       // INSTANT UPDATE: Use optimized dashboard endpoint without loading states
-      const dashboardResponse = await fetch(`${API_URL}/dashboard?_refresh=${Date.now()}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+      const dashboardResponse = await api.get(`/dashboard?_refresh=${Date.now()}`)
 
-      if (dashboardResponse.ok) {
-        const dashboardData = await dashboardResponse.json()
+      if (dashboardResponse && dashboardResponse.data) {
+        const dashboardData = dashboardResponse.data
         const refreshTime = Date.now() - startTime
 
         console.log(`⚡ Smart refresh completed in ${refreshTime}ms (backend: ${dashboardData.performance?.queryTime}ms)`)
@@ -404,10 +395,10 @@ const DataProvider = ({ children }) => {
     const startTime = Date.now()
 
     try {
-      const response = await fetch(`${API_URL}/dashboard?_instant=${Date.now()}`)
+      const response = await api.get(`/dashboard?_instant=${Date.now()}`)
 
-      if (response.ok) {
-        const data = await response.json()
+      if (response && response.data) {
+        const data = response.data
         const updateTime = Date.now() - startTime
 
         // INSTANT UPDATE: No loading states, just update data
@@ -515,16 +506,10 @@ const DataProvider = ({ children }) => {
 
   const addProperty = async (propertyData) => {
     try {
-      const response = await fetch(`${API_URL}/properties`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(propertyData)
-      })
+      const response = await api.post('/properties', propertyData)
 
-      if (response.ok) {
-        const result = await response.json()
+      if (response && response.data) {
+        const result = response.data
 
         // Optimistic update: Update UI immediately and keep it
         setProperties(prev => [...prev, result.data])

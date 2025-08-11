@@ -65,22 +65,32 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token')
-      if (token) {
-        // For demo purposes, create a mock user
-        const mockUser = {
-          id: '1',
-          name: 'Demo User',
-          email: 'demo@agency.com',
-          role: 'admin'
+      const userData = localStorage.getItem('user')
+
+      console.log('🔍 AuthContext - Checking authentication on app start')
+      console.log('🔑 Token exists:', !!token)
+      console.log('👤 User data exists:', !!userData)
+
+      if (token && userData) {
+        try {
+          const user = JSON.parse(userData)
+          console.log('✅ AuthContext - Restoring user session:', user.email)
+
+          dispatch({
+            type: 'LOGIN_SUCCESS',
+            payload: {
+              user,
+              token
+            }
+          })
+        } catch (error) {
+          console.error('❌ AuthContext - Error parsing user data:', error)
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          dispatch({ type: 'SET_LOADING', payload: false })
         }
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: {
-            user: mockUser,
-            token
-          }
-        })
       } else {
+        console.log('❌ AuthContext - No valid session found')
         dispatch({ type: 'SET_LOADING', payload: false })
       }
     }

@@ -1,31 +1,48 @@
 import axios from 'axios'
 
-// Create axios instance
+// Create axios instance with correct backend URL
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:6001/api',
-  timeout: 10000,
+  baseURL: 'https://leadestate-backend-9fih.onrender.com/api',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
 })
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
+    console.log('🔑 API Request interceptor - Token exists:', !!token)
+    console.log('🌐 API Request:', config.method?.toUpperCase(), config.url)
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+      console.log('✅ Added Authorization header to request')
+    } else {
+      console.warn('❌ No token found in localStorage')
     }
     return config
   },
   (error) => {
+    console.error('❌ Request interceptor error:', error)
     return Promise.reject(error)
   }
 )
 
 // Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('✅ API Response:', response.status, response.config.url)
+    return response
+  },
   (error) => {
+    console.error('❌ API Response error:', error.response?.status, error.config?.url)
+
     if (error.response?.status === 401) {
+      console.warn('🚨 401 Unauthorized - Clearing token and redirecting to login')
       localStorage.removeItem('token')
+      localStorage.removeItem('user')
       window.location.href = '/login'
     }
     return Promise.reject(error)

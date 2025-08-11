@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import api from '../services/api'
 import {
   Users,
   Home,
@@ -134,10 +135,10 @@ const Dashboard = () => {
         try {
           console.log('🚀 Dashboard: Loading direct properties API (context is empty)...')
 
-          const directResponse = await fetch('https://leadestate-backend-9fih.onrender.com/api/properties?dashboard=true&t=' + Date.now())
+          const directResponse = await api.get('/properties?dashboard=true&t=' + Date.now())
 
-          if (directResponse.ok) {
-            const directData = await directResponse.json()
+          if (directResponse && directResponse.data) {
+            const directData = directResponse.data
 
             let directPropertiesData = []
             if (Array.isArray(directData)) {
