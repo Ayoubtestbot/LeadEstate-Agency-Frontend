@@ -207,27 +207,39 @@ const DataProvider = ({ children }) => {
           console.log('🔍 Dashboard first property city:', dashboardProperties[0].city)
         }
 
-        // Set all data at once
-        setLeads(dashboardData.data?.leads || [])
-        setProperties(dashboardProperties)
-        setTeamMembers(dashboardData.data?.team || [])
+        // Check if dashboard returned the expected data arrays
+        if (dashboardData.data?.leads && dashboardData.data?.properties && dashboardData.data?.team) {
+          console.log('✅ Dashboard returned complete data structure')
 
-        // PERFORMANCE: Cache the data for future use
-        setDataCache({
-          data: dashboardData.data,
-          timestamp: Date.now(),
-          isValid: true
-        })
+          // Set all data at once
+          setLeads(dashboardData.data?.leads || [])
+          setProperties(dashboardProperties)
+          setTeamMembers(dashboardData.data?.team || [])
 
-        console.log('📊 High-performance data loaded and cached:', {
-          leads: dashboardData.data?.leads?.length || 0,
-          properties: dashboardData.data?.properties?.length || 0,
-          team: dashboardData.data?.team?.length || 0,
-          totalLoadTime: `${loadTime}ms`,
-          backendTime: `${dashboardData.performance?.queryTime}ms`,
-          performance: '🚀 OPTIMIZED'
-        })
-        return // Success, exit early
+          // PERFORMANCE: Cache the data for future use
+          setDataCache({
+            data: dashboardData.data,
+            timestamp: Date.now(),
+            isValid: true
+          })
+
+          console.log('📊 High-performance data loaded and cached:', {
+            leads: dashboardData.data?.leads?.length || 0,
+            properties: dashboardData.data?.properties?.length || 0,
+            team: dashboardData.data?.team?.length || 0,
+            totalLoadTime: `${loadTime}ms`,
+            backendTime: `${dashboardData.performance?.queryTime}ms`,
+            performance: '🚀 OPTIMIZED'
+          })
+          return // Success, exit early
+        } else {
+          console.warn('⚠️ Dashboard API returned incomplete data structure - using fallback:', {
+            hasLeads: !!dashboardData.data?.leads,
+            hasProperties: !!dashboardData.data?.properties,
+            hasTeam: !!dashboardData.data?.team,
+            stats: dashboardData.data?.stats
+          })
+        }
       }
 
       console.warn('❌ High-performance dashboard endpoint failed, using fallback...')
