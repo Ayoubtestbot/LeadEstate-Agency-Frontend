@@ -167,31 +167,54 @@ const Dashboard = () => {
     loadDirectProperties()
   }, [properties])
 
-  // Calculate stats directly from local data for instant updates
+  // Fetch dashboard stats from backend API
   useEffect(() => {
-    console.log('📊 Dashboard: Data changed, calculating stats from local data...')
-    console.log('📊 Current leads:', leads?.length || 0)
-    console.log('📊 Current properties:', properties?.length || 0)
-    console.log('📊 Direct properties:', directProperties?.length || 0)
-    console.log('📊 Using direct properties:', useDirectProperties)
+    const fetchDashboardStats = async () => {
+      try {
+        console.log('📊 Dashboard: Fetching stats from backend API...')
+        setUpdating(true)
 
-    setUpdating(true)
+        const response = await api.get('/dashboard')
 
-    // Use direct properties if context properties are empty
-    const effectiveProperties = useDirectProperties ? directProperties : properties
+        if (response.data.success) {
+          const backendStats = response.data.data.stats
+          console.log('✅ Dashboard stats from backend:', backendStats)
 
-    // Calculate stats directly from the current data
-    const calculatedStats = {
-      totalLeads: leads?.length || 0,
-      availableProperties: effectiveProperties?.length || 0,
-      conversionRate: leads?.length > 0 ?
-        ((leads.filter(l => l.status === 'closed-won').length / leads.length) * 100).toFixed(1) : 0,
-      closedWonLeads: leads?.filter(l => l.status === 'closed-won').length || 0
+          setStats({
+            totalLeads: backendStats.totalLeads || 0,
+            availableProperties: backendStats.totalProperties || backendStats.availableProperties || 0,
+            conversionRate: backendStats.conversionRate || '0.0',
+            closedWonLeads: backendStats.closedWonLeads || 0
+          })
+        } else {
+          console.error('❌ Dashboard API failed:', response.data.message)
+          // Fallback to local calculation
+          const effectiveProperties = useDirectProperties ? directProperties : properties
+          setStats({
+            totalLeads: leads?.length || 0,
+            availableProperties: effectiveProperties?.length || 0,
+            conversionRate: leads?.length > 0 ?
+              ((leads.filter(l => l.status === 'closed-won').length / leads.length) * 100).toFixed(1) : '0.0',
+            closedWonLeads: leads?.filter(l => l.status === 'closed-won').length || 0
+          })
+        }
+      } catch (error) {
+        console.error('❌ Dashboard API error:', error)
+        // Fallback to local calculation
+        const effectiveProperties = useDirectProperties ? directProperties : properties
+        setStats({
+          totalLeads: leads?.length || 0,
+          availableProperties: effectiveProperties?.length || 0,
+          conversionRate: leads?.length > 0 ?
+            ((leads.filter(l => l.status === 'closed-won').length / leads.length) * 100).toFixed(1) : '0.0',
+          closedWonLeads: leads?.filter(l => l.status === 'closed-won').length || 0
+        })
+      } finally {
+        setUpdating(false)
+      }
     }
 
-    setStats(calculatedStats)
-    setUpdating(false)
-    console.log('✅ Dashboard stats updated instantly:', calculatedStats)
+    fetchDashboardStats()
   }, [leads, properties, directProperties, useDirectProperties])
 
   // Removed fetchDashboardStats - now calculating directly from local data for instant updates
